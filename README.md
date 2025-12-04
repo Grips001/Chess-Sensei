@@ -52,43 +52,44 @@ system**:
 
 ### Design & Development Specifications
 
-Comprehensive design documentation is available in the [`source-docs/`](source-docs/) directory:
+Comprehensive design documentation is available in the
+[`source-docs/`](source-docs/) directory:
 
 ### Core Concept & Design
 
-- [**Overview**](source-docs/overview.md) --- Game concept, core features, and training
-  philosophy
+- [**Overview**](source-docs/overview.md) --- Game concept, core features, and
+  training philosophy
 - [**UI/UX Design**](source-docs/ui-ux-design.md) --- Visual theme, layout, and
   interaction patterns
-- [**Game Modes**](source-docs/game-modes.md) --- Training, Exam, and Sandbox modes
-  explained
+- [**Game Modes**](source-docs/game-modes.md) --- Training, Exam, and Sandbox
+  modes explained
 
 ### Technical Architecture
 
-- [**Architecture**](source-docs/architecture.md) --- Technical stack, platform goals,
-  and system design
+- [**Architecture**](source-docs/architecture.md) --- Technical stack, platform
+  goals, and system design
 - [**AI Engine**](source-docs/ai-engine.md) --- Stockfish WASM integration, bot
   personalities, and difficulty scaling
-- [**Move Guidance**](source-docs/move-guidance.md) --- Best-move guidance system and
-  visual highlighting
+- [**Move Guidance**](source-docs/move-guidance.md) --- Best-move guidance
+  system and visual highlighting
 
 ### Player Progress & Analytics
 
-- [**Player Progress**](source-docs/player-progress.md) --- Metrics tracking, composite
-  scores, and visual analytics
+- [**Player Progress**](source-docs/player-progress.md) --- Metrics tracking,
+  composite scores, and visual analytics
 - [**Tracked Metrics**](source-docs/tracked-metrics.md) --- Complete list of all
   performance metrics
-- [**Post-Game Analysis**](source-docs/post-game-analysis.md) --- Review tools, mistake
-  analysis, and deep analytics
+- [**Post-Game Analysis**](source-docs/post-game-analysis.md) --- Review tools,
+  mistake analysis, and deep analytics
 
 ### Data & Development
 
-- [**Data Storage**](source-docs/data-storage.md) --- Local storage, import/export, and
-  data management
-- [**Development**](source-docs/development.md) --- Best practices, GitHub workflow,
-  and contributing guidelines
-- [**Roadmap**](source-docs/roadmap.md) --- Development phases, milestones, and future
-  plans
+- [**Data Storage**](source-docs/data-storage.md) --- Local storage,
+  import/export, and data management
+- [**Development**](source-docs/development.md) --- Best practices, GitHub
+  workflow, and contributing guidelines
+- [**Roadmap**](source-docs/roadmap.md) --- Development phases, milestones, and
+  future plans
 
 ### End-User Documentation
 
@@ -97,15 +98,22 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 0 Complete ✓ → Phase 1 Starting
+**Current Phase:** Phase 1 Complete ✓ → Phase 2 Starting
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
 - ✅ Comprehensive documentation written
-- 🚧 Phase 1: Core Chess Engine Integration (Next)
+- ✅ Phase 1: Core Chess Engine Integration complete
+  - Stockfish WASM integrated (v17.1 NNUE Lite)
+  - Chess.js for move validation
+  - Full UCI protocol communication
+  - Move analysis with classification
+    (Excellent/Good/Inaccuracy/Mistake/Blunder)
+  - IPC bridge between frontend and backend
+- 🚧 Phase 2: Minimal UI & Chessboard (Next)
 
-See [roadmap.md](source-docs/roadmap.md) for detailed development plan and current
-progress.
+See [roadmap.md](source-docs/roadmap.md) for detailed development plan and
+current progress.
 
 ## Getting Started
 
@@ -118,7 +126,7 @@ progress.
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/Chess-Sensei.git
+git clone https://github.com/Grips001/Chess-Sensei.git
 cd Chess-Sensei
 
 # Install dependencies
@@ -128,14 +136,42 @@ bun install
 bun run dev
 ```
 
-See [SETUP.md](SETUP.md) for complete setup documentation.
+### Build Commands
+
+```bash
+# Build frontend assets (Vite)
+bun run build
+
+# Full app build (all platforms)
+bun run build:app
+
+# Windows-specific build (workaround for pe-library issue)
+bun run build:windows
+```
+
+### Code Quality
+
+```bash
+# Run all linters
+bun run lint
+
+# Auto-fix linting issues
+bun run lint:fix
+
+# Format code with Prettier
+bun run format
+```
+
+See [SETUP.md](SETUP.md) for complete setup documentation and
+[documents/building.md](documents/building.md) for detailed build instructions.
 
 ## Contributing
 
 Interested in contributing? Check out our guidelines:
 
 - [**CONTRIBUTING.md**](CONTRIBUTING.md) --- Contribution workflow and standards
-- [**source-docs/development.md**](source-docs/development.md) --- Development best practices
+- [**source-docs/development.md**](source-docs/development.md) --- Development
+  best practices
 
 Key resources:
 

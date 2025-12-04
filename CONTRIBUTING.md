@@ -16,7 +16,7 @@ provides guidelines and information for contributors.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Chess-Sensei.git
+   git clone https://github.com/Grips001/Chess-Sensei.git
    cd Chess-Sensei
    ```
 
@@ -89,24 +89,59 @@ feat: add real-time best-move highlighting system
 ### Code Standards
 
 - TypeScript strict mode enabled
-- ESLint/Prettier for formatting (coming soon)
+- ESLint for TypeScript/JavaScript linting
+- Stylelint for CSS linting
+- Prettier for code formatting
+- Markdownlint for documentation
 - Type safety required
 - Clear variable and function names
 - Comments for complex logic
 - No hardcoded values (use constants)
 
+### Linting Workflow
+
+Before submitting a PR, ensure your code passes all linters:
+
+```bash
+# Run all linters (ESLint, Stylelint, Markdownlint, Prettier)
+bun run lint
+
+# Auto-fix most issues
+bun run lint:fix
+
+# Format code only
+bun run format
+```
+
+Individual linters:
+
+```bash
+bun run lint:ts      # ESLint for TypeScript/JavaScript
+bun run lint:css     # Stylelint for CSS
+bun run lint:md      # Markdownlint for Markdown
+bun run lint:format  # Prettier check (no write)
+```
+
 ## Documentation
 
-All major features should be documented in the [`source-docs/`](source-docs/) directory. See
-existing documentation for style and structure guidelines.
+All major features should be documented in the [`source-docs/`](source-docs/)
+directory. See existing documentation for style and structure guidelines.
 
 ## Testing
 
-### Coming in Phase 1
+Test files exist in the `src/engine/` directory for engine validation:
 
-- Unit tests for core logic
-- Integration tests for engine communication
-- End-to-end tests for critical flows
+- `test-stockfish.ts` - Basic Stockfish WASM initialization
+- `test-engine-interface.ts` - Engine interface compliance
+- `test-engine-operations.ts` - UCI operations and analysis
+
+Run tests with:
+
+```bash
+bun run src/engine/test-engine-interface.ts
+```
+
+Formal test framework (Jest/Vitest) coming in future phases.
 
 ## Questions?
 

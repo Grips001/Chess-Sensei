@@ -14,7 +14,8 @@ application.
 
 ### 2. Directory Structure
 
-Created the following structure as per [architecture.md](source-docs/architecture.md):
+Created the following structure as per
+[architecture.md](source-docs/architecture.md):
 
 ```text
 Chess-Sensei/
@@ -52,9 +53,25 @@ Chess-Sensei/
 
 ## Current Technology Stack
 
-✅ **Bun** v1.3.3 - Runtime and package manager ✅ **Buntralino** v1.0.10 -
-Desktop framework ✅ **Neutralinojs** v5.6.0 - Native window shell ✅ **Vite**
-v6.1.0 - Frontend build tool ✅ **TypeScript** - Type-safe development
+### Runtime & Framework
+
+- ✅ **Bun** v1.3+ - Runtime and package manager
+- ✅ **Buntralino** v1.0.10 - Desktop framework
+- ✅ **Neutralinojs** v5.6.0 - Native window shell
+- ✅ **Vite** v6.1.0 - Frontend build tool
+- ✅ **TypeScript** - Type-safe development
+
+### Chess Engine
+
+- ✅ **Stockfish** v17.1 - NNUE Lite WASM build
+- ✅ **chess.js** v1.4.0 - Move validation and game state
+
+### Code Quality
+
+- ✅ **ESLint** v9+ - TypeScript/JavaScript linting
+- ✅ **Stylelint** v16+ - CSS linting
+- ✅ **Prettier** v3+ - Code formatting
+- ✅ **Markdownlint** - Documentation linting
 
 ## Running the Project
 
@@ -69,39 +86,69 @@ This starts the Vite dev server and launches the Neutralino window.
 ### Build for Production
 
 ```bash
+# Build frontend assets only (Vite)
 bun run build
+
+# Full app build for all platforms
+bun run build:app
+
+# Windows-specific build (workaround for pe-library issue)
+bun run build:windows
 ```
 
-This builds the frontend and packages the backend into executables.
+See [documents/building.md](documents/building.md) for detailed build
+instructions and troubleshooting.
+
+### Code Quality
+
+```bash
+# Run all linters
+bun run lint
+
+# Auto-fix linting issues
+bun run lint:fix
+
+# Format code
+bun run format
+```
 
 ## Project Status
 
-**Phase:** Foundation Complete (Phase 0) ✓ **Next:** Phase 1 - Core Chess Engine
-Integration
+**Phase:** Phase 1 Complete ✓ **Next:** Phase 2 - Minimal UI & Chessboard
+
+### Phase 1 Achievements
+
+- ✅ Stockfish WASM integrated and working
+- ✅ Chess.js for move validation
+- ✅ Engine interface with UCI protocol
+- ✅ Move analysis (centipawn loss, classification)
+- ✅ IPC bridge between frontend and backend
+- ✅ Performance benchmarks met (<2s per position)
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 1 involves:
+According to the roadmap, Phase 2 involves:
 
-1. **Research and select Stockfish WASM build**
-   - Find a reliable WASM build of Stockfish
-   - Verify it works with Bun runtime
+1. **Chessboard Rendering**
+   - Implement responsive 8x8 grid layout
+   - Render chess pieces using SVG assets
+   - Board orientation (flip for black)
 
-2. **Integrate chess.js or similar library**
-   - For move validation
-   - Board state management
-   - FEN/PGN support
+2. **Piece Interaction**
+   - Drag-and-drop piece movement
+   - Click-to-select, click-to-move
+   - Legal move highlighting
 
-3. **Create engine interface**
-   - Abstract UCI communication
-   - Implement position evaluation
-   - Add best move calculation
+3. **Game State Display**
+   - Move history panel
+   - Captured pieces display
+   - Turn indicator and game status
 
-4. **Test performance**
-   - Ensure <2s analysis time per position
-   - Optimize WASM loading and execution
+4. **Basic Game Controls**
+   - New game, undo/redo
+   - Board flip toggle
 
 ## Development Resources
 
@@ -119,14 +166,21 @@ bun install
 # Run development server
 bun run dev
 
-# Build for production
-bun run build
+# Build commands
+bun run build           # Frontend only (Vite)
+bun run build:app       # Full app (all platforms)
+bun run build:windows   # Windows with rcedit workaround
 
-# Check Bun version
+# Code quality
+bun run lint            # Run all linters
+bun run lint:fix        # Auto-fix issues
+bun run format          # Format with Prettier
+
+# Check versions
 bun --version
 
-# Run tests (coming in Phase 1)
-bun test
+# Run engine tests
+bun run src/engine/test-engine-interface.ts
 ```
 
 ## Troubleshooting
@@ -139,6 +193,18 @@ servers or change the port in `vite.config.mts`.
 ### Build Failures
 
 Ensure all dependencies are installed: `bun install`
+
+### Windows Build: pe-library Error
+
+If you see "After Resource section, sections except for relocation are not
+supported", use the Windows-specific build:
+
+```bash
+bun run build:windows
+```
+
+This uses rcedit instead of resedit to patch the executable. See
+[documents/building.md](documents/building.md) for details.
 
 ### Neutralino Not Starting
 
@@ -153,7 +219,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is now ready for active development. Phase 0 is complete, and the
-foundation is solid.
+Chess-Sensei is ready for active development. Phase 1 (Core Chess Engine
+Integration) is complete, and the foundation is solid.
 
-Start with Phase 1: Chess Engine Integration!
+Next up: Phase 2 - Minimal UI & Chessboard!

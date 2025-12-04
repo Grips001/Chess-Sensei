@@ -4,6 +4,7 @@ bun.lockb
 
 # Build outputs
 dist/
+build/
 app/
 .neutralino/
 
@@ -64,6 +65,10 @@ eslint.config.mjs
 # Markdownlint
 .markdownlint.json
 .markdownlintignore
+
+# Stylelint
+.stylelintrc.json
+.stylelintignore
 
 # Python scripts (dev utilities)
 *.py

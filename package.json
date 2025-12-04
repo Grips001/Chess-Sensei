@@ -5,12 +5,15 @@
   "scripts": {
     "dev": "bunx --bun vite",
     "build": "bunx --bun vite build",
-    "lint": "bun run lint:ts && bun run lint:md && bun run lint:format",
+    "build:app": "bunx buntralino build src/backend/index.ts",
+    "build:windows": "bun run scripts/build-windows.ts",
+    "lint": "bun run lint:ts && bun run lint:css && bun run lint:md && bun run lint:format",
     "lint:ts": "eslint . --ext .ts,.tsx,.mts,.js,.mjs",
+    "lint:css": "stylelint \"src/**/*.css\" --ignore-path .gitignore",
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
-    "lint:format": "prettier --check \"**/*.{ts,tsx,mts,js,mjs,json,md}\"",
-    "lint:fix": "bun run lint:ts --fix && bun run lint:format --write && bun run lint:md --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,mts,js,mjs,json,md}\""
+    "lint:format": "prettier --check \"**/*.{ts,tsx,mts,js,mjs,json,md,html,css}\"",
+    "lint:fix": "bun run lint:ts --fix && bun run lint:css --fix && bun run lint:format --write && bun run lint:md --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,mts,js,mjs,json,md,html,css}\""
   },
   "keywords": [
     "chess",
@@ -26,18 +29,27 @@
     "@neutralinojs/lib": "^5.6.0",
     "buntralino": "^1.0.10",
     "buntralino-client": "^1.0.7",
-    "execa": "^9.5.2"
+    "chess.js": "^1.4.0",
+    "execa": "^9.5.2",
+    "stockfish": "^17.1.0",
+    "stockfish.wasm": "^0.10.0"
   },
   "devDependencies": {
+    "@ctjs/png2icons": "^3.0.3",
     "@neutralinojs/neu": "^11.3.0",
     "@types/bun": "^1.1.14",
+    "@types/fs-extra": "^11.0.4",
     "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^8.48.1",
     "buntralino-cli": "^1.2.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
+    "fs-extra": "^11.3.2",
     "markdownlint-cli2": "^0.19.1",
     "prettier": "^3.7.4",
+    "rcedit": "^5.0.2",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^39.0.1",
     "vite": "^6.1.0"
   }
 }

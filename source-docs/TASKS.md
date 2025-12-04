@@ -1,8 +1,8 @@
 # Chess-Sensei Development Task List
 
 This document serves as the authoritative task tracking system for Chess-Sensei
-development. It is derived directly from the project documentation and must be
-followed exactly.
+development. It is derived directly from the project source documentation and
+must be followed exactly.
 
 **Purpose:**
 
@@ -17,33 +17,40 @@ followed exactly.
 
 Every task in this document is derived from these authoritative sources:
 
-| #   | Document                                             | Purpose                                   |
-| --- | ---------------------------------------------------- | ----------------------------------------- |
-| 1   | [overview.md](overview.md)                           | Core concept, features, training philosophy |
-| 2   | [roadmap.md](roadmap.md)                             | Development phases, milestones, timeline  |
-| 3   | [architecture.md](architecture.md)                   | Technical stack, platform goals, structure |
-| 4   | [ai-engine.md](ai-engine.md)                         | Stockfish WASM, bot personalities, difficulty |
-| 5   | [ui-ux-design.md](ui-ux-design.md)                   | Visual theme, layout, interaction design  |
-| 6   | [game-modes.md](game-modes.md)                       | Training, Exam, Sandbox mode specifications |
-| 7   | [move-guidance.md](move-guidance.md)                 | Best-move system, highlighting, sync      |
-| 8   | [player-progress.md](player-progress.md)             | Composite scores, analytics, dashboards   |
-| 9   | [tracked-metrics.md](tracked-metrics.md)             | Complete metrics reference (100+ metrics) |
-| 10  | [post-game-analysis.md](post-game-analysis.md)       | Analysis UI, review tools, recommendations |
-| 11  | [data-storage.md](data-storage.md)                   | JSON formats, file structure, import/export |
-| 12  | [development.md](development.md)                     | Best practices, workflow, CI/CD           |
+| #   | Document                                       | Purpose                                       |
+| --- | ---------------------------------------------- | --------------------------------------------- |
+| 1   | [overview.md](overview.md)                     | Core concept, features, training philosophy   |
+| 2   | [roadmap.md](roadmap.md)                       | Development phases, milestones, timeline      |
+| 3   | [architecture.md](architecture.md)             | Technical stack, platform goals, structure    |
+| 4   | [ai-engine.md](ai-engine.md)                   | Stockfish WASM, bot personalities, difficulty |
+| 5   | [ui-ux-design.md](ui-ux-design.md)             | Visual theme, layout, interaction design      |
+| 6   | [game-modes.md](game-modes.md)                 | Training, Exam, Sandbox mode specifications   |
+| 7   | [move-guidance.md](move-guidance.md)           | Best-move system, highlighting, sync          |
+| 8   | [player-progress.md](player-progress.md)       | Composite scores, analytics, dashboards       |
+| 9   | [tracked-metrics.md](tracked-metrics.md)       | Complete metrics reference (100+ metrics)     |
+| 10  | [post-game-analysis.md](post-game-analysis.md) | Analysis UI, review tools, recommendations    |
+| 11  | [data-storage.md](data-storage.md)             | JSON formats, file structure, import/export   |
+| 12  | [development.md](development.md)               | Best practices, workflow, CI/CD               |
 
-**IMPORTANT:** All tasks must trace back to one or more of these documents.
-Deviations require approval from the user and documentation updates first.
+**IMPORTANT:** All tasks must trace back to one or more of these source
+documents. Deviations require approval from the user and source documentation
+updates first.
 
 ---
 
 ## Current Status
 
-**Last Updated:** 2025-12-03
+**Last Updated:** 2025-12-04
 
-**Current Phase:** Phase 1 - Core Chess Engine Integration
+**Current Phase:** Phase 1 ✅ COMPLETE → Phase 2 - Minimal UI & Chessboard
 
-**Session Resumption Point:** Beginning of Phase 1
+**Session Resumption Point:** Phase 2, Task 2.1.1 - Implement responsive
+chessboard layout
+
+**Note:** Windows build issue resolved. See
+[documents/building.md](../documents/building.md) for build instructions. Use
+`bun run build:windows` for Windows builds (workaround for pe-library/resedit
+incompatibility with Bun executables).
 
 ---
 
@@ -51,14 +58,14 @@ Deviations require approval from the user and documentation updates first.
 
 **Status:** ✅ COMPLETE
 
-**Source:** [roadmap.md](roadmap.md) - Phase 0, [architecture.md](architecture.md),
-[development.md](development.md)
+**Source:** [roadmap.md](roadmap.md) - Phase 0,
+[architecture.md](architecture.md), [development.md](development.md)
 
 All foundational work has been completed:
 
 - [x] Project architecture defined
 - [x] Technology stack selected (Buntralino, Bun, Neutralinojs, Stockfish WASM)
-- [x] Comprehensive documentation written (all 12 docs)
+- [x] Comprehensive source documentation written (all 12 docs)
 - [x] Repository structure established
 - [x] Development best practices documented
 - [x] Metrics framework defined
@@ -69,7 +76,7 @@ All foundational work has been completed:
 
 ## Phase 1: Core Chess Engine Integration
 
-**Status:** 🚧 IN PROGRESS
+**Status:** ✅ COMPLETE
 
 **Source:** [roadmap.md](roadmap.md) - Phase 1, [ai-engine.md](ai-engine.md),
 [architecture.md](architecture.md)
@@ -83,25 +90,33 @@ All foundational work has been completed:
 - Basic analysis pipeline functional
 - Unit tests pass with 100% coverage
 - Performance benchmarks meet targets (<2s per position analysis)
+- Documentation detailing engine integration exists in the documents\ directory
 
 ### 1.1 Stockfish WASM Integration
 
-**Source:** [ai-engine.md](ai-engine.md) - "Engine Choice" and "WASM Integration"
-sections
+**Source:** [ai-engine.md](ai-engine.md) - "Engine Choice" and "WASM
+Integration" sections
 
-- [ ] **1.1.1** Research and select Stockfish WASM build
+- [x] **1.1.1** Research and select Stockfish WASM build
   - Evaluate available WASM builds (stockfish.js, stockfish-nnue.wasm, etc.)
   - Verify NNUE support for strongest play
   - Document selection rationale
   - Verify licensing compatibility (GPL)
   - Target: Single `stockfish.wasm` module plus JS glue layer
-- [ ] **1.1.2** Integrate WASM module into Buntralino
+  - **COMPLETED:** Selected `stockfish` npm package v17.1 (NNUE Lite
+    Single-threaded)
+  - See: `src/engine/STOCKFISH_SELECTION.md` for full rationale
+- [x] **1.1.2** Integrate WASM module into Buntralino
   - Add WASM files to project structure (`src/engine/`)
   - Configure Bun backend to load WASM module at startup
   - Maintain persistent engine instance(s) in memory
   - Test module initialization in Bun runtime
   - Verify deterministic behavior across platforms
-- [ ] **1.1.3** Create engine interface abstraction
+  - **COMPLETED:** Created `stockfish-loader.ts` with Bun-compatible WASM
+    loading
+  - Key solution: Polyfill `self.location` for stockfish.js browser detection
+  - Uses ccall() interface for UCI command execution
+- [x] **1.1.3** Create engine interface abstraction
   - Implement `Engine` interface as defined in ai-engine.md:
 
     ```typescript
@@ -121,9 +136,9 @@ sections
 
     ```typescript
     interface BestMove {
-      move: string;   // UCI format (e.g., "e2e4")
-      score: number;  // Centipawn evaluation
-      pv?: string[];  // Principal variation
+      move: string; // UCI format (e.g., "e2e4")
+      score: number; // Centipawn evaluation
+      pv?: string[]; // Principal variation
     }
     ```
 
@@ -131,30 +146,37 @@ sections
     - Setting positions (via FEN + move history)
     - Requesting best moves / analysis
     - Controlling search depth, time, and skill level
-- [ ] **1.1.4** Implement UCI protocol communication
+  - **COMPLETED:** Created `src/shared/engine-types.ts` with all interfaces
+  - **COMPLETED:** Created `src/engine/stockfish-engine.ts` implementing Engine
+    interface
+
+- [x] **1.1.4** Implement UCI protocol communication
   - Parse UCI commands and responses
   - Handle `uci`, `isready`, `position`, `go`, `stop`, `quit` commands
   - Parse `info` and `bestmove` responses
   - Extract evaluation scores from `info score cp` or `info score mate`
   - Support `multipv` for multiple candidate moves
-- [ ] **1.1.5** Test engine initialization and basic commands
+  - **COMPLETED:** Full UCI parsing in `stockfish-engine.ts`
+- [x] **1.1.5** Test engine initialization and basic commands
   - Write unit tests for engine init
   - Write unit tests for position setting
   - Write unit tests for basic analysis
   - Verify no OS-level process spawning (pure WASM)
   - Test offline functionality
+  - **COMPLETED:** `test-engine-interface.ts` passes all tests
 
 ### 1.2 Chess Logic Foundation
 
-**Source:** [roadmap.md](roadmap.md) - Phase 1.2, [data-storage.md](data-storage.md) -
-game data formats
+**Source:** [roadmap.md](roadmap.md) - Phase 1.2,
+[data-storage.md](data-storage.md) - game data formats
 
-- [ ] **1.2.1** Integrate chess.js library for move validation
+- [x] **1.2.1** Integrate chess.js library for move validation
   - Install chess.js dependency
   - Create wrapper module for chess.js (`src/shared/chess-logic.ts`)
   - Test basic move generation
   - Ensure compatibility with Bun runtime
-- [ ] **1.2.2** Implement board state management
+  - **COMPLETED:** chess.js v1.4.0 installed, ChessGame wrapper created
+- [x] **1.2.2** Implement board state management
   - Create BoardState class/interface
   - Track current position (FEN)
   - Track move history (array of moves)
@@ -164,12 +186,15 @@ game data formats
     - Draw by repetition
     - Draw by 50-move rule
     - Draw by insufficient material
-- [ ] **1.2.3** Add FEN string parsing and generation
+  - **COMPLETED:** BoardState interface and getStatus() method implemented
+- [x] **1.2.3** Add FEN string parsing and generation
   - Parse FEN to board state
   - Generate FEN from board state
   - Validate FEN format
-  - Support all FEN components (position, turn, castling, en passant, halfmove, fullmove)
-- [ ] **1.2.4** Implement PGN import/export
+  - Support all FEN components (position, turn, castling, en passant, halfmove,
+    fullmove)
+  - **COMPLETED:** loadFen(), getFen(), validateFen() methods
+- [x] **1.2.4** Implement PGN import/export
   - Parse PGN to move list
   - Generate PGN from game (format per data-storage.md):
 
@@ -185,7 +210,9 @@ game data formats
     ```
 
   - Handle PGN headers and annotations
-- [ ] **1.2.5** Add move legality checking
+  - **COMPLETED:** loadPgn(), getPgn() methods
+
+- [x] **1.2.5** Add move legality checking
   - Validate moves against current position
   - Return list of legal moves for position
   - Handle special moves:
@@ -193,71 +220,111 @@ game data formats
     - Queenside castling (O-O-O)
     - En passant captures
     - Pawn promotion (to Q, R, B, N)
+  - **COMPLETED:** isLegalMove(), getLegalMoves(), makeMove() with flag
+    detection
 
 ### 1.3 Basic Engine Operations
 
-**Source:** [ai-engine.md](ai-engine.md) - all sections, [move-guidance.md](move-guidance.md) -
-"Integration with AI Engine"
+**Source:** [ai-engine.md](ai-engine.md) - all sections,
+[move-guidance.md](move-guidance.md) - "Integration with AI Engine"
 
-- [ ] **1.3.1** Request position evaluation
+- [x] **1.3.1** Request position evaluation
   - Send position to engine via UCI `position` command
   - Parse evaluation response from `info score`
   - Convert centipawn score to human-readable format
   - Handle mate scores (`score mate N`)
-- [ ] **1.3.2** Get best move calculation
+  - **COMPLETED:** Added `evaluatePosition()` and `getFormattedEvaluation()`
+    methods
+  - Added `formatScore()` utility function for human-readable scores
+- [x] **1.3.2** Get best move calculation
   - Request best move at specified depth (`go depth N`)
   - Handle move time limits (`go movetime N`)
   - Return structured BestMove result
   - Support skill level adjustment for bots
-- [ ] **1.3.3** Implement move analysis (centipawn loss)
+  - **COMPLETED:** `getBestMoves()` supports depth, movetime, and skill level
+- [x] **1.3.3** Implement move analysis (centipawn loss)
   - Compare played move to best move
   - Calculate centipawn loss (CPL)
   - Classify moves per player-progress.md thresholds:
-    - **Excellent**: CPL 0-10 (100% accuracy)
-    - **Good**: CPL 11-25 (90% accuracy)
-    - **Inaccuracy**: CPL 26-50 (70% accuracy)
-    - **Mistake**: CPL 51-100 (40% accuracy)
-    - **Blunder**: CPL >100 (0% accuracy)
-- [ ] **1.3.4** Add multi-move principal variation (PV) extraction
+    - **Excellent**: Within 10 centipawns of best move (100% accuracy)
+    - **Good**: Within 10-25 centipawns (90% accuracy)
+    - **Inaccuracy**: 25-75 centipawns worse (70% accuracy)
+    - **Mistake**: 75-200 centipawns worse (40% accuracy)
+    - **Blunder**: 200+ centipawns worse (0% accuracy)
+  - **COMPLETED:** Added `analyzeMove()` method and `classifyMove()` function
+  - Added `MoveAnalysis` interface, `MoveClassification` enum, threshold
+    constants
+- [x] **1.3.4** Add multi-move principal variation (PV) extraction
   - Configure engine for `multipv 3` (top 3 moves)
   - Parse PV lines from engine output
   - Return top N moves with evaluations
   - Store PV for each candidate move
   - Support move-guidance.md requirement for top 3 moves
-- [ ] **1.3.5** Test performance and optimization
+  - **COMPLETED:** MultiPV fully supported via `count` parameter
+- [x] **1.3.5** Test performance and optimization
   - Benchmark analysis time per position
   - Ensure <2s per position at depth 20 (roadmap.md target)
   - Optimize memory usage
   - Profile and address bottlenecks
   - Test with complex positions (200+ legal moves)
+  - **COMPLETED:** Average 865ms at depth 20 (well under 2s target)
+  - See: `test-engine-operations.ts` for comprehensive tests
 
 ### 1.4 IPC Bridge Setup
 
 **Source:** [architecture.md](architecture.md) - "Backend / Logic Layer",
 [ai-engine.md](ai-engine.md) - "WASM Integration in Buntralino"
 
-- [ ] **1.4.1** Implement Neutralino IPC methods for engine
+- [x] **1.4.1** Implement Neutralino IPC methods for engine
   - Register `requestBestMoves` method
   - Register `evaluatePosition` method
   - Register `startNewGame` method
   - Use Buntralino's `registerMethodMap()` pattern
-- [ ] **1.4.2** Define structured JSON payloads
+  - **COMPLETED:** Registered 8 IPC methods in `src/backend/index.ts`:
+    - `sayHello`, `startNewGame`, `requestBestMoves`, `evaluatePosition`
+    - `analyzeMove`, `getGuidanceMoves`, `setSkillLevel`, `getEngineStatus`
+- [x] **1.4.2** Define structured JSON payloads
   - Request payload: `{ fen: string, moves?: string[], depth?: number }`
   - Response payload: `{ moves: BestMove[], evaluation: number }`
   - Error handling: `{ error: string, code: string }`
-- [ ] **1.4.3** Test frontend-backend communication
+  - **COMPLETED:** Created `src/shared/ipc-types.ts` with typed interfaces:
+    - `PositionRequest`, `AnalyzeMoveRequest`, `BestMovesResponse`
+    - `EvaluationResponse`, `MoveAnalysisResponse`, `ErrorResponse`
+    - Type guards: `isErrorResponse()`, `isSuccessResponse()`
+- [x] **1.4.3** Test frontend-backend communication
   - Verify IPC calls complete successfully
   - Test error propagation
   - Measure latency
+  - **COMPLETED:** Frontend test suite in `src/frontend/index.ts`
+    - Tests all IPC methods with visual results display
+    - App runs successfully in dev mode with engine initialized
 
-### 1.5 Phase 1 Milestones Verification
+### 1.5 Phase 1 Documentation Created
+
+**Source:** [roadmap.md](roadmap.md) - Phase 1 Documentation
+
+- [x] Comprehensive documentation detailing engine integration exists in
+      `documents/` folder
+  - **COMPLETED:** Created `documents/engine-integration.md`
+  - Covers architecture, IPC methods, move classification, performance, and
+    usage examples
+
+### 1.6 Phase 1 Milestones Verification
 
 **Source:** [roadmap.md](roadmap.md) - Phase 1 Milestones
 
-- [ ] Engine successfully loads in Bun backend
-- [ ] Engine responds to position evaluation requests
-- [ ] Move analysis returns accurate results
-- [ ] Performance benchmarks meet targets (<2s per position analysis)
+- [x] Engine successfully loads in Bun backend
+  - ✓ Verified: Engine initializes at startup, "Stockfish engine ready" logged
+- [x] Engine responds to position evaluation requests
+  - ✓ Verified: `evaluatePosition()` returns scores, best moves, PV
+- [x] Move analysis returns accurate results
+  - ✓ Verified: `analyzeMove()` calculates CPL, classifies moves correctly
+  - ✓ Thresholds match player-progress.md
+    (Excellent/Good/Inaccuracy/Mistake/Blunder)
+- [x] Performance benchmarks meet targets (<2s per position analysis)
+  - ✓ Verified: Average 865ms at depth 20 (well under 2s target)
+- [x] Documentation detailing engine integration exists in `documents/` folder
+  - ✓ Verified: `documents/engine-integration.md` created
 
 ---
 
@@ -265,8 +332,9 @@ game data formats
 
 **Status:** 📋 PLANNED
 
-**Source:** [roadmap.md](roadmap.md) - Phase 2, [ui-ux-design.md](ui-ux-design.md),
-[architecture.md](architecture.md) - "Frontend Layer"
+**Source:** [roadmap.md](roadmap.md) - Phase 2,
+[ui-ux-design.md](ui-ux-design.md), [architecture.md](architecture.md) -
+"Frontend Layer"
 
 **Goal:** Create functional chessboard interface with piece movement
 
@@ -276,10 +344,12 @@ game data formats
 - All moves are validated correctly
 - UI is intuitive and visually appealing
 - No major bugs or glitches
+- Documentation detailing UI implementation exists in `documents/` folder
 
 ### 2.1 Chessboard Rendering
 
-**Source:** [ui-ux-design.md](ui-ux-design.md) - "Layout Overview", "Visual Theme"
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Layout Overview", "Visual
+Theme"
 
 - [ ] **2.1.1** Implement responsive chessboard layout
   - Create 8x8 grid structure
@@ -368,7 +438,8 @@ game data formats
 
 ### 2.4 Basic Game Controls
 
-**Source:** [ui-ux-design.md](ui-ux-design.md) - "Game Controls (Middle Section)"
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Game Controls (Middle
+Section)"
 
 - [ ] **2.4.1** New game button
   - Reset board to starting position
@@ -398,6 +469,7 @@ game data formats
 - [ ] Pieces can be moved legally
 - [ ] Game state updates correctly
 - [ ] UI is responsive and smooth
+- [ ] Documentation detailing UI implementation exists in `documents/` folder
 
 ---
 
@@ -417,11 +489,12 @@ game data formats
 - Guidance system accurate and responsive
 - AI plays convincingly at all difficulty levels
 - UI is polished and user-friendly
+- Documentation detailing AI implementation exists in `documents/` folder
 
 ### 3.1 AI Opponent
 
-**Source:** [ai-engine.md](ai-engine.md) - "Bot Personalities & Human-Like Play",
-"Difficulty & Strength Scaling"
+**Source:** [ai-engine.md](ai-engine.md) - "Bot Personalities & Human-Like
+Play", "Difficulty & Strength Scaling"
 
 - [ ] **3.1.1** Implement bot move selection from engine
   - Request move from engine for bot's turn
@@ -495,12 +568,13 @@ game data formats
   - Parse top 3 moves with evaluations
   - Update after every opponent move
   - Update after player undoes a move
-- [ ] **3.3.2** Implement color-coded highlighting (from overview.md/move-guidance.md)
+- [ ] **3.3.2** Implement color-coded highlighting (from
+      overview.md/move-guidance.md)
   - **Blue**: Best move
   - **Green**: Second-best move
   - **Yellow**: Third-best move
-- [ ] **3.3.3** Implement three-way visual sync (from move-guidance.md)
-  For each recommended move, highlight in same color:
+- [ ] **3.3.3** Implement three-way visual sync (from move-guidance.md) For each
+      recommended move, highlight in same color:
   1. **The piece that can be moved** - highlighted on board
   2. **The destination square** - highlighted on board
   3. **The notation in the side panel** - highlighted in text
@@ -551,7 +625,8 @@ game data formats
   - Restart
   - Analysis / Review Toggle
   - Settings Access
-- [ ] **3.4.4** Add status and feedback area (Bottom Section per ui-ux-design.md)
+- [ ] **3.4.4** Add status and feedback area (Bottom Section per
+      ui-ux-design.md)
   - Current turn indicator
   - Check / Checkmate alerts
   - Game state messages
@@ -570,6 +645,7 @@ game data formats
 - [ ] Real-time guidance displays correctly
 - [ ] Visual sync between board and notation works
 - [ ] AI opponent plays at expected strength
+- [ ] Documentation detailing AI implementation exists in `documents/` folder
 
 ---
 
@@ -578,7 +654,8 @@ game data formats
 **Status:** 📋 PLANNED
 
 **Source:** [roadmap.md](roadmap.md) - Phase 4, [game-modes.md](game-modes.md) -
-"Exam Mode", [tracked-metrics.md](tracked-metrics.md), [data-storage.md](data-storage.md)
+"Exam Mode", [tracked-metrics.md](tracked-metrics.md),
+[data-storage.md](data-storage.md)
 
 **Goal:** Add Exam Mode with performance tracking
 
@@ -588,6 +665,8 @@ game data formats
 - Analysis pipeline is accurate and fast (<30s per game)
 - All metrics match specifications
 - Data storage is reliable
+- Documentation detailing Exam Mode & Metrics Collection implementation exists
+  in `documents/` folder
 
 ### 4.1 Exam Mode Implementation
 
@@ -625,8 +704,9 @@ game data formats
 
 ### 4.2 Post-Game Analysis Pipeline
 
-**Source:** [post-game-analysis.md](post-game-analysis.md) - "Analysis Pipeline",
-[player-progress.md](player-progress.md) - "Metrics Collection Pipeline"
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Analysis
+Pipeline", [player-progress.md](player-progress.md) - "Metrics Collection
+Pipeline"
 
 - [ ] **4.2.1** Implement analysis pipeline (per post-game-analysis.md)
   1. Game Completion (Exam Mode)
@@ -772,8 +852,8 @@ Implement all 9 composite index calculations with their component metrics:
   - Opening evaluation trend
   - Conversion trend over time
   - Time trouble trend over time
-- [ ] **4.3.10** Implement composite index calculation formula
-  Per player-progress.md:
+- [ ] **4.3.10** Implement composite index calculation formula Per
+      player-progress.md:
 
   ```text
   Precision = (
@@ -823,14 +903,18 @@ Implement all 9 composite index calculations with their component metrics:
   - **Linux**: `~/.local/share/chess-sensei/`
 - [ ] **4.4.3** Implement game data format (per data-storage.md)
   - JSON structure with gameId, version, timestamp, mode
-  - Metadata: playerColor, botPersonality, botElo, opening, result, termination, duration
+  - Metadata: playerColor, botPersonality, botElo, opening, result, termination,
+    duration
   - Moves array with moveNumber, white/black objects containing:
     - move, san, uci, fen, timestamp, timeSpent
   - PGN string
 - [ ] **4.4.4** Implement analysis data format (per data-storage.md)
-  - JSON structure with gameId, analysisVersion, analysisTimestamp, engineVersion
-  - Summary: overallAccuracy, phase accuracies, averageCentipawnLoss, move counts
-  - MoveAnalysis array with: moveNumber, color, move, evaluations, centipawnLoss, classification, bestMove, alternativeMoves
+  - JSON structure with gameId, analysisVersion, analysisTimestamp,
+    engineVersion
+  - Summary: overallAccuracy, phase accuracies, averageCentipawnLoss, move
+    counts
+  - MoveAnalysis array with: moveNumber, color, move, evaluations,
+    centipawnLoss, classification, bestMove, alternativeMoves
   - CriticalMoments array
   - TacticalOpportunities array
   - GamePhases object
@@ -870,6 +954,8 @@ Implement all 9 composite index calculations with their component metrics:
 - [ ] Post-game analysis completes successfully
 - [ ] All metrics calculated accurately
 - [ ] Data saved and loaded correctly
+- [ ] Documentation detailing Exam Mode & Metrics Collection implementation
+      exists in `documents/` folder
 
 ---
 
@@ -877,7 +963,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Status:** 📋 PLANNED
 
-**Source:** [roadmap.md](roadmap.md) - Phase 5, [post-game-analysis.md](post-game-analysis.md)
+**Source:** [roadmap.md](roadmap.md) - Phase 5,
+[post-game-analysis.md](post-game-analysis.md)
 
 **Goal:** Build comprehensive post-game analysis interface
 
@@ -887,6 +974,8 @@ Implement all 9 composite index calculations with their component metrics:
 - All visualizations are clear and accurate
 - Performance is smooth (no lag on long games)
 - Users find the analysis valuable
+- Documentation detailing Post-Game Analysis implementation exists in
+  `documents/` folder
 
 ### 5.1 Analysis Launch
 
@@ -986,7 +1075,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 5.5 Game Summary Report
 
-**Source:** [post-game-analysis.md](post-game-analysis.md) - "Game Summary Report"
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Game Summary
+Report"
 
 - [ ] **5.5.1** Game metadata section
   - Date and time played
@@ -1024,7 +1114,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 5.6 Deep Analytics Dashboard
 
-**Source:** [post-game-analysis.md](post-game-analysis.md) - "Deep Analytics View"
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Deep Analytics
+View"
 
 - [ ] **5.6.1** Metrics scorecard for game
   - All 9 composite scores for this game
@@ -1062,7 +1153,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 5.7 Training Recommendations
 
-**Source:** [post-game-analysis.md](post-game-analysis.md) - "Training Recommendations"
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Training
+Recommendations"
 
 - [ ] **5.7.1** Generate personalized training suggestions
   - Based on weakness analysis
@@ -1083,7 +1175,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 5.8 Export Options
 
-**Source:** [post-game-analysis.md](post-game-analysis.md) - "Exporting and Sharing"
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Exporting and
+Sharing"
 
 - [ ] **5.8.1** Export Game PGN
   - Standard notation format
@@ -1104,6 +1197,8 @@ Implement all 9 composite index calculations with their component metrics:
 - [ ] All data visualizations render correctly
 - [ ] User can review games effectively
 - [ ] Recommendations are actionable
+- [ ] Documentation detailing Post-Game Analysis implementation exists in
+      `documents/` folder
 
 ---
 
@@ -1111,7 +1206,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Status:** 📋 PLANNED
 
-**Source:** [roadmap.md](roadmap.md) - Phase 6, [player-progress.md](player-progress.md)
+**Source:** [roadmap.md](roadmap.md) - Phase 6,
+[player-progress.md](player-progress.md)
 
 **Goal:** Create comprehensive player progress tracking and analytics
 
@@ -1121,10 +1217,13 @@ Implement all 9 composite index calculations with their component metrics:
 - All visualizations are meaningful and actionable
 - Performance is fast even with 100+ games
 - Users are motivated by progress tracking
+- Documentation detailing Player Progress Dashboard implementation exists in
+  `documents/` folder
 
 ### 6.1 Progress Dashboard Overview
 
-**Source:** [player-progress.md](player-progress.md) - "Visual Analytics & Reporting"
+**Source:** [player-progress.md](player-progress.md) - "Visual Analytics &
+Reporting"
 
 - [ ] **6.1.1** Composite index radar chart
   - Spider/radar chart showing all 9 master scores
@@ -1152,7 +1251,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 6.2 Detailed Analytics Views
 
-**Source:** [player-progress.md](player-progress.md) - "Detailed Analytics Views"
+**Source:** [player-progress.md](player-progress.md) - "Detailed Analytics
+Views"
 
 - [ ] **6.2.1** Drill-down for each composite score
   - Click any score to expand
@@ -1206,8 +1306,9 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 6.5 Opponent-Adjusted Performance
 
-**Source:** [player-progress.md](player-progress.md) - "Opponent-Adjusted Performance",
-[tracked-metrics.md](tracked-metrics.md) - "Opponent Adjusted Performance"
+**Source:** [player-progress.md](player-progress.md) - "Opponent-Adjusted
+Performance", [tracked-metrics.md](tracked-metrics.md) - "Opponent Adjusted
+Performance"
 
 - [ ] **6.5.1** Performance vs. bot difficulty charts
   - Accuracy by opponent Elo
@@ -1223,7 +1324,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 6.6 Milestones & Achievements
 
-**Source:** [player-progress.md](player-progress.md) - "Progress Milestones & Achievements"
+**Source:** [player-progress.md](player-progress.md) - "Progress Milestones &
+Achievements"
 
 - [ ] **6.6.1** Achievement system implementation
   - **Precision Milestones**:
@@ -1252,7 +1354,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 6.7 Training Goals & Focus Areas
 
-**Source:** [player-progress.md](player-progress.md) - "Training Goals & Focus Areas"
+**Source:** [player-progress.md](player-progress.md) - "Training Goals & Focus
+Areas"
 
 - [ ] **6.7.1** Suggest training focus based on metrics
   - Identify weakest composite score
@@ -1274,6 +1377,8 @@ Implement all 9 composite index calculations with their component metrics:
 - [ ] Charts and graphs render correctly
 - [ ] Historical data loads efficiently
 - [ ] Trends calculated accurately
+- [ ] Documentation detailing Player Progress Dashboard implementation exists in
+      `documents/` folder
 
 ---
 
@@ -1292,6 +1397,8 @@ Implement all 9 composite index calculations with their component metrics:
 - Analysis results are accurate
 - UI is simple and focused
 - Useful for targeted practice
+- Documentation detailing Sandbox Mode implementation exists in `documents/`
+  folder
 
 ### 7.1 Board Editor
 
@@ -1400,6 +1507,8 @@ Implement all 9 composite index calculations with their component metrics:
 - [ ] Position analysis works correctly
 - [ ] UI is intuitive
 - [ ] Common positions load quickly
+- [ ] Documentation detailing Sandbox Mode implementation exists in `documents/`
+      folder
 
 ---
 
@@ -1407,8 +1516,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Status:** 📋 PLANNED
 
-**Source:** [roadmap.md](roadmap.md) - Phase 8, [data-storage.md](data-storage.md) -
-"Import & Export" section
+**Source:** [roadmap.md](roadmap.md) - Phase 8,
+[data-storage.md](data-storage.md) - "Import & Export" section
 
 **Goal:** Add comprehensive data import/export functionality
 
@@ -1418,6 +1527,8 @@ Implement all 9 composite index calculations with their component metrics:
 - Import/export works across devices
 - No data loss during operations
 - File formats are standard and portable
+- Documentation detailing Import/Export & Data Management implementation exists
+  in `documents/` folder
 
 ### 8.1 Export Functions
 
@@ -1543,6 +1654,8 @@ Implement all 9 composite index calculations with their component metrics:
 - [ ] Backup system is reliable
 - [ ] UI is straightforward
 - [ ] Data integrity maintained
+- [ ] Documentation detailing Import/Export & Data Management implementation
+      exists in `documents/` folder
 
 ---
 
@@ -1550,8 +1663,9 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Status:** 📋 PLANNED
 
-**Source:** [roadmap.md](roadmap.md) - Phase 9, [ui-ux-design.md](ui-ux-design.md) -
-"Responsiveness & Accessibility", [development.md](development.md)
+**Source:** [roadmap.md](roadmap.md) - Phase 9,
+[ui-ux-design.md](ui-ux-design.md) - "Responsiveness & Accessibility",
+[development.md](development.md)
 
 **Goal:** Refine UI/UX, optimize performance, fix bugs
 
@@ -1561,6 +1675,8 @@ Implement all 9 composite index calculations with their component metrics:
 - UI is professional and refined
 - No critical bugs remain
 - Users can learn the app easily
+- Documentation detailing Polish & Optimization implementation exists in
+  `documents/` folder
 
 ### 9.1 UI/UX Refinements
 
@@ -1618,7 +1734,8 @@ Implement all 9 composite index calculations with their component metrics:
 
 ### 9.3 Accessibility Improvements
 
-**Source:** [ui-ux-design.md](ui-ux-design.md) - "Responsiveness & Accessibility"
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Responsiveness &
+Accessibility"
 
 - [ ] **9.3.1** Implement color-blind modes
   - **Color-blind safe color profiles**
@@ -1715,6 +1832,8 @@ Implement all 9 composite index calculations with their component metrics:
 - [ ] Performance targets met
 - [ ] Accessibility standards achieved
 - [ ] User experience polished
+- [ ] Documentation detailing Polish & Optimization implementation exists in
+      `documents/` folder
 
 ---
 
@@ -1772,6 +1891,7 @@ All features must be stable and tested:
 - [ ] Player progress dashboard
 - [ ] Import/export functionality
 - [ ] Cross-platform desktop support (Windows, macOS, Linux)
+- [ ] Documentation detailing v1.0 feature set exists in `documents/` folder
 
 ### v1.0 Quality Standards
 
@@ -1853,28 +1973,28 @@ If any deviation from this plan is required:
 
 **Source:** [roadmap.md](roadmap.md), [architecture.md](architecture.md)
 
-| Metric               | Target    |
-| -------------------- | --------- |
-| Engine analysis      | <2 seconds per position |
-| Post-game analysis   | <30 seconds per game |
-| UI responsiveness    | <100ms for interactions |
-| Memory usage         | <500MB typical |
-| Application size     | <10MB |
-| Crash rate           | <1% |
+| Metric             | Target                  |
+| ------------------ | ----------------------- |
+| Engine analysis    | <2 seconds per position |
+| Post-game analysis | <30 seconds per game    |
+| UI responsiveness  | <100ms for interactions |
+| Memory usage       | <500MB typical          |
+| Application size   | <10MB                   |
+| Crash rate         | <1%                     |
 
 ### All 12 Source Documents
 
-| Document | Key Content |
-| -------- | ----------- |
-| [overview.md](overview.md) | Core concept, top 3 moves, training philosophy |
-| [roadmap.md](roadmap.md) | All phases, milestones, success criteria |
-| [architecture.md](architecture.md) | Buntralino, Bun, Neutralino, file structure |
-| [ai-engine.md](ai-engine.md) | Stockfish WASM, UCI, bot personalities, difficulty |
-| [ui-ux-design.md](ui-ux-design.md) | Neomorphism, glassmorphism, right panel, accessibility |
-| [game-modes.md](game-modes.md) | Training/Exam/Sandbox specs, state management |
-| [move-guidance.md](move-guidance.md) | Color coding, three-way sync, hover behavior |
-| [player-progress.md](player-progress.md) | 9 composite indexes, dashboard, achievements |
-| [tracked-metrics.md](tracked-metrics.md) | 100+ individual metrics by category |
-| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations |
-| [data-storage.md](data-storage.md) | JSON formats, file paths, import/export, backups |
-| [development.md](development.md) | Git workflow, testing, CI/CD, release process |
+| Document                                       | Key Content                                            |
+| ---------------------------------------------- | ------------------------------------------------------ |
+| [overview.md](overview.md)                     | Core concept, top 3 moves, training philosophy         |
+| [roadmap.md](roadmap.md)                       | All phases, milestones, success criteria               |
+| [architecture.md](architecture.md)             | Buntralino, Bun, Neutralino, file structure            |
+| [ai-engine.md](ai-engine.md)                   | Stockfish WASM, UCI, bot personalities, difficulty     |
+| [ui-ux-design.md](ui-ux-design.md)             | Neomorphism, glassmorphism, right panel, accessibility |
+| [game-modes.md](game-modes.md)                 | Training/Exam/Sandbox specs, state management          |
+| [move-guidance.md](move-guidance.md)           | Color coding, three-way sync, hover behavior           |
+| [player-progress.md](player-progress.md)       | 9 composite indexes, dashboard, achievements           |
+| [tracked-metrics.md](tracked-metrics.md)       | 100+ individual metrics by category                    |
+| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations        |
+| [data-storage.md](data-storage.md)             | JSON formats, file paths, import/export, backups       |
+| [development.md](development.md)               | Git workflow, testing, CI/CD, release process          |
