@@ -157,27 +157,17 @@ async function buildWindows(): Promise<void> {
     await fs.remove(buildsDir);
   }
 
-  // Step 1: Build Neutralino
+  // Step 1: Update Neutralino binaries (needed in CI)
+  console.log('\n📥 Updating Neutralino binaries...');
+  await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
+  console.log('  ✓ Neutralino binaries updated');
+
+  // Step 2: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
 
-  // Debug: List what Neutralino created
-  console.log(`  📂 Checking ${neuBuildsDir}...`);
-  if (await fs.pathExists(neuBuildsDir)) {
-    const files = await fs.readdir(neuBuildsDir);
-    console.log(`  📂 Contents: ${files.join(', ')}`);
-  } else {
-    console.log(`  ⚠ Directory doesn't exist: ${neuBuildsDir}`);
-    // Try to find where Neutralino actually put things
-    const distPath = path.join(projectRoot, 'dist');
-    if (await fs.pathExists(distPath)) {
-      const distContents = await fs.readdir(distPath);
-      console.log(`  📂 dist/ contains: ${distContents.join(', ')}`);
-    }
-  }
-
-  // Step 2: Build Bun executable for Windows
+  // Step 3: Build Bun executable for Windows
   console.log('\n📦 Building Bun executable for Windows...');
   await fs.ensureDir(bunBuildsDir);
 

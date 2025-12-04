@@ -36,12 +36,17 @@ async function buildLinux(): Promise<void> {
   const appName = config.cli.binaryName;
   const distDir = path.join(projectRoot, config.cli.distributionPath ?? 'dist', appName);
 
-  // Step 1: Build Neutralino
-  console.log('📦 Building Neutralino.js app...');
+  // Step 1: Update Neutralino binaries (needed in CI)
+  console.log('📥 Updating Neutralino binaries...');
+  await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
+  console.log('  ✓ Neutralino binaries updated');
+
+  // Step 2: Build Neutralino
+  console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
 
-  // Step 2: Build Bun executable for Linux x64
+  // Step 3: Build Bun executable for Linux x64
   console.log('\n📦 Building Bun executable for Linux x64...');
   const bunExePath = path.join(distDir, `${appName}-linux_x64`);
 
