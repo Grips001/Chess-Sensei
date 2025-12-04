@@ -1321,7 +1321,7 @@ function renderChessboard(): void {
   const fileStep = boardFlipped ? -1 : 1;
 
   for (let rank = rankStart; boardFlipped ? rank <= rankEnd : rank >= rankEnd; rank += rankStep) {
-    for (let file = fileStart; boardFlipped ? file >= fileEnd : file < fileEnd; file += fileStep) {
+    for (let file = fileStart; boardFlipped ? file > fileEnd : file < fileEnd; file += fileStep) {
       const square = document.createElement('div');
       square.className = 'square';
 

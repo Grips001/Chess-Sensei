@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
   "applicationId": "com.chess-sensei.app",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "applicationName": "Chess-Sensei",
   "author": "Jhon D. Vise",
   "description": "A modern chess training application with real-time AI-assisted move guidance",

@@ -14,6 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Player progress dashboard (Phase 6)
 - Sandbox Mode for position exploration (Phase 7)
 
+## [0.3.2] - 2025-12-04
+
+### Fixed
+
+- Flip Board button causing board grid corruption (9 columns instead of 8)
+- Piece position shifts when board was flipped
+- Checkerboard pattern replaced by solid color columns when flipped
+
+### Changed
+
+- Updated documentation build references to point to documents/building.md
+
 ## [0.3.1] - 2025-12-04
 
 ### Fixed
@@ -169,7 +181,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.1.0...v0.2.0

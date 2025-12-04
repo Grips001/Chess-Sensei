@@ -43,6 +43,8 @@ updates first.
 
 **Last Updated:** 2025-12-04
 
+**Current Version:** v0.3.2
+
 **Current Phase:** Phase 3 - AI Opponent & Training Mode ✅ COMPLETE
 
 **Next Phase:** Phase 4 - Exam Mode & Metrics Collection

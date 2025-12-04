@@ -199,7 +199,7 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    # Edit package.json version field
-   "version": "0.3.1"
+   "version": "0.3.2"
    ```
 
 2. **Update CHANGELOG.md** with release notes
@@ -301,13 +301,11 @@ Pre-release tags automatically mark the GitHub release as "pre-release".
 2. Install dependencies: `bun install`
 3. Run development server: `bun run dev`
 4. Run linters: `bun run lint`
-5. Build for production:
-   - Frontend only: `bun run build`
-   - Full app (all platforms): `bun run build:app`
-   - Windows (with rcedit workaround): `bun run build:windows`
+5. Build for production: See [documents/building.md](../documents/building.md)
 
-See [documents/building.md](../documents/building.md) for detailed build
-instructions and troubleshooting.
+**Important:** Always refer to `documents/building.md` for the correct
+platform-specific build commands and troubleshooting. Build procedures vary by
+platform due to toolchain differences.
 
 ## Continuous Integration
 

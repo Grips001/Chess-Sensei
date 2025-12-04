@@ -148,7 +148,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.3.1 (Phase 3: AI Opponent & Training Mode)
+**Current Version:** v0.3.2 (Phase 3: AI Opponent & Training Mode)
 
 ### Installation
 

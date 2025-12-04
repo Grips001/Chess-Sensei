@@ -372,7 +372,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 3 (v0.3.1)** is complete and includes:
+**Phase 3 (v0.3.2)** is complete and includes:
 
 - AI opponent with 5 bot personalities
 - Difficulty levels from 800 to 2400 Elo
