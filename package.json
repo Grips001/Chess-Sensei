@@ -7,6 +7,8 @@
     "build": "bunx --bun vite build",
     "build:app": "bunx buntralino build src/backend/index.ts",
     "build:windows": "bun run scripts/build-windows.ts",
+    "build:linux": "bun run scripts/build-linux.ts",
+    "build:macos": "bun run scripts/build-macos.ts",
     "lint": "bun run lint:ts && bun run lint:css && bun run lint:md && bun run lint:format",
     "lint:ts": "eslint . --ext .ts,.tsx,.mts,.js,.mjs",
     "lint:css": "stylelint \"src/**/*.css\" --ignore-path .gitignore",

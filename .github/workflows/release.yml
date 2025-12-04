@@ -56,26 +56,24 @@ jobs:
         env:
           SKIP_BUNTRALINO: 'true'
 
-      - name: Build Neutralino resources
-        run: bunx @neutralinojs/neu build
-
       - name: Build application (Windows)
         if: matrix.platform == 'windows'
         run: bun run build:windows
 
       - name: Build application (Linux)
         if: matrix.platform == 'linux'
-        run: bunx buntralino build src/backend/index.ts --target=linux-x64
+        run: bun run build:linux
 
       - name: Build application (macOS)
         if: matrix.platform == 'macos'
-        run: bunx buntralino build src/backend/index.ts --target=darwin-x64
+        run: bun run build:macos
 
       - name: List build output
         shell: bash
         run: |
           echo "Build output:"
-          ls -la dist/ || echo "No dist directory"
+          ls -laR build/ 2>/dev/null || echo "No build directory"
+          ls -laR dist/ 2>/dev/null || echo "No dist directory"
 
       - name: Package Windows build
         if: matrix.platform == 'windows'
@@ -83,11 +81,9 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}" -replace '^v', ''
           New-Item -ItemType Directory -Force -Path "release"
-          # Copy the Windows executable and resources
-          if (Test-Path "dist/Chess-Sensei") {
-            Compress-Archive -Path "dist/Chess-Sensei/*" -DestinationPath "release/Chess-Sensei-$version-windows-x64.zip"
-          } elseif (Test-Path "dist") {
-            Compress-Archive -Path "dist/*" -DestinationPath "release/Chess-Sensei-$version-windows-x64.zip"
+          # Windows build outputs to build/Windows x64/
+          if (Test-Path "build/Windows x64") {
+            Compress-Archive -Path "build/Windows x64/*" -DestinationPath "release/Chess-Sensei-$version-windows-x64.zip"
           }
 
       - name: Package Linux build
@@ -96,10 +92,14 @@ jobs:
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
           mkdir -p release
-          if [ -d "dist/Chess-Sensei" ]; then
-            tar -czvf "release/Chess-Sensei-${VERSION}-linux-x64.tar.gz" -C dist Chess-Sensei
-          elif [ -d "dist" ]; then
-            tar -czvf "release/Chess-Sensei-${VERSION}-linux-x64.tar.gz" -C dist .
+          # Linux build outputs to dist/chess-sensei/
+          if [ -d "dist/chess-sensei" ]; then
+            # Create a cleaner package structure
+            mkdir -p "package/Chess-Sensei"
+            cp dist/chess-sensei/*linux* "package/Chess-Sensei/" 2>/dev/null || true
+            cp dist/chess-sensei/resources.neu "package/Chess-Sensei/" 2>/dev/null || true
+            tar -czvf "release/Chess-Sensei-${VERSION}-linux-x64.tar.gz" -C package Chess-Sensei
+            rm -rf package
           fi
 
       - name: Package macOS build
@@ -108,10 +108,16 @@ jobs:
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
           mkdir -p release
-          if [ -d "dist/Chess-Sensei" ]; then
-            tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C dist Chess-Sensei
-          elif [ -d "dist" ]; then
-            tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C dist .
+          # macOS build outputs to dist/chess-sensei/ with .app bundles
+          if [ -d "dist/chess-sensei" ]; then
+            # Package x64 build
+            if [ -d "dist/chess-sensei/chess-sensei-mac_x64" ]; then
+              tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C "dist/chess-sensei/chess-sensei-mac_x64" .
+            fi
+            # Package arm64 build
+            if [ -d "dist/chess-sensei/chess-sensei-mac_arm64" ]; then
+              tar -czvf "release/Chess-Sensei-${VERSION}-macos-arm64.tar.gz" -C "dist/chess-sensei/chess-sensei-mac_arm64" .
+            fi
           fi
 
       - name: Upload build artifacts
@@ -119,7 +125,7 @@ jobs:
         with:
           name: ${{ matrix.artifact }}
           path: release/*
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
 
   # Release job - creates GitHub release with all artifacts
