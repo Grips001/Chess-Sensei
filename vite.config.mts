@@ -48,6 +48,11 @@ const buntralino = (): PluginOption => [
     apply: 'build',
     enforce: 'post',
     async closeBundle() {
+      // Skip Buntralino build in CI (handled separately per-platform)
+      if (process.env.SKIP_BUNTRALINO === 'true') {
+        console.log('Skipping Buntralino build (SKIP_BUNTRALINO=true)');
+        return;
+      }
       // Build Buntralino after Vite builds
       await Bun.$`buntralino build ${bunIndex}`;
     },

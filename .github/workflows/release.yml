@@ -51,16 +51,25 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build frontend assets
-        run: bun run build
+      - name: Build frontend assets only
+        run: bunx --bun vite build --mode production
+        env:
+          SKIP_BUNTRALINO: 'true'
+
+      - name: Build Neutralino resources
+        run: bunx @neutralinojs/neu build
 
       - name: Build application (Windows)
         if: matrix.platform == 'windows'
         run: bun run build:windows
 
-      - name: Build application (Linux/macOS)
-        if: matrix.platform != 'windows'
-        run: bun run build:app
+      - name: Build application (Linux)
+        if: matrix.platform == 'linux'
+        run: bunx buntralino build src/backend/index.ts --target=linux-x64
+
+      - name: Build application (macOS)
+        if: matrix.platform == 'macos'
+        run: bunx buntralino build src/backend/index.ts --target=darwin-x64
 
       - name: List build output
         shell: bash
