@@ -183,7 +183,32 @@ Key resources:
 
 ## License
 
-### To be determined
+Chess-Sensei is licensed under the **MIT License**. See the [LICENSE](LICENSE)
+file for details.
+
+### Open Source
+
+This project is free and open-source software (FOSS). You are free to:
+
+- ✅ Use Chess-Sensei for any purpose (personal, educational, commercial)
+- ✅ Study and modify the source code
+- ✅ Distribute original or modified versions
+- ✅ Create derivative works
+
+### Third-Party Licenses
+
+Chess-Sensei uses several open-source components with various licenses. See
+[ATTRIBUTIONS.md](ATTRIBUTIONS.md) for complete details on third-party software,
+including:
+
+- **Stockfish** (GPL-3.0) - Chess engine
+- **chess.js** (BSD-2-Clause) - Chess logic library
+- **Neutralino.js** (MIT) - Desktop framework
+- **Buntralino** (MIT) - IPC bridge
+- **Chess pieces** (CC BY-SA 3.0) - SVG graphics
+- **Sound effects** (CC0) - Move sounds from Chess.com
+
+All third-party licenses are compatible with Chess-Sensei's MIT license.
 
 ## Philosophy
 

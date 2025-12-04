@@ -352,6 +352,14 @@ export class ChessGame {
   }
 
   /**
+   * Get move history with full details (verbose format)
+   * @returns Array of Move objects with detailed information
+   */
+  getHistory(): Move[] {
+    return this.chess.history({ verbose: true });
+  }
+
+  /**
    * Get piece at a square
    * @param square - Square to check
    * @returns Piece at square, or null if empty

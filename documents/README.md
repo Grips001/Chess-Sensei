@@ -17,9 +17,30 @@ Documentation here will include:
 - **Troubleshooting** - Common issues and solutions
 - **Release Notes** - Version history and changes
 
-## Status
+## Available Documentation
 
-This directory will be populated as features are implemented during development.
+### User Guides
+
+- **[Quick Start Guide](quick-start.md)** - Get started in under 2 minutes
+- **[User Guide](user-guide.md)** - Complete guide to all Chess-Sensei features
+- **[FAQ](faq.md)** - Frequently asked questions and answers
+- **[Troubleshooting](troubleshooting.md)** - Common problems and solutions
+
+### Technical Documentation
+
+- **[Building Guide](building.md)** - Build Chess-Sensei from source
+- **[Engine Integration](engine-integration.md)** - Chess engine technical
+  details
+
+## Quick Navigation
+
+**New Users:** Start with the [Quick Start Guide](quick-start.md)
+
+**Feature Details:** See the [User Guide](user-guide.md)
+
+**Having Issues?** Check [Troubleshooting](troubleshooting.md) or [FAQ](faq.md)
+
+**Building from Source?** See [Building Guide](building.md)
 
 ## Related Documentation
 

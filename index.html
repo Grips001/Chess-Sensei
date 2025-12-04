@@ -9,11 +9,94 @@
 
   <body>
     <div id="app">
-      <div id="chess-board">
-        <!-- Chessboard will be rendered here -->
+      <div id="chess-board-container">
+        <div id="chess-board-wrapper">
+          <div class="board-files">
+            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span
+            ><span>g</span><span>h</span>
+          </div>
+          <div class="board-ranks">
+            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span
+            ><span>2</span><span>1</span>
+          </div>
+          <div id="chess-board">
+            <!-- 8x8 grid of squares will be rendered here by JavaScript -->
+          </div>
+        </div>
       </div>
       <div id="right-panel">
-        <!-- Move guidance and controls will be rendered here -->
+        <div class="panel-section">
+          <h3>Game Status</h3>
+          <div id="game-alert" class="game-alert hidden">
+            <!-- Check, checkmate, stalemate alerts will appear here -->
+          </div>
+          <div id="turn-indicator">
+            <div class="turn-label">Current Turn:</div>
+            <div class="turn-display">
+              <div class="turn-piece" id="turn-piece-icon"></div>
+              <div class="turn-text" id="turn-text">White to move</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-section">
+          <h3>Game Controls</h3>
+          <div class="game-controls">
+            <button class="control-button" id="new-game-control">New Game</button>
+            <button class="control-button" id="undo-button" disabled>Undo</button>
+            <button class="control-button" id="redo-button" disabled>Redo</button>
+            <button class="control-button" id="resign-button">Resign</button>
+            <button class="control-button" id="flip-board-button">Flip Board</button>
+          </div>
+        </div>
+        <div class="panel-section">
+          <h3>Move History</h3>
+          <div id="move-history">
+            <div id="move-list">
+              <!-- Move history will be rendered here -->
+            </div>
+          </div>
+        </div>
+        <div class="panel-section">
+          <h3>Captured Pieces</h3>
+          <div id="captured-pieces">
+            <div class="captured-section">
+              <div class="captured-label">White captured:</div>
+              <div id="captured-by-white" class="captured-list">
+                <!-- Captured black pieces will be rendered here -->
+              </div>
+              <div class="material-advantage" id="white-advantage"></div>
+            </div>
+            <div class="captured-section">
+              <div class="captured-label">Black captured:</div>
+              <div id="captured-by-black" class="captured-list">
+                <!-- Captured white pieces will be rendered here -->
+              </div>
+              <div class="material-advantage" id="black-advantage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Confirmation Dialog -->
+    <div id="confirm-dialog-overlay" class="confirm-dialog-overlay hidden">
+      <div class="confirm-dialog">
+        <h3 class="confirm-dialog-title" id="confirm-title">Confirm Action</h3>
+        <p class="confirm-dialog-message" id="confirm-message">Are you sure?</p>
+        <div class="confirm-dialog-buttons">
+          <button class="confirm-dialog-button cancel" id="confirm-cancel">Cancel</button>
+          <button class="confirm-dialog-button confirm" id="confirm-yes">Confirm</button>
+        </div>
+      </div>
+    </div>
+    <!-- Game Result Modal -->
+    <div id="game-result-overlay" class="game-result-overlay hidden">
+      <div class="game-result-modal">
+        <h2 class="game-result-title" id="result-title">Game Over</h2>
+        <p class="game-result-subtitle" id="result-subtitle"></p>
+        <p class="game-result-reason" id="result-reason"></p>
+        <div class="game-result-buttons">
+          <button class="game-result-button" id="new-game-button">New Game</button>
+        </div>
       </div>
     </div>
     <!-- Frontend entry point -->

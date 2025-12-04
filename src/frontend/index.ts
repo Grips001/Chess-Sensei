@@ -18,11 +18,888 @@ import {
   type EvaluationResponse,
   type EngineStatusResponse,
 } from '../shared/ipc-types';
+import { ChessGame, type Piece, type PieceSymbol } from '../shared/chess-logic';
+import { SoundManager } from './sound-manager';
 
 console.log('Chess-Sensei Frontend initialized');
 
+// Initialize chess game state
+const game = new ChessGame();
+
+// Initialize sound manager
+const soundManager = new SoundManager();
+
+// Track drag and selection state
+let draggedPiece: { element: HTMLElement; square: string } | null = null;
+let selectedSquare: string | null = null;
+let boardFlipped: boolean = false;
+
+// Track redo stack (for redo functionality)
+let redoStack: string[] = [];
+
+/**
+ * Update the turn indicator display
+ * Per Task 2.3.1: Show current turn indicator
+ */
+function updateTurnIndicator(): void {
+  const turnText = document.getElementById('turn-text');
+  const turnPieceIcon = document.getElementById('turn-piece-icon');
+  const turnDisplay = document.querySelector('.turn-display');
+
+  if (!turnText || !turnPieceIcon || !turnDisplay) return;
+
+  const currentTurn = game.getTurn();
+  const isWhite = currentTurn === 'w';
+
+  // Update text
+  turnText.textContent = isWhite ? 'White to move' : 'Black to move';
+
+  // Update piece icon (show king of current player)
+  const kingPiece = isWhite ? 'wK' : 'bK';
+  turnPieceIcon.style.backgroundImage = `url('/assets/pieces/${kingPiece}.svg')`;
+
+  // Add animation
+  turnDisplay.classList.remove('animate');
+  // Force reflow to restart animation
+  void turnDisplay.offsetWidth;
+  turnDisplay.classList.add('animate');
+
+  // Remove animation class after animation completes
+  setTimeout(() => {
+    turnDisplay.classList.remove('animate');
+  }, 500);
+}
+
+/**
+ * Update the move history display
+ * Per Task 2.3.2: Display move history (notation list)
+ */
+function updateMoveHistory(): void {
+  const moveListElement = document.getElementById('move-list');
+  if (!moveListElement) return;
+
+  // Clear existing moves
+  moveListElement.innerHTML = '';
+
+  // Get move history from game
+  const history = game.getHistory();
+
+  // Group moves into pairs (White + Black)
+  for (let i = 0; i < history.length; i += 2) {
+    const moveNumber = Math.floor(i / 2) + 1;
+    const whiteMove = history[i];
+    const blackMove = history[i + 1];
+
+    // Create move pair container
+    const movePair = document.createElement('div');
+    movePair.className = 'move-pair';
+
+    // Move number
+    const moveNum = document.createElement('div');
+    moveNum.className = 'move-number';
+    moveNum.textContent = `${moveNumber}.`;
+    movePair.appendChild(moveNum);
+
+    // Move notation container
+    const moveNotation = document.createElement('div');
+    moveNotation.className = 'move-notation';
+
+    // White's move
+    const whiteMoveEl = document.createElement('div');
+    whiteMoveEl.className = 'move-white';
+    whiteMoveEl.textContent = whiteMove.san;
+    if (i === history.length - 1) {
+      whiteMoveEl.classList.add('latest');
+    }
+    moveNotation.appendChild(whiteMoveEl);
+
+    // Black's move (if exists)
+    if (blackMove) {
+      const blackMoveEl = document.createElement('div');
+      blackMoveEl.className = 'move-black';
+      blackMoveEl.textContent = blackMove.san;
+      if (i + 1 === history.length - 1) {
+        blackMoveEl.classList.add('latest');
+      }
+      moveNotation.appendChild(blackMoveEl);
+    }
+
+    movePair.appendChild(moveNotation);
+    moveListElement.appendChild(movePair);
+  }
+
+  // Auto-scroll to bottom to show latest move
+  const moveHistory = document.getElementById('move-history');
+  if (moveHistory) {
+    moveHistory.scrollTop = moveHistory.scrollHeight;
+  }
+}
+
+/**
+ * Update game alert display (check, checkmate, stalemate)
+ * Per Task 2.3.4: Check/checkmate indicators
+ */
+function updateGameAlert(): void {
+  const gameAlert = document.getElementById('game-alert');
+  if (!gameAlert) return;
+
+  // Check game state
+  const isCheck = game.isInCheck();
+  const isCheckmate = game.isCheckmate();
+  const isStalemate = game.isStalemate();
+  const isDraw = game.isDraw();
+
+  // Reset classes
+  gameAlert.className = 'game-alert';
+  gameAlert.innerHTML = '';
+
+  if (isCheckmate) {
+    // Checkmate
+    const winner = game.getTurn() === 'w' ? 'Black' : 'White';
+    gameAlert.classList.add('checkmate');
+    gameAlert.innerHTML = `<span class="game-alert-icon">♔</span><span>Checkmate! ${winner} wins!</span>`;
+  } else if (isStalemate) {
+    // Stalemate
+    gameAlert.classList.add('draw');
+    gameAlert.innerHTML = `<span class="game-alert-icon">⚖</span><span>Stalemate - Draw!</span>`;
+  } else if (isDraw) {
+    // Other draw conditions
+    gameAlert.classList.add('draw');
+    gameAlert.innerHTML = `<span class="game-alert-icon">⚖</span><span>Draw!</span>`;
+  } else if (isCheck) {
+    // Check
+    const player = game.getTurn() === 'w' ? 'White' : 'Black';
+    gameAlert.classList.add('check');
+    gameAlert.innerHTML = `<span class="game-alert-icon">⚠</span><span>${player} King in Check!</span>`;
+  } else {
+    // No alert - hide
+    gameAlert.classList.add('hidden');
+  }
+}
+
+/**
+ * Show game result modal
+ * Per Task 2.3.5: Game result display
+ */
+function showGameResult(): void {
+  const overlay = document.getElementById('game-result-overlay');
+  const title = document.getElementById('result-title');
+  const subtitle = document.getElementById('result-subtitle');
+  const reason = document.getElementById('result-reason');
+
+  if (!overlay || !title || !subtitle || !reason) return;
+
+  // Check game state
+  const isCheckmate = game.isCheckmate();
+  const isStalemate = game.isStalemate();
+  const isDraw = game.isDraw();
+
+  if (isCheckmate) {
+    // Checkmate
+    const winner = game.getTurn() === 'w' ? 'Black' : 'White';
+    const loser = game.getTurn() === 'w' ? 'White' : 'Black';
+    title.textContent = `${winner} Wins!`;
+    subtitle.textContent = 'Checkmate';
+    reason.textContent = `${loser} king has no legal moves`;
+    overlay.classList.remove('hidden');
+  } else if (isStalemate) {
+    // Stalemate
+    title.textContent = 'Draw';
+    subtitle.textContent = 'Stalemate';
+    reason.textContent = 'No legal moves available';
+    overlay.classList.remove('hidden');
+  } else if (isDraw) {
+    // Other draw conditions
+    title.textContent = 'Draw';
+    subtitle.textContent = 'Game Drawn';
+    reason.textContent = 'By repetition, 50-move rule, or insufficient material';
+    overlay.classList.remove('hidden');
+  } else {
+    // No game over - hide modal
+    overlay.classList.add('hidden');
+  }
+}
+
+/**
+ * Show confirmation dialog
+ * Per Task 2.4.1: Confirm if game in progress
+ */
+function showConfirmDialog(title: string, message: string, onConfirm: () => void): void {
+  const overlay = document.getElementById('confirm-dialog-overlay');
+  const titleEl = document.getElementById('confirm-title');
+  const messageEl = document.getElementById('confirm-message');
+  const yesBtn = document.getElementById('confirm-yes');
+  const cancelBtn = document.getElementById('confirm-cancel');
+
+  if (!overlay || !titleEl || !messageEl || !yesBtn || !cancelBtn) return;
+
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+
+  // Show overlay
+  overlay.classList.remove('hidden');
+
+  // Handle confirmation
+  const handleYes = () => {
+    overlay.classList.add('hidden');
+    onConfirm();
+    yesBtn.removeEventListener('click', handleYes);
+    cancelBtn.removeEventListener('click', handleCancel);
+  };
+
+  const handleCancel = () => {
+    overlay.classList.add('hidden');
+    yesBtn.removeEventListener('click', handleYes);
+    cancelBtn.removeEventListener('click', handleCancel);
+  };
+
+  yesBtn.addEventListener('click', handleYes);
+  cancelBtn.addEventListener('click', handleCancel);
+}
+
+/**
+ * Start a new game
+ * Per Task 2.3.5 & 2.4.1: Option to start new game
+ */
+function startNewGame(): void {
+  // Reset game to starting position
+  game.reset();
+
+  // Clear redo stack
+  redoStack = [];
+
+  // Hide game result modal
+  const overlay = document.getElementById('game-result-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+
+  // Hide confirmation dialog
+  const confirmOverlay = document.getElementById('confirm-dialog-overlay');
+  if (confirmOverlay) {
+    confirmOverlay.classList.add('hidden');
+  }
+
+  // Re-render everything
+  renderChessboard();
+  updateTurnIndicator();
+  updateMoveHistory();
+  updateCapturedPieces();
+  updateGameAlert();
+  updateUndoRedoButtons();
+
+  console.log('New game started');
+}
+
+/**
+ * Handle "New Game" button from Game Controls
+ * Per Task 2.4.1: New game button with confirmation
+ */
+function handleNewGameControl(): void {
+  const history = game.getHistory();
+
+  // If game in progress, confirm before resetting
+  if (history.length > 0) {
+    showConfirmDialog(
+      'Start New Game?',
+      'Current game progress will be lost. Continue?',
+      startNewGame
+    );
+  } else {
+    // No game in progress, just start
+    startNewGame();
+  }
+}
+
+/**
+ * Handle "Resign" button
+ * Per Task 2.4.3: Resign button with confirmation
+ */
+function handleResign(): void {
+  const history = game.getHistory();
+
+  // Only allow resignation if game is in progress
+  if (history.length === 0) {
+    return;
+  }
+
+  // Check if game is already over
+  if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+    return;
+  }
+
+  showConfirmDialog('Resign Game?', 'You will lose this game. Are you sure?', () => {
+    // Show game result as if opponent won
+    const overlay = document.getElementById('game-result-overlay');
+    const title = document.getElementById('result-title');
+    const subtitle = document.getElementById('result-subtitle');
+    const reason = document.getElementById('result-reason');
+
+    if (!overlay || !title || !subtitle || !reason) return;
+
+    const currentTurn = game.getTurn();
+    const winner = currentTurn === 'w' ? 'Black' : 'White';
+    const resigner = currentTurn === 'w' ? 'White' : 'Black';
+
+    title.textContent = `${winner} Wins!`;
+    subtitle.textContent = 'Resignation';
+    reason.textContent = `${resigner} resigned`;
+    overlay.classList.remove('hidden');
+  });
+}
+
+/**
+ * Handle "Flip Board" button
+ * Per Task 2.4.4: Flip board 180 degrees
+ */
+function handleFlipBoard(): void {
+  boardFlipped = !boardFlipped;
+  renderChessboard();
+}
+
+/**
+ * Update undo/redo button states
+ * Per Task 2.4.2: Enable/disable based on available history
+ */
+function updateUndoRedoButtons(): void {
+  const undoButton = document.getElementById('undo-button') as HTMLButtonElement;
+  const redoButton = document.getElementById('redo-button') as HTMLButtonElement;
+
+  if (undoButton) {
+    const history = game.getHistory();
+    undoButton.disabled = history.length === 0;
+  }
+
+  if (redoButton) {
+    redoButton.disabled = redoStack.length === 0;
+  }
+}
+
+/**
+ * Handle "Undo" button
+ * Per Task 2.4.2: Undo last move
+ */
+function handleUndo(): void {
+  const history = game.getHistory();
+  if (history.length === 0) return;
+
+  // Get the last move before undoing
+  const lastMove = history[history.length - 1];
+
+  // Store move in redo stack (in SAN format for easy replay)
+  redoStack.push(lastMove.san);
+
+  // Undo the move
+  game.undoMove();
+
+  // Re-render everything
+  renderChessboard();
+  updateTurnIndicator();
+  updateMoveHistory();
+  updateCapturedPieces();
+  updateGameAlert();
+  updateUndoRedoButtons();
+
+  console.log('Move undone:', lastMove.san);
+}
+
+/**
+ * Handle "Redo" button
+ * Per Task 2.4.2: Redo undone move
+ */
+function handleRedo(): void {
+  if (redoStack.length === 0) return;
+
+  // Get the move from redo stack
+  const moveToRedo = redoStack.pop()!;
+
+  try {
+    // Make the move again
+    const move = game.makeMove(moveToRedo);
+
+    if (move) {
+      // Play appropriate sound
+      if (move.isCheckmate) {
+        soundManager.play('checkmate');
+      } else if (move.isCheck) {
+        soundManager.play('check');
+      } else if (move.isCastling) {
+        soundManager.play('castle');
+      } else if (move.promotion) {
+        soundManager.play('promotion');
+      } else if (move.captured) {
+        soundManager.play('capture');
+      } else {
+        soundManager.play('move');
+      }
+
+      // Check for stalemate or draw
+      if (game.isStalemate() || game.isDraw()) {
+        soundManager.play('stalemate');
+      }
+
+      // Re-render everything
+      renderChessboard();
+      updateTurnIndicator();
+      updateMoveHistory();
+      updateCapturedPieces();
+      updateGameAlert();
+      updateUndoRedoButtons();
+
+      // Show game result modal if game is over
+      if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+        setTimeout(() => {
+          showGameResult();
+        }, 1000);
+      }
+
+      console.log('Move redone:', moveToRedo);
+    }
+  } catch (error) {
+    console.error('Failed to redo move:', error);
+    // Put move back in redo stack if it failed
+    redoStack.push(moveToRedo);
+  }
+}
+
+/**
+ * Update captured pieces display
+ * Per Task 2.3.3: Show captured pieces
+ */
+function updateCapturedPieces(): void {
+  const capturedByWhite = document.getElementById('captured-by-white');
+  const capturedByBlack = document.getElementById('captured-by-black');
+  const whiteAdvantage = document.getElementById('white-advantage');
+  const blackAdvantage = document.getElementById('black-advantage');
+
+  if (!capturedByWhite || !capturedByBlack || !whiteAdvantage || !blackAdvantage) return;
+
+  // Clear existing captured pieces
+  capturedByWhite.innerHTML = '';
+  capturedByBlack.innerHTML = '';
+
+  // Piece values for material calculation
+  const pieceValues: Record<string, number> = {
+    p: 1,
+    n: 3,
+    b: 3,
+    r: 5,
+    q: 9,
+  };
+
+  // Track captured pieces from move history
+  const history = game.getHistory();
+  const whiteCaptured: string[] = [];
+  const blackCaptured: string[] = [];
+
+  for (const move of history) {
+    if (move.captured) {
+      const capturedPieceType = move.captured;
+      if (move.color === 'w') {
+        // White captured a black piece
+        whiteCaptured.push(capturedPieceType);
+      } else {
+        // Black captured a white piece
+        blackCaptured.push(capturedPieceType);
+      }
+    }
+  }
+
+  // Render captured pieces for White
+  whiteCaptured.forEach((pieceType) => {
+    const pieceEl = document.createElement('div');
+    pieceEl.className = 'captured-piece';
+    pieceEl.style.backgroundImage = `url('/assets/pieces/b${pieceType.toUpperCase()}.svg')`;
+    capturedByWhite.appendChild(pieceEl);
+  });
+
+  // Render captured pieces for Black
+  blackCaptured.forEach((pieceType) => {
+    const pieceEl = document.createElement('div');
+    pieceEl.className = 'captured-piece';
+    pieceEl.style.backgroundImage = `url('/assets/pieces/w${pieceType.toUpperCase()}.svg')`;
+    capturedByBlack.appendChild(pieceEl);
+  });
+
+  // Calculate material advantage
+  const whiteMaterial = whiteCaptured.reduce((sum, p) => sum + pieceValues[p], 0);
+  const blackMaterial = blackCaptured.reduce((sum, p) => sum + pieceValues[p], 0);
+  const materialDiff = whiteMaterial - blackMaterial;
+
+  // Update advantage indicators
+  whiteAdvantage.textContent = '';
+  blackAdvantage.textContent = '';
+  whiteAdvantage.className = 'material-advantage';
+  blackAdvantage.className = 'material-advantage';
+
+  if (materialDiff > 0) {
+    whiteAdvantage.textContent = `+${materialDiff}`;
+    whiteAdvantage.classList.add('positive');
+  } else if (materialDiff < 0) {
+    blackAdvantage.textContent = `+${Math.abs(materialDiff)}`;
+    blackAdvantage.classList.add('positive');
+  }
+}
+
+/**
+ * Get piece image path for a given piece
+ * Per Task 2.1.2: Render chess pieces using SVG assets
+ */
+function getPieceImagePath(piece: Piece): string {
+  const colorPrefix = piece.color === 'w' ? 'w' : 'b';
+  const pieceSymbol = piece.type.toUpperCase();
+  return `/assets/pieces/${colorPrefix}${pieceSymbol}.svg`;
+}
+
+/**
+ * Parse FEN to create a 2D array of pieces
+ */
+function parseFenToBoard(fen: string): (Piece | null)[][] {
+  const fenParts = fen.split(' ');
+  const boardFen = fenParts[0];
+  const ranks = boardFen.split('/');
+  const board: (Piece | null)[][] = [];
+
+  for (const rankString of ranks) {
+    const rank: (Piece | null)[] = [];
+    for (const char of rankString) {
+      if (/\d/.test(char)) {
+        // Empty squares
+        const emptyCount = parseInt(char, 10);
+        for (let i = 0; i < emptyCount; i++) {
+          rank.push(null);
+        }
+      } else if (/[rnbqkpRNBQKP]/.test(char)) {
+        // Piece
+        const isWhite = char === char.toUpperCase();
+        rank.push({
+          color: isWhite ? 'w' : 'b',
+          type: char.toLowerCase() as PieceSymbol,
+        });
+      }
+    }
+    board.push(rank);
+  }
+
+  return board;
+}
+
+/**
+ * Handle square click for click-to-move
+ * Per Task 2.2.2: Click-to-move alternative
+ */
+function handleSquareClick(squareName: string): void {
+  const clickedSquare = document.querySelector(`[data-square="${squareName}"]`) as HTMLElement;
+  if (!clickedSquare) return;
+
+  const hasPiece = clickedSquare.querySelector('.piece');
+  const currentTurn = game.getTurn();
+
+  // If no square is selected
+  if (!selectedSquare) {
+    // Only allow selecting pieces of the current player
+    if (hasPiece) {
+      const piece = clickedSquare.querySelector('.piece') as HTMLElement;
+      const alt = piece.getAttribute('alt') || '';
+      const isWhitePiece = alt.includes('White');
+
+      if ((currentTurn === 'w' && isWhitePiece) || (currentTurn === 'b' && !isWhitePiece)) {
+        selectedSquare = squareName;
+        clickedSquare.classList.add('selected');
+        highlightLegalMoves(squareName);
+      }
+    }
+  } else {
+    // Square already selected - try to move or reselect
+    if (selectedSquare === squareName) {
+      // Clicking same square - deselect
+      clearSelection();
+    } else if (hasPiece) {
+      // Clicking another piece of same color - reselect
+      const piece = clickedSquare.querySelector('.piece') as HTMLElement;
+      const alt = piece.getAttribute('alt') || '';
+      const isWhitePiece = alt.includes('White');
+
+      if ((currentTurn === 'w' && isWhitePiece) || (currentTurn === 'b' && !isWhitePiece)) {
+        // Same color piece - reselect
+        clearSelection();
+        selectedSquare = squareName;
+        clickedSquare.classList.add('selected');
+        highlightLegalMoves(squareName);
+      } else {
+        // Opponent's piece - try to capture
+        attemptMove(selectedSquare, squareName);
+      }
+    } else {
+      // Empty square - try to move
+      attemptMove(selectedSquare, squareName);
+    }
+  }
+}
+
+/**
+ * Clear square selection and highlights
+ */
+function clearSelection(): void {
+  if (selectedSquare) {
+    const square = document.querySelector(`[data-square="${selectedSquare}"]`);
+    square?.classList.remove('selected');
+    selectedSquare = null;
+  }
+  clearHighlights();
+}
+
+/**
+ * Clear all legal move highlights
+ */
+function clearHighlights(): void {
+  document.querySelectorAll('.square.legal-move, .square.legal-capture').forEach((sq) => {
+    sq.classList.remove('legal-move', 'legal-capture');
+  });
+}
+
+/**
+ * Highlight legal moves for a piece
+ * Per Task 2.2.3: Legal move highlighting
+ */
+function highlightLegalMoves(fromSquare: string): void {
+  clearHighlights();
+
+  const legalMoves = game.getLegalMoves({ square: fromSquare as any });
+
+  legalMoves.forEach((move) => {
+    const targetSquare = document.querySelector(`[data-square="${move.to}"]`);
+    if (targetSquare) {
+      if (move.captured) {
+        targetSquare.classList.add('legal-capture');
+      } else {
+        targetSquare.classList.add('legal-move');
+      }
+    }
+  });
+}
+
+/**
+ * Attempt to make a move
+ * Per Task 2.2.4: Piece animation on move
+ * Per Task 2.2.5: Move sound effects
+ */
+function attemptMove(from: string, to: string): void {
+  try {
+    const move = game.makeMove({ from: from as any, to: to as any });
+    if (move) {
+      console.log('Move made:', move.san);
+
+      // Clear redo stack on new move (can't redo after making a new move)
+      redoStack = [];
+
+      // Play appropriate sound
+      if (move.isCheckmate) {
+        soundManager.play('checkmate');
+      } else if (move.isCheck) {
+        soundManager.play('check');
+      } else if (move.isCastling) {
+        soundManager.play('castle');
+      } else if (move.promotion) {
+        soundManager.play('promotion');
+      } else if (move.captured) {
+        soundManager.play('capture');
+      } else {
+        soundManager.play('move');
+      }
+
+      // Check for stalemate or draw
+      if (game.isStalemate() || game.isDraw()) {
+        soundManager.play('stalemate');
+      }
+
+      // Add animation to moving piece
+      const toSquare = document.querySelector(`[data-square="${to}"]`);
+      const fromSquare = document.querySelector(`[data-square="${from}"]`);
+
+      if (toSquare && fromSquare) {
+        const piece = fromSquare.querySelector('.piece') as HTMLElement;
+
+        // If capture, animate the captured piece
+        if (move.captured) {
+          const capturedPiece = toSquare.querySelector('.piece') as HTMLElement;
+          if (capturedPiece) {
+            capturedPiece.classList.add('captured');
+          }
+        }
+
+        // Animate the moving piece
+        if (piece) {
+          piece.classList.add('moving');
+        }
+      }
+
+      // Render board after animation
+      setTimeout(
+        () => {
+          clearSelection();
+          renderChessboard();
+          updateTurnIndicator();
+          updateMoveHistory();
+          updateCapturedPieces();
+          updateGameAlert();
+          updateUndoRedoButtons();
+
+          // Show game result modal if game is over
+          if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+            setTimeout(() => {
+              showGameResult();
+            }, 1000); // Delay modal to let alert animation play first
+          }
+        },
+        move.captured ? 250 : 300
+      );
+    }
+  } catch (error) {
+    console.error('Invalid move:', error);
+    clearSelection();
+  }
+}
+
+/**
+ * Handle drag start
+ * Per Task 2.2.1: Drag-and-drop piece movement
+ */
+function handleDragStart(e: DragEvent, squareName: string): void {
+  const target = e.target as HTMLElement;
+  draggedPiece = { element: target, square: squareName };
+
+  // Set drag image
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', squareName);
+  }
+
+  // Add visual feedback
+  setTimeout(() => {
+    target.style.opacity = '0.5';
+  }, 0);
+
+  // Highlight legal moves
+  highlightLegalMoves(squareName);
+}
+
+/**
+ * Handle drag over
+ */
+function handleDragOver(e: DragEvent): void {
+  e.preventDefault();
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move';
+  }
+}
+
+/**
+ * Handle drop
+ * Per Task 2.2.1: Drag-and-drop piece movement
+ */
+function handleDrop(e: DragEvent, targetSquare: string): void {
+  e.preventDefault();
+
+  if (!draggedPiece) return;
+
+  const fromSquare = draggedPiece.square;
+
+  // Reset opacity
+  draggedPiece.element.style.opacity = '1';
+
+  // Try to make the move
+  attemptMove(fromSquare, targetSquare);
+
+  draggedPiece = null;
+  clearHighlights();
+}
+
+/**
+ * Render the 8x8 chessboard grid with pieces
+ * Per Task 2.1.1: Implement responsive chessboard layout
+ * Per Task 2.1.2: Render chess pieces using SVG assets
+ * Per Task 2.2.1: Drag-and-drop piece movement
+ * Per Task 2.2.2: Click-to-move alternative
+ */
+function renderChessboard(): void {
+  const boardElement = document.getElementById('chess-board');
+  if (!boardElement) {
+    console.error('chess-board element not found');
+    return;
+  }
+
+  // Clear any existing squares
+  boardElement.innerHTML = '';
+
+  // Get current position from game
+  const fen = game.getFen();
+  const position = parseFenToBoard(fen);
+
+  console.log('Position:', position);
+
+  // Create 8x8 grid of squares (64 total)
+  // Rows are numbered 8-1 (top to bottom)
+  // Columns are a-h (left to right)
+  // When flipped, iterate in reverse
+  let squareCount = 0;
+  const rankStart = boardFlipped ? 1 : 8;
+  const rankEnd = boardFlipped ? 8 : 1;
+  const rankStep = boardFlipped ? 1 : -1;
+  const fileStart = boardFlipped ? 7 : 0;
+  const fileEnd = boardFlipped ? -1 : 8;
+  const fileStep = boardFlipped ? -1 : 1;
+
+  for (let rank = rankStart; boardFlipped ? rank <= rankEnd : rank >= rankEnd; rank += rankStep) {
+    for (let file = fileStart; boardFlipped ? file >= fileEnd : file < fileEnd; file += fileStep) {
+      const square = document.createElement('div');
+      square.className = 'square';
+
+      // Determine if square is light or dark
+      // Light squares: even sum of rank + file
+      const isLight = (rank + file) % 2 === 0;
+      square.classList.add(isLight ? 'light' : 'dark');
+
+      // Set data attributes for square identification
+      const fileChar = String.fromCharCode(97 + file); // 'a' = 97
+      const squareName = `${fileChar}${rank}`;
+      square.dataset.square = squareName;
+
+      // Add click handler for click-to-move
+      square.addEventListener('click', () => handleSquareClick(squareName));
+
+      // Get piece at this position
+      const rankIndex = 8 - rank; // Array index: rank 8 = index 0
+      const piece = position[rankIndex][file];
+
+      // Add piece if one exists on this square
+      if (piece) {
+        const pieceImg = document.createElement('img');
+        pieceImg.src = getPieceImagePath(piece);
+        pieceImg.className = 'piece';
+        pieceImg.alt = `${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}`;
+        pieceImg.draggable = true;
+
+        // Drag-and-drop handlers
+        pieceImg.addEventListener('dragstart', (e) => handleDragStart(e, squareName));
+
+        square.appendChild(pieceImg);
+      }
+
+      // Drop handlers for all squares
+      square.addEventListener('dragover', handleDragOver);
+      square.addEventListener('drop', (e) => handleDrop(e, squareName));
+
+      boardElement.appendChild(square);
+      squareCount++;
+    }
+  }
+
+  console.log(`Chessboard rendered: ${squareCount} squares with pieces at starting position`);
+}
+
 // Results display element
-let resultsDiv: HTMLDivElement | null = null;
+const resultsDiv: HTMLDivElement | null = null;
 
 /**
  * Display results in the UI
@@ -125,45 +1002,72 @@ async function testIPCCommunication(): Promise<void> {
   console.log('\n=== IPC Communication Tests Complete ===');
 }
 
-// Initialize Buntralino connection
+// Initialize application
 (async () => {
+  // Render the chessboard immediately
+  renderChessboard();
+
+  // Initialize UI elements
+  updateTurnIndicator();
+  updateGameAlert();
+
+  // Wire up "New Game" buttons
+  const newGameButton = document.getElementById('new-game-button');
+  if (newGameButton) {
+    newGameButton.addEventListener('click', startNewGame);
+  }
+
+  const newGameControl = document.getElementById('new-game-control');
+  if (newGameControl) {
+    newGameControl.addEventListener('click', handleNewGameControl);
+  }
+
+  // Wire up "Resign" button
+  const resignButton = document.getElementById('resign-button');
+  if (resignButton) {
+    resignButton.addEventListener('click', handleResign);
+  }
+
+  // Wire up "Flip Board" button
+  const flipBoardButton = document.getElementById('flip-board-button');
+  if (flipBoardButton) {
+    flipBoardButton.addEventListener('click', handleFlipBoard);
+  }
+
+  // Wire up "Undo" button
+  const undoButton = document.getElementById('undo-button');
+  if (undoButton) {
+    undoButton.addEventListener('click', handleUndo);
+  }
+
+  // Wire up "Redo" button
+  const redoButton = document.getElementById('redo-button');
+  if (redoButton) {
+    redoButton.addEventListener('click', handleRedo);
+  }
+
+  // Set initial button states
+  updateUndoRedoButtons();
+
+  // Add keyboard shortcuts for undo/redo (Ctrl+Z, Ctrl+Y)
+  document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey || event.metaKey) {
+      if (event.key === 'z' || event.key === 'Z') {
+        event.preventDefault();
+        handleUndo();
+      } else if (event.key === 'y' || event.key === 'Y') {
+        event.preventDefault();
+        handleRedo();
+      }
+    }
+  });
+
+  // Wait for Buntralino connection
   await buntralino.ready;
   console.log('Buntralino connection established');
 
-  // Make test function available globally for debugging
+  // Make test function available globally for debugging (Phase 1 tests)
   (window as unknown as { testIPC: () => Promise<void> }).testIPC = testIPCCommunication;
 
-  // Auto-run IPC tests after a short delay to let engine initialize
-  setTimeout(async () => {
-    try {
-      await testIPCCommunication();
-    } catch (error) {
-      console.error('IPC test error:', error);
-      displayResults('ERROR', { error: String(error) });
-    }
-  }, 1000);
+  console.log('Phase 2: UI rendering complete');
 })();
-
-// Display welcome message with IPC test results
-const app = document.getElementById('app');
-if (app) {
-  const welcomeDiv = document.createElement('div');
-  welcomeDiv.innerHTML = `
-    <div style="text-align: center; padding: 30px; font-family: system-ui; max-width: 800px; margin: 0 auto;">
-      <h1>Chess-Sensei</h1>
-      <p style="font-size: 1.2em; margin: 20px 0;">Phase 1: Core Chess Engine Integration</p>
-      <p style="color: #666;">
-        Engine IPC communication test results:
-      </p>
-      <div id="ipc-results" style="margin-top: 20px; max-height: 500px; overflow-y: auto;"></div>
-      <p style="color: #999; font-size: 0.9em; margin-top: 20px;">
-        Open DevTools (F12) for full console output
-      </p>
-      <button onclick="window.testIPC()" style="margin-top: 10px; padding: 8px 16px; cursor: pointer;">
-        Re-run IPC Tests
-      </button>
-    </div>
-  `;
-  app.prepend(welcomeDiv);
-  resultsDiv = document.getElementById('ipc-results') as HTMLDivElement;
-}
