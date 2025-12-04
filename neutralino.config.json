@@ -40,7 +40,7 @@
     "binaryName": "chess-sensei",
     "resourcesPath": "/app/",
     "extensionsPath": "/extensions/",
-    "distributionPath": "/dist/",
+    "distributionPath": "dist",
     "binaryVersion": "5.6.0",
     "clientVersion": "5.6.0"
   }

@@ -159,8 +159,23 @@ async function buildWindows(): Promise<void> {
 
   // Step 1: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
-  await $`bunx --bun @neutralinojs/neu build`.cwd(projectRoot).quiet();
+  await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
+
+  // Debug: List what Neutralino created
+  console.log(`  📂 Checking ${neuBuildsDir}...`);
+  if (await fs.pathExists(neuBuildsDir)) {
+    const files = await fs.readdir(neuBuildsDir);
+    console.log(`  📂 Contents: ${files.join(', ')}`);
+  } else {
+    console.log(`  ⚠ Directory doesn't exist: ${neuBuildsDir}`);
+    // Try to find where Neutralino actually put things
+    const distPath = path.join(projectRoot, 'dist');
+    if (await fs.pathExists(distPath)) {
+      const distContents = await fs.readdir(distPath);
+      console.log(`  📂 dist/ contains: ${distContents.join(', ')}`);
+    }
+  }
 
   // Step 2: Build Bun executable for Windows
   console.log('\n📦 Building Bun executable for Windows...');
