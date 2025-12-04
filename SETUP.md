@@ -124,7 +124,7 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 3 Complete ✓ **Version:** v0.3.0 **Next:** Phase 4 - Exam Mode
+**Phase:** Phase 3 Complete ✓ **Version:** v0.3.1 **Next:** Phase 4 - Exam Mode
 
 ### Completed Phases
 
@@ -224,6 +224,6 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 ## Success
 
 Chess-Sensei is ready for active development. Phase 3 (AI Opponent & Training
-Mode) is complete with version v0.3.0.
+Mode) is complete with version v0.3.1.
 
 Next up: Phase 4 - Exam Mode & Metrics Collection!

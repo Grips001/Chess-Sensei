@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Player progress dashboard (Phase 6)
 - Sandbox Mode for position exploration (Phase 7)
 
+## [0.3.1] - 2025-12-04
+
+### Fixed
+
+- Best Moves panel visibility states not toggling correctly
+- Stockfish engine loading in compiled executables
+- Windows build configuration and distribution path format
+
+### Changed
+
+- Synchronized all version numbers across project files
+- Updated documentation to reflect v0.3.1
+
 ## [0.3.0] - 2025-12-04
 
 ### Added
@@ -156,7 +169,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.0.0...v0.1.0

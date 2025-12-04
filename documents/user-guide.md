@@ -311,7 +311,7 @@ practice!
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 3 (v0.3.0)
+### Current Release: Phase 3 (v0.3.1)
 
 Training Mode is now available with:
 

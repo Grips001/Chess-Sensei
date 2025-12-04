@@ -199,7 +199,7 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    # Edit package.json version field
-   "version": "0.3.0"
+   "version": "0.3.1"
    ```
 
 2. **Update CHANGELOG.md** with release notes
