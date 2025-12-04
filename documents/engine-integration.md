@@ -63,6 +63,9 @@ Handles loading the Stockfish WASM module in Bun's runtime:
 - Polyfills browser globals for compatibility
 - Provides clean interface for UCI communication
 - Uses Emscripten's `ccall()` for command execution
+- **Compiled mode**: Loads stockfish files from `stockfish/` directory next to
+  executable (Bun's bundler cannot correctly bundle the stockfish.js IIFE module
+  pattern)
 
 ### 2. Stockfish Engine (`src/engine/stockfish-engine.ts`)
 
@@ -197,8 +200,16 @@ src/
 
 The engine initializes automatically on backend startup. Check:
 
+**Development mode:**
+
 1. `node_modules/stockfish` is installed
 2. Console shows "Stockfish engine ready"
+
+**Compiled executable mode:**
+
+1. `stockfish/` directory exists next to the executable
+2. Contains `stockfish-17.1-lite-single-*.js` and `stockfish-17.1-lite-single-*.wasm`
+3. Console shows "[Stockfish] Running in compiled mode"
 
 ### Slow Analysis
 
