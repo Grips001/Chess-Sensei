@@ -9,9 +9,12 @@
  */
 
 let viteHost: string | null = null;
+let devMode = false;
 {
   const viteHostArg = process.argv.find((arg) => arg.startsWith('--vitehost'));
   viteHost = viteHostArg?.split('=')[1]!;
+  // Check for --dev flag to enable developer mode (console + inspector)
+  devMode = process.argv.includes('--dev');
 }
 
 import { create, events, registerMethodMap } from 'buntralino';
@@ -32,7 +35,11 @@ import {
   applyDifficultyPreset,
 } from '../shared/bot-types';
 
-console.log('Chess-Sensei Backend initialized');
+if (devMode) {
+  console.log('Chess-Sensei Backend initialized (DEV MODE)');
+} else {
+  console.log('Chess-Sensei Backend initialized');
+}
 
 // Global engine instance (persistent in memory per ai-engine.md)
 let engine: StockfishEngine | null = null;
@@ -559,7 +566,8 @@ await create(viteHost ?? '/', {
   name: 'main',
   // We need this option to add Neutralino globals to the Vite-hosted page
   injectGlobals: true,
-  // Any options for Neutralino.window.create can go here
+  // Enable inspector (DevTools) only in dev mode
+  enableInspector: devMode,
 });
 
 // Exit the app completely when the main window is closed without the `shutdown` command.

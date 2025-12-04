@@ -36,6 +36,12 @@ async function buildLinux(): Promise<void> {
   const appName = config.cli.binaryName;
   const distDir = path.join(projectRoot, config.cli.distributionPath ?? 'dist', appName);
 
+  // Stockfish engine files to copy
+  const stockfishSrcDir = path.join(projectRoot, 'node_modules', 'stockfish', 'src');
+  const stockfishDestDir = path.join(distDir, 'stockfish');
+  const STOCKFISH_JS = 'stockfish-17.1-lite-single-03e3232.js';
+  const STOCKFISH_WASM = 'stockfish-17.1-lite-single-03e3232.wasm';
+
   // Step 1: Update Neutralino binaries (needed in CI)
   console.log('📥 Updating Neutralino binaries...');
   await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
@@ -66,6 +72,17 @@ async function buildLinux(): Promise<void> {
     await fs.chmod(neuBinPath, 0o755);
   }
 
+  // Step 4: Copy Stockfish engine files
+  // Bun's bundler cannot correctly bundle the stockfish.js IIFE module pattern,
+  // so we distribute the files alongside the executable
+  console.log('\n🎯 Copying Stockfish engine files...');
+  await fs.ensureDir(stockfishDestDir);
+  await Promise.all([
+    fs.copy(path.join(stockfishSrcDir, STOCKFISH_JS), path.join(stockfishDestDir, STOCKFISH_JS)),
+    fs.copy(path.join(stockfishSrcDir, STOCKFISH_WASM), path.join(stockfishDestDir, STOCKFISH_WASM)),
+  ]);
+  console.log('  ✓ Stockfish engine files copied');
+
   console.log(`\n✅ Linux build complete! Output: ${distDir}`);
   console.log(`\nFiles created:`);
   const files = await fs.readdir(distDir);
@@ -77,6 +94,12 @@ async function buildLinux(): Promise<void> {
   // Also list resources.neu
   if (files.includes('resources.neu')) {
     console.log('  - resources.neu');
+  }
+  // List stockfish directory
+  if (files.includes('stockfish')) {
+    console.log('  - stockfish/');
+    console.log(`      ${STOCKFISH_JS}`);
+    console.log(`      ${STOCKFISH_WASM}`);
   }
 }
 

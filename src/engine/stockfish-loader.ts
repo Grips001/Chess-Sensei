@@ -7,11 +7,16 @@
  * Key insight: The stockfish.js module checks for `self.location.hash` to detect
  * browser vs Node.js environment. We polyfill `self.location` to make it work in Bun.
  *
+ * For compiled executables: The stockfish JS and WASM files must be distributed
+ * alongside the executable in a 'stockfish/' subdirectory. Bun's bundler cannot
+ * correctly bundle the complex CommonJS IIFE pattern in stockfish.js, so we load
+ * it dynamically at runtime.
+ *
  * @see src/engine/STOCKFISH_SELECTION.md for build selection rationale
  */
 
 import { join, dirname } from 'path';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 // Get current directory for ES modules
@@ -35,10 +40,32 @@ if (typeof self !== 'undefined' && !self.location) {
   };
 }
 
-// Path to the stockfish lite single-threaded JS and WASM files
-const STOCKFISH_DIR = join(__dirname, '..', '..', 'node_modules', 'stockfish', 'src');
-const STOCKFISH_JS_PATH = join(STOCKFISH_DIR, 'stockfish-17.1-lite-single-03e3232.js');
-const STOCKFISH_WASM_PATH = join(STOCKFISH_DIR, 'stockfish-17.1-lite-single-03e3232.wasm');
+// Stockfish engine file names
+const STOCKFISH_JS = 'stockfish-17.1-lite-single-03e3232.js';
+const STOCKFISH_WASM = 'stockfish-17.1-lite-single-03e3232.wasm';
+
+// Development mode: node_modules path
+const DEV_STOCKFISH_DIR = join(__dirname, '..', '..', 'node_modules', 'stockfish', 'src');
+
+// Compiled mode: stockfish files alongside executable
+// process.execPath points to the executable itself
+const COMPILED_STOCKFISH_DIR = join(dirname(process.execPath), 'stockfish');
+
+/**
+ * Determine if we're running in a compiled Bun executable
+ */
+function isCompiledExecutable(): boolean {
+  // In compiled mode, __dirname points to a temp extraction location
+  // Check if the node_modules path exists - if not, we're compiled
+  return !existsSync(DEV_STOCKFISH_DIR);
+}
+
+/**
+ * Get the stockfish directory based on execution mode
+ */
+function getStockfishDir(): string {
+  return isCompiledExecutable() ? COMPILED_STOCKFISH_DIR : DEV_STOCKFISH_DIR;
+}
 
 /**
  * Listener callback type for engine output
@@ -77,17 +104,55 @@ interface RawEngine {
  * Loads the WASM binary and initializes the Stockfish engine directly in
  * the Bun runtime. Provides a clean interface for UCI communication.
  *
+ * For compiled executables, loads the stockfish JS and WASM files from the
+ * 'stockfish/' subdirectory next to the executable. Bun's bundler cannot
+ * correctly handle the stockfish.js IIFE module pattern.
+ *
  * @returns Promise resolving to initialized Stockfish instance
  */
 export async function loadStockfish(): Promise<StockfishInstance> {
-  // Read the WASM binary
-  const wasmBinary = readFileSync(STOCKFISH_WASM_PATH);
+  // Determine paths and load binary based on execution context
+  const compiled = isCompiledExecutable();
+  const stockfishDir = getStockfishDir();
+  const jsPath = join(stockfishDir, STOCKFISH_JS);
+  const wasmPath = join(stockfishDir, STOCKFISH_WASM);
 
-  // Dynamically require the stockfish module (factory function)
+  console.log(`[Stockfish] Running in ${compiled ? 'compiled' : 'development'} mode`);
+  console.log('[Stockfish] Stockfish directory:', stockfishDir);
+  console.log('[Stockfish] JS path:', jsPath);
+  console.log('[Stockfish] WASM path:', wasmPath);
 
-  const StockfishFactory = require(STOCKFISH_JS_PATH) as () => (
-    config: Record<string, unknown>
-  ) => Promise<RawEngine>;
+  // Verify files exist
+  if (!existsSync(jsPath)) {
+    throw new Error(`Stockfish JS not found at: ${jsPath}`);
+  }
+  if (!existsSync(wasmPath)) {
+    throw new Error(`Stockfish WASM not found at: ${wasmPath}`);
+  }
+
+  // Load WASM binary
+  const wasmBinary = readFileSync(wasmPath);
+  console.log('[Stockfish] WASM binary loaded, size:', wasmBinary.length);
+
+  // Dynamically require the stockfish module
+  // This works in both development and compiled mode because:
+  // - Development: loads from node_modules
+  // - Compiled: loads from stockfish/ directory next to executable
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const StockfishModule = require(jsPath);
+
+  // The stockfish.js module exports a factory function via module.exports = e
+  // Calling it returns another function (the Stockfish constructor)
+  const StockfishFactory: () => (config: Record<string, unknown>) => Promise<RawEngine> =
+    StockfishModule;
+
+  if (typeof StockfishFactory !== 'function') {
+    console.error('[Stockfish] Module type:', typeof StockfishModule);
+    console.error('[Stockfish] Module keys:', Object.keys(StockfishModule || {}));
+    throw new Error(
+      `Stockfish module did not export a factory function. Got: ${typeof StockfishFactory}`
+    );
+  }
 
   let listener: EngineListener = () => {};
   let ready = false;
@@ -97,7 +162,7 @@ export async function loadStockfish(): Promise<StockfishInstance> {
     wasmBinary: wasmBinary.buffer,
     locateFile: (filename: string) => {
       if (filename.endsWith('.wasm')) {
-        return STOCKFISH_WASM_PATH;
+        return wasmPath;
       }
       return filename;
     },

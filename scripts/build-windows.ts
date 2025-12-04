@@ -132,6 +132,16 @@ async function patchWithRcedit(exePath: string, config: NeutralinoConfig): Promi
 
 /**
  * Build Windows executables without resedit
+ *
+ * Output structure:
+ *   build/Windows x64/
+ *     Chess-Sensei/
+ *       Chess-Sensei.exe     (main application - GUI mode)
+ *       neutralino.exe       (UI runtime)
+ *       resources.neu        (app resources)
+ *
+ * Note: Dependencies must be in the same folder as the main exe because
+ * Buntralino looks for neutralino.exe in process.cwd()
  */
 async function buildWindows(): Promise<void> {
   console.log('🔨 Custom Windows Build for Chess-Sensei\n');
@@ -146,10 +156,18 @@ async function buildWindows(): Promise<void> {
   }
 
   const appName = config.cli.binaryName;
+  const displayName = config.applicationName ?? 'Chess-Sensei';
   const buildsDir = path.join(projectRoot, 'build');
   const neuBuildsDir = path.join(projectRoot, config.cli.distributionPath ?? 'dist', appName);
   const bunBuildsDir = path.join(buildsDir, 'bun');
-  const winOutputDir = path.join(buildsDir, 'Windows x64');
+  // Structure: build/Windows x64/Chess-Sensei/
+  const winOutputDir = path.join(buildsDir, 'Windows x64', displayName);
+
+  // Stockfish engine files to copy
+  const stockfishSrcDir = path.join(projectRoot, 'node_modules', 'stockfish', 'src');
+  const stockfishDestDir = path.join(winOutputDir, 'stockfish');
+  const STOCKFISH_JS = 'stockfish-17.1-lite-single-03e3232.js';
+  const STOCKFISH_WASM = 'stockfish-17.1-lite-single-03e3232.wasm';
 
   // Clean previous builds
   if (await fs.pathExists(buildsDir)) {
@@ -157,17 +175,23 @@ async function buildWindows(): Promise<void> {
     await fs.remove(buildsDir);
   }
 
-  // Step 1: Update Neutralino binaries (needed in CI)
+  // Step 1: Build frontend with Vite (compiles TS/CSS and copies public/ to app/)
+  // Set SKIP_BUNTRALINO=true to prevent Vite from running buntralino build (we do it ourselves)
+  console.log('\n🏗️  Building frontend with Vite...');
+  await $`SKIP_BUNTRALINO=true bun run build`.cwd(projectRoot).quiet();
+  console.log('  ✓ Vite build complete (frontend + assets)');
+
+  // Step 2: Update Neutralino binaries (needed in CI)
   console.log('\n📥 Updating Neutralino binaries...');
   await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino binaries updated');
 
-  // Step 2: Build Neutralino
+  // Step 3: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
 
-  // Step 3: Build Bun executable for Windows
+  // Step 4: Build Bun executable for Windows
   console.log('\n📦 Building Bun executable for Windows...');
   await fs.ensureDir(bunBuildsDir);
 
@@ -179,11 +203,12 @@ async function buildWindows(): Promise<void> {
     .quiet();
   console.log('  ✓ Bun executable built');
 
-  // Step 3: Copy files to output directory
+  // Step 5: Copy files to output directory
   console.log('\n📁 Organizing output files...');
   await fs.ensureDir(winOutputDir);
 
-  const finalBunPath = path.join(winOutputDir, `${appName}.exe`);
+  // All files in the same directory (Buntralino requirement)
+  const finalBunPath = path.join(winOutputDir, `${displayName}.exe`);
   const finalNeuPath = path.join(winOutputDir, 'neutralino.exe');
   const finalResPath = path.join(winOutputDir, 'resources.neu');
 
@@ -194,16 +219,19 @@ async function buildWindows(): Promise<void> {
   ]);
   console.log('  ✓ Files organized');
 
-  // Step 4: Convert to GUI mode (hide console)
-  console.log('\n🖥️  Converting to GUI mode...');
-  await makeWindowsBinGui(finalBunPath);
-  console.log('  ✓ Subsystem set to GUI');
+  // Step 5b: Copy Stockfish engine files
+  // Bun's bundler cannot correctly bundle the stockfish.js IIFE module pattern,
+  // so we distribute the files alongside the executable
+  console.log('\n🎯 Copying Stockfish engine files...');
+  await fs.ensureDir(stockfishDestDir);
+  await Promise.all([
+    fs.copy(path.join(stockfishSrcDir, STOCKFISH_JS), path.join(stockfishDestDir, STOCKFISH_JS)),
+    fs.copy(path.join(stockfishSrcDir, STOCKFISH_WASM), path.join(stockfishDestDir, STOCKFISH_WASM)),
+  ]);
+  console.log('  ✓ Stockfish engine files copied');
 
-  // Give Windows filesystem a moment
-  console.log('\n⏳ Waiting for filesystem...');
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-
-  // Step 5: Try to patch with rcedit
+  // Step 6: Try to patch with rcedit FIRST (before GUI conversion)
+  // rcedit can sometimes reset subsystem, so we do GUI conversion after
   console.log('\n🎨 Patching executable metadata...');
   const rceditSuccess = await patchWithRcedit(finalBunPath, config);
 
@@ -213,15 +241,28 @@ async function buildWindows(): Promise<void> {
     console.log('   Check the error message above for details.\n');
   }
 
+  // Give Windows filesystem a moment
+  console.log('\n⏳ Waiting for filesystem...');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // Step 7: Convert to GUI mode (hide command prompt window) - do this AFTER rcedit
+  console.log('\n🖥️  Converting to GUI mode...');
+  await makeWindowsBinGui(finalBunPath);
+  console.log('  ✓ Subsystem set to GUI');
+
   // Cleanup intermediate files
   await fs.remove(bunBuildsDir);
   await fs.remove(neuBuildsDir);
 
-  console.log(`\n✅ Build complete! Output: ${winOutputDir}`);
-  console.log(`\nFiles created:`);
-  console.log(`  - ${appName}.exe (main application)`);
-  console.log(`  - neutralino.exe (UI runtime)`);
-  console.log(`  - resources.neu (app resources)`);
+  console.log(`\n✅ Build complete! Output: ${path.dirname(winOutputDir)}`);
+  console.log(`\nFolder structure:`);
+  console.log(`  ${displayName}/`);
+  console.log(`    ${displayName}.exe     (run with --dev for DevTools)`);
+  console.log(`    neutralino.exe`);
+  console.log(`    resources.neu`);
+  console.log(`    stockfish/`);
+  console.log(`      ${STOCKFISH_JS}`);
+  console.log(`      ${STOCKFISH_WASM}`);
 }
 
 // Run the build

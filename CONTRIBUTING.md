@@ -41,11 +41,11 @@ Chess-Sensei/
 │   ├── backend/      # Bun-powered services
 │   ├── engine/       # Chess engine + AI logic
 │   ├── shared/       # Shared types and utilities
-│   └── assets/       # Internal assets
-├── assets/           # Chess pieces, icons, sounds
+│   └── assets/       # Source assets (development only)
+├── public/           # Static files (copied to app/ during build)
+│   └── assets/       # Chess pieces, icons, sounds
 ├── source-docs/      # Design & development specifications
-├── documents/        # End-user documentation
-└── public/           # Static files
+└── documents/        # End-user documentation
 ```
 
 ## Development Workflow

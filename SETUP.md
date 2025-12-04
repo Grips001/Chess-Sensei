@@ -22,13 +22,13 @@ Chess-Sensei/
 ├── src/
 │   ├── frontend/        # Neutralino UI code (Vite + TypeScript)
 │   ├── backend/         # Bun-powered services
-│   ├── engine/          # Chess engine + AI logic (future)
+│   ├── engine/          # Chess engine + AI logic
 │   ├── shared/          # Shared types and utilities
-│   └── assets/          # Internal source assets
-├── assets/              # Chess pieces, icons, sounds
+│   └── assets/          # Source assets (development only)
+├── public/              # Static files (copied to app/ during build)
+│   └── assets/          # Chess pieces, icons, sounds
 ├── source-docs/         # Design & development specifications
 ├── documents/           # End-user documentation
-├── public/              # Static files
 └── Configuration files
 ```
 
@@ -85,16 +85,26 @@ This starts the Vite dev server and launches the Neutralino window.
 
 ### Build for Production
 
+The build process has two stages:
+
+1. **Vite build** - Compiles frontend and copies `public/assets/` to `app/assets/`
+2. **Platform build** - Packages the app for distribution
+
 ```bash
-# Build frontend assets only (Vite)
+# Build frontend assets only (Vite → app/)
 bun run build
 
-# Full app build for all platforms
-bun run build:app
-
-# Windows-specific build (workaround for pe-library issue)
+# Windows build (Vite + Buntralino with rcedit workaround)
 bun run build:windows
+
+# Linux build
+bun run build:linux
+
+# macOS build
+bun run build:macos
 ```
+
+Note: Platform-specific builds run Vite first, then package for distribution.
 
 See [documents/building.md](documents/building.md) for detailed build
 instructions and troubleshooting.

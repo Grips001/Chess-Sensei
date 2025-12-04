@@ -21,6 +21,18 @@ This starts:
 - Vite development server for the frontend
 - Bun backend with the chess engine
 
+## Build Process Overview
+
+The build has two stages:
+
+1. **Vite build** - Compiles frontend TypeScript/CSS and copies `public/` to
+   `app/`
+2. **Platform build** - Packages Bun backend + Neutralino + resources for
+   distribution
+
+Assets (chess pieces, sounds, icons) are stored in `public/assets/` and get
+copied to `app/assets/` during the Vite build stage.
+
 ## Production Builds
 
 ### Windows Build
@@ -37,10 +49,33 @@ This creates:
 ```text
 build/
 └── Windows x64/
-    ├── chess-sensei.exe    # Main application (Bun runtime)
-    ├── neutralino.exe      # UI runtime (Neutralino.js)
-    └── resources.neu       # Application resources
+    └── Chess-Sensei/
+        ├── Chess-Sensei.exe    # Main application (Bun runtime)
+        ├── neutralino.exe      # UI runtime (Neutralino.js)
+        ├── resources.neu       # Application resources
+        └── stockfish/          # Chess engine files
+            ├── stockfish-17.1-lite-single-*.js
+            └── stockfish-17.1-lite-single-*.wasm
 ```
+
+**Developer mode:** Run `Chess-Sensei.exe --dev` to enable Chrome DevTools
+(F12).
+
+### Linux Build
+
+```bash
+bun run build:linux
+```
+
+Creates `dist/chess-sensei/` with Linux x64 binaries.
+
+### macOS Build
+
+```bash
+bun run build:macos
+```
+
+Creates `.app` bundles for both x64 and arm64 architectures.
 
 #### Technical Details
 
@@ -76,9 +111,11 @@ Note: This may fail on Windows due to the pe-library issue described above.
 | Script                  | Description                                   |
 | ----------------------- | --------------------------------------------- |
 | `bun run dev`           | Development mode with hot reload              |
-| `bun run build`         | Build frontend assets only (Vite)             |
-| `bun run build:app`     | Full app build via Buntralino (all platforms) |
-| `bun run build:windows` | Windows-specific build with rcedit            |
+| `bun run build`         | Build frontend assets only (Vite → app/)      |
+| `bun run build:windows` | Windows build with rcedit (includes Vite)     |
+| `bun run build:linux`   | Linux x64 build (includes Vite)               |
+| `bun run build:macos`   | macOS x64/arm64 build (includes Vite)         |
+| `bun run build:app`     | Full app build via Buntralino (legacy)        |
 
 ## Build Output Structure
 
@@ -87,18 +124,25 @@ After a successful Windows build:
 ```text
 build/
 └── Windows x64/
-    ├── chess-sensei.exe    # 115MB - Bun + Stockfish WASM
-    ├── neutralino.exe      # 2.7MB - Neutralino runtime
-    └── resources.neu       # ~76KB - Frontend bundle
+    └── Chess-Sensei/
+        ├── Chess-Sensei.exe    # ~115MB - Bun runtime + backend
+        ├── neutralino.exe      # ~2.7MB - Neutralino runtime
+        ├── resources.neu       # ~76KB - Frontend bundle + assets
+        └── stockfish/          # ~7MB - Chess engine
+            ├── stockfish-17.1-lite-single-*.js
+            └── stockfish-17.1-lite-single-*.wasm
 ```
 
 ### File Descriptions
 
-- **chess-sensei.exe**: The main application containing the Bun runtime, backend
-  code, and Stockfish WASM engine (~115MB due to embedded WASM)
+- **Chess-Sensei.exe**: The main application containing the Bun runtime and
+  backend code (~115MB due to Bun runtime)
 - **neutralino.exe**: The lightweight Neutralino.js runtime that provides the
   native window and web view (~2.7MB)
 - **resources.neu**: Compressed bundle of frontend HTML, CSS, JS, and assets
+- **stockfish/**: Directory containing the Stockfish WASM chess engine files.
+  These are loaded dynamically at runtime because Bun's bundler cannot correctly
+  handle the stockfish.js IIFE module pattern.
 
 ## Troubleshooting
 
@@ -125,10 +169,10 @@ If rcedit fails to set icons/metadata:
 The main executable (~115MB) includes:
 
 - Bun runtime (~90MB)
-- Stockfish WASM (~7MB)
 - Application code
 
-This is expected for a Bun-compiled application with WASM.
+The stockfish directory (~7MB) contains the WASM chess engine files which are
+loaded at runtime. This is expected for a Bun-compiled application.
 
 ### Missing Dependencies
 

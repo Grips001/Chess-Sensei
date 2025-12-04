@@ -28,6 +28,10 @@ interface NeutralinoConfig {
 
 const projectRoot = process.cwd();
 
+// Stockfish engine file names
+const STOCKFISH_JS = 'stockfish-17.1-lite-single-03e3232.js';
+const STOCKFISH_WASM = 'stockfish-17.1-lite-single-03e3232.wasm';
+
 function getIconPath(config: NeutralinoConfig): string {
   if (config.applicationIcon) {
     return path.join(projectRoot, config.applicationIcon.replace(/^\//, ''));
@@ -73,6 +77,18 @@ async function createMacOSBundle(
   await fs.copy(bunExePath, path.join(macOSPath, appName));
   await fs.copy(neuBinaryPath, path.join(macOSPath, 'neutralino'));
   await fs.copy(path.join(distDir, 'resources.neu'), path.join(macOSPath, 'resources.neu'));
+
+  // Copy Stockfish engine files
+  // Bun's bundler cannot correctly bundle the stockfish.js IIFE module pattern,
+  // so we distribute the files alongside the executable
+  const stockfishSrcDir = path.join(projectRoot, 'node_modules', 'stockfish', 'src');
+  const stockfishDestDir = path.join(macOSPath, 'stockfish');
+  await fs.ensureDir(stockfishDestDir);
+  await Promise.all([
+    fs.copy(path.join(stockfishSrcDir, STOCKFISH_JS), path.join(stockfishDestDir, STOCKFISH_JS)),
+    fs.copy(path.join(stockfishSrcDir, STOCKFISH_WASM), path.join(stockfishDestDir, STOCKFISH_WASM)),
+  ]);
+  console.log(`  ✓ Stockfish engine files copied for ${archSuffix}`);
 
   // Make executables... executable
   await fs.chmod(path.join(macOSPath, appName), 0o755);

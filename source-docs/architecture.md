@@ -90,12 +90,12 @@ Chess-Sensei/
 │   ├── backend/      # Bun-powered services and IPC handlers
 │   ├── engine/       # Chess engine + AI logic (Stockfish WASM)
 │   ├── shared/       # Shared types and utilities (chess-logic, IPC types)
-│   └── assets/       # Internal source assets
-├── scripts/          # Build scripts (Windows build workaround)
-├── assets/           # Chess pieces, icons, sounds
+│   └── assets/       # Source assets (development only)
+├── scripts/          # Build scripts (platform-specific builds)
+├── public/           # Static files (copied to app/ during Vite build)
+│   └── assets/       # Chess pieces, icons, sounds
 ├── source-docs/      # Design & development specifications
-├── documents/        # End-user documentation
-└── public/           # Static files
+└── documents/        # End-user documentation
 ```
 
 ## Code Quality Tools

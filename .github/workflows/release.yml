@@ -98,6 +98,10 @@ jobs:
             mkdir -p "package/Chess-Sensei"
             cp dist/chess-sensei/*linux* "package/Chess-Sensei/" 2>/dev/null || true
             cp dist/chess-sensei/resources.neu "package/Chess-Sensei/" 2>/dev/null || true
+            # Copy stockfish engine files
+            if [ -d "dist/chess-sensei/stockfish" ]; then
+              cp -r dist/chess-sensei/stockfish "package/Chess-Sensei/"
+            fi
             tar -czvf "release/Chess-Sensei-${VERSION}-linux-x64.tar.gz" -C package Chess-Sensei
             rm -rf package
           fi

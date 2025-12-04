@@ -294,7 +294,8 @@ return to normal orientation.
    - Volume controls coming in future update
 
 3. **Verify sound files:**
-   - Sound files should be in `assets/sounds/` directory
+   - Sound files should be in `public/assets/sounds/` directory (source)
+   - After build, they're in `app/assets/sounds/` (deployed)
    - Check console for "Sound file not found" errors
 
 4. **Browser autoplay policy (dev builds only):**
