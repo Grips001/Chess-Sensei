@@ -1,6 +1,8 @@
 # Roadmap & Development Phases
 
-Chess-Sensai's development is organized into clear phases, each building upon the previous foundation. This roadmap outlines the planned features, milestones, and priorities for bringing the chess training application to life.
+Chess-Sensai's development is organized into clear phases, each building upon
+the previous foundation. This roadmap outlines the planned features, milestones,
+and priorities for bringing the chess training application to life.
 
 ## Development Philosophy
 
@@ -638,23 +640,24 @@ Features planned for future versions after v1.0:
 - Integration with external databases (Lichess, Chess.com)
 - AI coach with natural language explanations
 
-These are exploratory ideas and not commitments. Development priorities will be driven by user feedback and demand.
+These are exploratory ideas and not commitments. Development priorities will be
+driven by user feedback and demand.
 
 ## Milestones Summary
 
-| Phase | Description | Duration | Status |
-|-------|-------------|----------|--------|
-| Phase 0 | Foundation & Setup | 2 weeks | ✓ Complete |
-| Phase 1 | Core Chess Engine Integration | 4-6 weeks | 🚧 Next |
-| Phase 2 | Minimal UI & Chessboard | 3-4 weeks | 📋 Planned |
-| Phase 3 | AI Opponent & Training Mode | 4-5 weeks | 📋 Planned |
-| Phase 4 | Exam Mode & Metrics Collection | 3-4 weeks | 📋 Planned |
-| Phase 5 | Post-Game Analysis UI | 4-5 weeks | 📋 Planned |
-| Phase 6 | Player Progress Dashboard | 3-4 weeks | 📋 Planned |
-| Phase 7 | Sandbox Mode | 2-3 weeks | 📋 Planned |
-| Phase 8 | Import/Export & Data Management | 2-3 weeks | 📋 Planned |
-| Phase 9 | Polish & Optimization | 3-4 weeks | 📋 Planned |
-| **v1.0** | **Public Release** | - | 📋 Q3 2025 |
+| Phase    | Description                     | Duration  | Status     |
+| -------- | ------------------------------- | --------- | ---------- |
+| Phase 0  | Foundation & Setup              | 2 weeks   | ✓ Complete |
+| Phase 1  | Core Chess Engine Integration   | 4-6 weeks | 🚧 Next    |
+| Phase 2  | Minimal UI & Chessboard         | 3-4 weeks | 📋 Planned |
+| Phase 3  | AI Opponent & Training Mode     | 4-5 weeks | 📋 Planned |
+| Phase 4  | Exam Mode & Metrics Collection  | 3-4 weeks | 📋 Planned |
+| Phase 5  | Post-Game Analysis UI           | 4-5 weeks | 📋 Planned |
+| Phase 6  | Player Progress Dashboard       | 3-4 weeks | 📋 Planned |
+| Phase 7  | Sandbox Mode                    | 2-3 weeks | 📋 Planned |
+| Phase 8  | Import/Export & Data Management | 2-3 weeks | 📋 Planned |
+| Phase 9  | Polish & Optimization           | 3-4 weeks | 📋 Planned |
+| **v1.0** | **Public Release**              | -         | 📋 Q3 2025 |
 
 **Total Estimated Development Time:** 6-9 months (from Phase 1 start)
 
@@ -678,7 +681,8 @@ These are exploratory ideas and not commitments. Development priorities will be 
 
 ## Contributing to Development
 
-Interested in helping build Chess-Sensai? See [development.md](development.md) for:
+Interested in helping build Chess-Sensai? See [development.md](development.md)
+for:
 
 - How to set up your development environment
 - Coding standards and best practices
@@ -704,7 +708,8 @@ This roadmap is a living document and will evolve based on:
 - Community priorities
 - Market changes
 
-The core vision (offline-first chess training with real-time guidance) remains fixed, but specific features and timelines may adjust.
+The core vision (offline-first chess training with real-time guidance) remains
+fixed, but specific features and timelines may adjust.
 
 ## Questions?
 
@@ -714,4 +719,5 @@ For questions about the roadmap or development priorities, please:
 - Review existing documentation
 - Check the FAQ (coming soon)
 
-We're excited to bring Chess-Sensai to life and help chess players around the world improve their game!
+We're excited to bring Chess-Sensai to life and help chess players around the
+world improve their game!

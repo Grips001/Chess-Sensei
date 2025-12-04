@@ -1,20 +1,24 @@
 # Game Modes
 
-Chess-Sensai offers three distinct game modes, each designed for different learning and practice scenarios. Understanding when to use each mode is key to maximizing your training effectiveness.
+Chess-Sensai offers three distinct game modes, each designed for different
+learning and practice scenarios. Understanding when to use each mode is key to
+maximizing your training effectiveness.
 
 ## Mode Overview
 
-| Mode | Trainer Active | Metrics Tracked | Post-Game Analysis | Best For |
-|------|----------------|-----------------|-------------------|----------|
-| Training | Yes | No | No | Learning new concepts |
-| Exam | No | Yes | Yes | Testing skills |
-| Sandbox | Yes (Single Move) | No | No | Position exploration |
+| Mode     | Trainer Active    | Metrics Tracked | Post-Game Analysis | Best For              |
+| -------- | ----------------- | --------------- | ------------------ | --------------------- |
+| Training | Yes               | No              | No                 | Learning new concepts |
+| Exam     | No                | Yes             | Yes                | Testing skills        |
+| Sandbox  | Yes (Single Move) | No              | No                 | Position exploration  |
 
 ## Training Mode
 
 **Purpose:** Learn and practice with real-time guidance
 
-Training Mode is the core learning environment where the **visual best-move guidance system** is fully active. This mode is designed for stress-free learning and experimentation.
+Training Mode is the core learning environment where the **visual best-move
+guidance system** is fully active. This mode is designed for stress-free
+learning and experimentation.
 
 ### Features
 
@@ -50,7 +54,8 @@ Training Mode is the core learning environment where the **visual best-move guid
 
 ### Training Mode Philosophy
 
-Training Mode embodies the core philosophy of Chess-Sensai: **learning without intimidation**. The constant guidance allows you to:
+Training Mode embodies the core philosophy of Chess-Sensai: **learning without
+intimidation**. The constant guidance allows you to:
 
 - Observe optimal play in real-time
 - Compare your instincts against engine recommendations
@@ -61,7 +66,9 @@ Training Mode embodies the core philosophy of Chess-Sensai: **learning without i
 
 **Purpose:** Test your skills and measure progress
 
-Exam Mode removes all training wheels. The **guidance system is disabled**, forcing you to rely entirely on your own skills and judgment. This is where you prove what you've learned.
+Exam Mode removes all training wheels. The **guidance system is disabled**,
+forcing you to rely entirely on your own skills and judgment. This is where you
+prove what you've learned.
 
 ### Exam Mode Features
 
@@ -104,7 +111,9 @@ Exam Mode removes all training wheels. The **guidance system is disabled**, forc
 
 ### Exam Mode Philosophy
 
-Exam Mode is where **growth is measured**. By removing the guidance system and tracking every detail, you get honest feedback about your current skill level and specific areas for improvement.
+Exam Mode is where **growth is measured**. By removing the guidance system and
+tracking every detail, you get honest feedback about your current skill level
+and specific areas for improvement.
 
 The comprehensive metrics allow you to:
 
@@ -118,7 +127,8 @@ The comprehensive metrics allow you to:
 
 **Purpose:** Explore specific positions and scenarios
 
-Sandbox Mode is a **position setup and analysis tool**. It allows you to create any board state and immediately see the engine's best move recommendation.
+Sandbox Mode is a **position setup and analysis tool**. It allows you to create
+any board state and immediately see the engine's best move recommendation.
 
 ### Sandbox Mode Features
 
@@ -197,7 +207,9 @@ Sandbox Mode is a **position setup and analysis tool**. It allows you to create 
 
 ### Sandbox Mode Philosophy
 
-Sandbox Mode is your **chess laboratory**. It allows you to explore, experiment, and learn without the constraints of a full game. By focusing on specific positions, you can:
+Sandbox Mode is your **chess laboratory**. It allows you to explore, experiment,
+and learn without the constraints of a full game. By focusing on specific
+positions, you can:
 
 - Deepen understanding of critical moments
 - Study without time pressure

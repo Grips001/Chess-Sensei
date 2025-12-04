@@ -1,10 +1,12 @@
 # Best-Move Guidance System
 
-The real-time best-move guidance system is the defining feature of Chess-Sensai, providing visual coaching without restricting player freedom.
+The real-time best-move guidance system is the defining feature of Chess-Sensai,
+providing visual coaching without restricting player freedom.
 
 ## Integration with the AI Engine
 
-The guidance system is tightly integrated with the **AI engine**, ensuring consistency between:
+The guidance system is tightly integrated with the **AI engine**, ensuring
+consistency between:
 
 - What the user is taught
 - What the opponent plays
@@ -12,7 +14,8 @@ The guidance system is tightly integrated with the **AI engine**, ensuring consi
 
 ### Data Flow Overview
 
-1. The frontend sends the **current board position (FEN + move history)** to the Bun backend.
+1. The frontend sends the **current board position (FEN + move history)** to the
+   Bun backend.
 2. The backend queries the Stockfish WASM engine using:
    - Fixed depth
    - Or fixed time per move
@@ -56,21 +59,22 @@ For each recommended move, three elements are highlighted in the same color:
 2. **The destination square** --- Highlighted on the board
 3. **The notation in the side panel** --- Highlighted in the text
 
-This creates an instant visual connection between the written move and its board representation.
+This creates an instant visual connection between the written move and its board
+representation.
 
 ### Example Visualization
 
 If the three best moves are:
 
-- **Bxe5** *(Blue --- best move)*
+- **Bxe5** _(Blue --- best move)_
   - The notation **Bxe5** is highlighted blue in the right panel
   - The bishop is highlighted blue on the board
   - The square **e5** is highlighted blue
-- **exd5** *(Green --- second-best move)*
+- **exd5** _(Green --- second-best move)_
   - The notation **exd5** is highlighted green
   - The pawn is highlighted green
   - The square **d5** is highlighted green
-- **Nf3** *(Yellow --- third-best move)*
+- **Nf3** _(Yellow --- third-best move)_
   - The notation **Nf3** is highlighted yellow
   - The knight is highlighted yellow
   - The square **f3** is highlighted yellow
@@ -120,9 +124,11 @@ If the three best moves are:
 The guidance system allows players to:
 
 - **Learn by observation** --- See what strong moves look like in real positions
-- **Compare choices** --- Understand the difference between their instincts and optimal play
+- **Compare choices** --- Understand the difference between their instincts and
+  optimal play
 - **Experiment freely** --- Try different approaches without penalty
-- **Build pattern recognition** --- Develop intuition through repeated exposure to good moves
+- **Build pattern recognition** --- Develop intuition through repeated exposure
+  to good moves
 
 ### No Enforcement
 

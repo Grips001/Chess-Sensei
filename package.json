@@ -1,0 +1,43 @@
+{
+  "name": "chess-sensai",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun vite build",
+    "lint": "bun run lint:ts && bun run lint:md && bun run lint:format",
+    "lint:ts": "eslint . --ext .ts,.tsx,.mts,.js,.mjs",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint:format": "prettier --check \"**/*.{ts,tsx,mts,js,mjs,json,md}\"",
+    "lint:fix": "bun run lint:ts --fix && bun run lint:format --write && bun run lint:md --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,mts,js,mjs,json,md}\""
+  },
+  "keywords": [
+    "chess",
+    "training",
+    "ai",
+    "desktop",
+    "buntralino"
+  ],
+  "author": "",
+  "license": "TBD",
+  "description": "A modern chess training application with real-time AI-assisted move guidance",
+  "dependencies": {
+    "@neutralinojs/lib": "^5.6.0",
+    "buntralino": "^1.0.10",
+    "buntralino-client": "^1.0.7",
+    "execa": "^9.5.2"
+  },
+  "devDependencies": {
+    "@neutralinojs/neu": "^11.3.0",
+    "@types/bun": "^1.1.14",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
+    "@typescript-eslint/parser": "^8.48.1",
+    "buntralino-cli": "^1.2.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "markdownlint-cli2": "^0.19.1",
+    "prettier": "^3.7.4",
+    "vite": "^6.1.0"
+  }
+}

@@ -1,6 +1,9 @@
 # Post-Game Analysis & Review Tools
 
-After completing an **Exam Mode** game, Chess-Sensai provides a comprehensive post-game analysis system that helps you understand your performance, identify mistakes, and learn from each game. This is where metrics come to life with actionable insights.
+After completing an **Exam Mode** game, Chess-Sensai provides a comprehensive
+post-game analysis system that helps you understand your performance, identify
+mistakes, and learn from each game. This is where metrics come to life with
+actionable insights.
 
 ## When Post-Game Analysis Is Available
 
@@ -28,11 +31,13 @@ After an Exam Mode game concludes:
 3. **"View Analysis"** button prominently displayed
 4. Click to enter the **Post-Game Analysis Interface**
 
-Alternatively, you can access any past Exam Mode game from the **Game History** section of your player profile.
+Alternatively, you can access any past Exam Mode game from the **Game History**
+section of your player profile.
 
 ## Post-Game Analysis Interface
 
-The analysis interface consists of multiple sections, allowing different depths of review.
+The analysis interface consists of multiple sections, allowing different depths
+of review.
 
 ### Main View: Move-by-Move Review
 
@@ -215,11 +220,13 @@ Endgame: Opponent converted advantage
 - Longest think: 2m 15s (Move 24 - the blunder!)
 - Time trouble: No
 
-**Insight:** "You blundered after long thinking on Move 24. Consider simplifying your calculations."
+**Insight:** "You blundered after long thinking on Move 24. Consider simplifying
+your calculations."
 
 ## Deep Analytics View
 
-For players who want **maximum detail**, click **"Deep Analytics"** to open the advanced metrics dashboard for this specific game.
+For players who want **maximum detail**, click **"Deep Analytics"** to open the
+advanced metrics dashboard for this specific game.
 
 ### Deep Analytics Sections
 
@@ -232,7 +239,8 @@ See your composite index scores **for this game only**:
 - Stability Score: 80 (vs. your average: 77) ✓
 - Conversion Score: 45 (vs. your average: 65) ✗✗ Much worse!
 
-**Key Insight:** "Your conversion was poor this game. You failed to win a rook endgame with a 2-pawn advantage."
+**Key Insight:** "Your conversion was poor this game. You failed to win a rook
+endgame with a 2-pawn advantage."
 
 #### 2. Detailed Metric Breakdown
 
@@ -279,7 +287,8 @@ Shows how volatile the evaluation was:
 - Flat line = stable position
 - Sharp swings = tactical chaos
 
-**Insight:** "You thrive in stable positions (80% accuracy) but drop to 65% in tactical positions."
+**Insight:** "You thrive in stable positions (80% accuracy) but drop to 65% in
+tactical positions."
 
 #### 6. Opening Analysis
 
@@ -288,7 +297,8 @@ Shows how volatile the evaluation was:
 - **Evaluation at Move 10:** +0.3 (slight advantage)
 - **Evaluation at Move 15:** -0.5 (lost advantage in middlegame)
 
-**Recommendation:** "Review your middlegame plan after the Berlin Defense opening."
+**Recommendation:** "Review your middlegame plan after the Berlin Defense
+opening."
 
 #### 7. Endgame Analysis
 
@@ -305,7 +315,8 @@ If the game reached an endgame:
 - Move 42: Allowed opponent rook to 7th rank
 - Move 45: Blundered pawn, lost material advantage
 
-**Recommendation:** "Practice rook endgames in Sandbox Mode. Focus on rook activity."
+**Recommendation:** "Practice rook endgames in Sandbox Mode. Focus on rook
+activity."
 
 ## Training Recommendations
 
@@ -362,7 +373,8 @@ Based on the analysis, Chess-Sensai provides **actionable training advice**.
 
 ### Sharing (Future Feature)
 
-*Note: Currently, all data is local. Future versions may allow optional sharing.*
+_Note: Currently, all data is local. Future versions may allow optional
+sharing._
 
 - Share game link with other Chess-Sensai users
 - Compare your analysis with friend's games
@@ -444,7 +456,8 @@ Users can choose the depth of analysis based on time available.
 
 ### Spaced Repetition
 
-Chess-Sensai can **track positions you struggled with** and present them again later:
+Chess-Sensai can **track positions you struggled with** and present them again
+later:
 
 - Positions where you blundered are saved
 - Periodic review prompts: "Revisit this position?"
@@ -541,4 +554,5 @@ Potential future features for post-game analysis:
 - **Comparative analysis** (compare two games side-by-side)
 - **AI coach comments** (natural language explanations of strategic ideas)
 
-These will be considered in future development phases. See [roadmap.md](roadmap.md).
+These will be considered in future development phases. See
+[roadmap.md](roadmap.md).

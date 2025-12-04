@@ -1,12 +1,17 @@
 # Chess-Sensai
 
-A modern chess training application designed to help players improve decision-making through real-time AI-assisted move guidance---without restricting player freedom. Chess-Sensai blends traditional chess gameplay with real-time visual coaching, offering immediate strategic insight through non-intrusive training.
+A modern chess training application designed to help players improve
+decision-making through real-time AI-assisted move guidance---without
+restricting player freedom. Chess-Sensai blends traditional chess gameplay with
+real-time visual coaching, offering immediate strategic insight through
+non-intrusive training.
 
 ## Key Features
 
 ### Real-Time Best-Move Guidance (Key Differentiator)
 
-The defining feature of Chess-Sensai is its **visual best-move guidance system**:
+The defining feature of Chess-Sensai is its **visual best-move guidance
+system**:
 
 - **Top 3 moves highlighted** in real-time during your turn
 - **Color-coded system**: Blue (best), Green (second-best), Yellow (third-best)
@@ -16,7 +21,8 @@ The defining feature of Chess-Sensai is its **visual best-move guidance system**
 ### AI Opponent
 
 - **Embedded Stockfish WASM engine** --- world-class chess strength
-- **Human-like bot personalities** --- Sensei, Student, Club Player, Tactician, and more
+- **Human-like bot personalities** --- Sensei, Student, Club Player, Tactician,
+  and more
 - **Adjustable difficulty** --- from beginner (800 Elo) to master (2400+ Elo)
 - **Training vs. Punishing modes** --- choose your learning style
 
@@ -48,43 +54,85 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 ### Core Concept & Design
 
-- [**Overview**](docs/overview.md) --- Game concept, core features, and training philosophy
-- [**UI/UX Design**](docs/ui-ux-design.md) --- Visual theme, layout, and interaction patterns
-- [**Game Modes**](docs/game-modes.md) --- Training, Exam, and Sandbox modes explained
+- [**Overview**](docs/overview.md) --- Game concept, core features, and training
+  philosophy
+- [**UI/UX Design**](docs/ui-ux-design.md) --- Visual theme, layout, and
+  interaction patterns
+- [**Game Modes**](docs/game-modes.md) --- Training, Exam, and Sandbox modes
+  explained
 
 ### Technical Architecture
 
-- [**Architecture**](docs/architecture.md) --- Technical stack, platform goals, and system design
-- [**AI Engine**](docs/ai-engine.md) --- Stockfish WASM integration, bot personalities, and difficulty scaling
-- [**Move Guidance**](docs/move-guidance.md) --- Best-move guidance system and visual highlighting
+- [**Architecture**](docs/architecture.md) --- Technical stack, platform goals,
+  and system design
+- [**AI Engine**](docs/ai-engine.md) --- Stockfish WASM integration, bot
+  personalities, and difficulty scaling
+- [**Move Guidance**](docs/move-guidance.md) --- Best-move guidance system and
+  visual highlighting
 
 ### Player Progress & Analytics
 
-- [**Player Progress**](docs/player-progress.md) --- Metrics tracking, composite scores, and visual analytics
-- [**Tracked Metrics**](docs/tracked-metrics.md) --- Complete list of all performance metrics
-- [**Post-Game Analysis**](docs/post-game-analysis.md) --- Review tools, mistake analysis, and deep analytics
+- [**Player Progress**](docs/player-progress.md) --- Metrics tracking, composite
+  scores, and visual analytics
+- [**Tracked Metrics**](docs/tracked-metrics.md) --- Complete list of all
+  performance metrics
+- [**Post-Game Analysis**](docs/post-game-analysis.md) --- Review tools, mistake
+  analysis, and deep analytics
 
 ### Data & Development
 
-- [**Data Storage**](docs/data-storage.md) --- Local storage, import/export, and data management
-- [**Development**](docs/development.md) --- Best practices, GitHub workflow, and contributing guidelines
-- [**Roadmap**](docs/roadmap.md) --- Development phases, milestones, and future plans
+- [**Data Storage**](docs/data-storage.md) --- Local storage, import/export, and
+  data management
+- [**Development**](docs/development.md) --- Best practices, GitHub workflow,
+  and contributing guidelines
+- [**Roadmap**](docs/roadmap.md) --- Development phases, milestones, and future
+  plans
 
 ## Project Status
 
-**Current Phase:** Design & architecture
+**Current Phase:** Phase 0 Complete ✓ → Phase 1 Starting
 
-This project is in active development. The architecture and feature set are defined, and implementation is underway.
+- ✅ Foundation and project setup complete
+- ✅ Buntralino initialized with proper structure
+- ✅ Comprehensive documentation written
+- 🚧 Phase 1: Core Chess Engine Integration (Next)
+
+See [roadmap.md](docs/roadmap.md) for detailed development plan and current
+progress.
 
 ## Getting Started
 
-*Coming soon* --- Setup instructions will be added once the initial implementation is complete.
+### Prerequisites
+
+- [Bun](https://bun.sh) v1.0 or higher
+- Git
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/Chess-Sensai.git
+cd Chess-Sensai
+
+# Install dependencies
+bun install
+
+# Run development server
+bun run dev
+```
+
+See [SETUP.md](SETUP.md) for complete setup documentation.
 
 ## Contributing
 
-Interested in contributing? Check out our [development guidelines](docs/development.md) for information on:
+Interested in contributing? Check out our guidelines:
 
-- Project structure
+- [**CONTRIBUTING.md**](CONTRIBUTING.md) --- Contribution workflow and standards
+- [**docs/development.md**](docs/development.md) --- Development best practices
+
+Key resources:
+
+- Project structure and conventions
 - Development workflow
 - Coding standards
 - Testing requirements

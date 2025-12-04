@@ -1,6 +1,8 @@
 # Game Persistence & Data Storage
 
-Chess-Sensai stores all game data, player metrics, and analysis results **locally** on the user's device. This ensures privacy, offline functionality, and full user control over their chess training data.
+Chess-Sensai stores all game data, player metrics, and analysis results
+**locally** on the user's device. This ensures privacy, offline functionality,
+and full user control over their chess training data.
 
 ## Storage Philosophy
 
@@ -33,15 +35,15 @@ Chess-Sensai stores all game data, player metrics, and analysis results **locall
 
 ### Data Categories
 
-| Data Type | Stored? | Mode(s) | Format | Size Estimate |
-|-----------|---------|---------|--------|---------------|
-| Training Mode Games | No | Training | - | - |
-| Exam Mode Games | Yes | Exam | JSON + PGN | ~5-10 KB per game |
-| Sandbox Positions | Temporary | Sandbox | FEN | Session only |
-| Player Metrics | Yes | Exam | JSON | ~2-5 KB per game |
-| Analysis Results | Yes | Exam | JSON | ~10-20 KB per game |
-| User Settings | Yes | All | JSON | ~1 KB |
-| Game History Index | Yes | Exam | JSON | ~1 KB per 100 games |
+| Data Type           | Stored?   | Mode(s)  | Format     | Size Estimate       |
+| ------------------- | --------- | -------- | ---------- | ------------------- |
+| Training Mode Games | No        | Training | -          | -                   |
+| Exam Mode Games     | Yes       | Exam     | JSON + PGN | ~5-10 KB per game   |
+| Sandbox Positions   | Temporary | Sandbox  | FEN        | Session only        |
+| Player Metrics      | Yes       | Exam     | JSON       | ~2-5 KB per game    |
+| Analysis Results    | Yes       | Exam     | JSON       | ~10-20 KB per game  |
+| User Settings       | Yes       | All      | JSON       | ~1 KB               |
+| Game History Index  | Yes       | Exam     | JSON       | ~1 KB per 100 games |
 
 ### Storage by Game Mode
 
@@ -513,7 +515,8 @@ Users can export their data in multiple formats:
 
 - **Format:** Complete game + analysis JSON
 - **Includes:** All moves, analysis, metrics, positions
-- **Use case:** Backup, deep analysis in external tools, re-import to Chess-Sensai
+- **Use case:** Backup, deep analysis in external tools, re-import to
+  Chess-Sensai
 
 #### 3. Export All Games (Batch JSON)
 
@@ -670,7 +673,8 @@ Manual backup:
 
 ### Database Alternative (Future Consideration)
 
-For users with hundreds or thousands of games, a lightweight database (e.g., SQLite) could be considered:
+For users with hundreds or thousands of games, a lightweight database (e.g.,
+SQLite) could be considered:
 
 **Advantages:**
 
@@ -684,7 +688,8 @@ For users with hundreds or thousands of games, a lightweight database (e.g., SQL
 - Less human-readable
 - Harder to manually edit/inspect
 
-Current JSON approach is sufficient for initial release. Database option can be added later if needed.
+Current JSON approach is sufficient for initial release. Database option can be
+added later if needed.
 
 ## Data Migration
 
@@ -725,7 +730,8 @@ See [roadmap.md](roadmap.md) for future data sync plans.
 
 ### No Telemetry by Default
 
-Chess-Sensai does **not** send any data to external servers unless explicitly enabled by the user.
+Chess-Sensai does **not** send any data to external servers unless explicitly
+enabled by the user.
 
 - No usage tracking
 - No analytics
@@ -759,15 +765,16 @@ See [roadmap.md](roadmap.md) for security enhancements.
 
 For a typical user:
 
-| Data | Size per Item | 100 Games | 1000 Games |
-|------|---------------|-----------|------------|
-| Game JSON | 5-10 KB | 0.5-1 MB | 5-10 MB |
-| Analysis JSON | 10-20 KB | 1-2 MB | 10-20 MB |
-| Player Profile | 2-5 KB | 2-5 KB | 2-5 KB |
-| Settings | 1 KB | 1 KB | 1 KB |
-| **Total** | - | **~2-3 MB** | **~15-30 MB** |
+| Data           | Size per Item | 100 Games   | 1000 Games    |
+| -------------- | ------------- | ----------- | ------------- |
+| Game JSON      | 5-10 KB       | 0.5-1 MB    | 5-10 MB       |
+| Analysis JSON  | 10-20 KB      | 1-2 MB      | 10-20 MB      |
+| Player Profile | 2-5 KB        | 2-5 KB      | 2-5 KB        |
+| Settings       | 1 KB          | 1 KB        | 1 KB          |
+| **Total**      | -             | **~2-3 MB** | **~15-30 MB** |
 
-Even with 1000 games, total storage is only ~30 MB, which is negligible on modern devices.
+Even with 1000 games, total storage is only ~30 MB, which is negligible on
+modern devices.
 
 ## Cleanup & Maintenance
 

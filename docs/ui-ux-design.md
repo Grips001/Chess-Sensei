@@ -1,6 +1,8 @@
 # UI / UX Design & Visual Identity
 
-The application's interface is designed to be **modern, minimal, and highly readable**, reinforcing its role as both a game and a training tool. The UI emphasizes clarity, focus on the board, and intuitive visual learning.
+The application's interface is designed to be **modern, minimal, and highly
+readable**, reinforcing its role as both a game and a training tool. The UI
+emphasizes clarity, focus on the board, and intuitive visual learning.
 
 ## Visual Theme & Art Direction
 
@@ -21,7 +23,8 @@ The application's interface is designed to be **modern, minimal, and highly read
 
 ## Layout Overview
 
-The UI follows a **board-first layout**, similar in structure to platforms like Chess.com:
+The UI follows a **board-first layout**, similar in structure to platforms like
+Chess.com:
 
 - The **chessboard is the primary focal point**, centered and dominant.
 - All secondary UI elements are housed in a **dedicated right-side panel**.
@@ -32,7 +35,9 @@ The UI follows a **board-first layout**, similar in structure to platforms like 
 
 ## Right Panel --- Controls & Move Guidance Hub
 
-The right panel serves as the **functional control center** of the application. It combines **training intelligence** and **game management** into a single, cohesive interface.
+The right panel serves as the **functional control center** of the application.
+It combines **training intelligence** and **game management** into a single,
+cohesive interface.
 
 ### 1. Best-Move Notation Panel (Top Section)
 
@@ -45,10 +50,11 @@ The right panel serves as the **functional control center** of the application. 
 
 ### 2. Game Controls (Middle Section)
 
-Standard game management tools are integrated directly below the move suggestions:
+Standard game management tools are integrated directly below the move
+suggestions:
 
 - **New Game**
-- **Undo / Takeback** *(if enabled by mode)*
+- **Undo / Takeback** _(if enabled by mode)_
 - **Resign**
 - **Offer Draw**
 - **Restart**

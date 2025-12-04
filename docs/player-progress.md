@@ -1,12 +1,17 @@
 # Player Progress, Metrics & Skill Tracking
 
-Chess-Sensai provides comprehensive performance tracking and analytics to help players understand their strengths, identify weaknesses, and measure improvement over time. All metrics are collected exclusively during **Exam Mode** games.
+Chess-Sensai provides comprehensive performance tracking and analytics to help
+players understand their strengths, identify weaknesses, and measure improvement
+over time. All metrics are collected exclusively during **Exam Mode** games.
 
 ## Tracking Philosophy
 
-Unlike traditional chess platforms that focus primarily on rating (Elo), Chess-Sensai takes a **multidimensional approach** to skill assessment. Rather than reducing your ability to a single number, the system tracks:
+Unlike traditional chess platforms that focus primarily on rating (Elo),
+Chess-Sensai takes a **multidimensional approach** to skill assessment. Rather
+than reducing your ability to a single number, the system tracks:
 
-- **Multiple skill dimensions** (precision, tactics, stability, conversion, etc.)
+- **Multiple skill dimensions** (precision, tactics, stability, conversion,
+  etc.)
 - **Trend analysis** over time
 - **Context-aware metrics** (position type, game phase, opponent strength)
 - **Actionable insights** that guide training focus
@@ -29,7 +34,8 @@ This creates a **skill profile** rather than just a skill score.
 
 ## Master Composite Indexes (Top-Level KPIs)
 
-These are the **primary skill scores** that summarize overall performance. Each composite index is calculated from multiple underlying metrics.
+These are the **primary skill scores** that summarize overall performance. Each
+composite index is calculated from multiple underlying metrics.
 
 ### 1. Precision Score
 
@@ -175,7 +181,8 @@ Measures opening knowledge, repertoire depth, and theoretical understanding.
 
 ### 6. Positional & Structure Score
 
-Measures understanding of pawn structure, piece placement, and long-term planning.
+Measures understanding of pawn structure, piece placement, and long-term
+planning.
 
 **Components:**
 
@@ -225,7 +232,7 @@ Measures playing style: aggressive vs. cautious.
 - 25-49: Cautious style
 - Below 25: Ultra-defensive
 
-*Note: This is a style indicator, not necessarily good or bad.*
+_Note: This is a style indicator, not necessarily good or bad._
 
 ### 8. Simplification Preference Score
 
@@ -249,7 +256,7 @@ Measures tendency to trade pieces and simplify positions.
 - 25-49: Keeps pieces on
 - Below 25: Avoids trades
 
-*Note: This is a style indicator, not necessarily good or bad.*
+_Note: This is a style indicator, not necessarily good or bad._
 
 ### 9. Training Transfer Score
 
@@ -277,7 +284,8 @@ Measures improvement trends and learning effectiveness.
 
 ## Detailed Metrics Categories
 
-For comprehensive details on every tracked metric, see [tracked-metrics.md](tracked-metrics.md).
+For comprehensive details on every tracked metric, see
+[tracked-metrics.md](tracked-metrics.md).
 
 ### Quick Reference by Category
 
@@ -452,7 +460,8 @@ These achievements provide positive reinforcement and clear goals.
 
 ## Data Privacy & Storage
 
-All metrics and game data are stored **locally** on your device. See [data-storage.md](data-storage.md) for technical details.
+All metrics and game data are stored **locally** on your device. See
+[data-storage.md](data-storage.md) for technical details.
 
 - No cloud upload by default
 - Full control over your data
@@ -463,7 +472,8 @@ All metrics and game data are stored **locally** on your device. See [data-stora
 
 ### Accuracy Calculation
 
-Move accuracy is determined by comparing your move to the engine's top recommendation:
+Move accuracy is determined by comparing your move to the engine's top
+recommendation:
 
 - **Excellent Move**: Within 10 centipawns of best move (100% accuracy)
 - **Good Move**: Within 10-25 centipawns (90% accuracy)
@@ -510,11 +520,13 @@ Look at your **Composite Index Radar Chart**. Which score is lowest?
 
 ### Step 2: Drill Into Details
 
-Click the weak score to see detailed metrics. Which specific metric is dragging it down?
+Click the weak score to see detailed metrics. Which specific metric is dragging
+it down?
 
 ### Step 3: Review Games
 
-Look at recent Exam Mode games where that metric was poor. Use post-game analysis to understand *why*.
+Look at recent Exam Mode games where that metric was poor. Use post-game
+analysis to understand _why_.
 
 ### Step 4: Targeted Training
 
@@ -546,8 +558,8 @@ Repeat the cycle. As one area improves, focus on the next weakest score.
 - Simplification: 55 (Balanced)
 - Training Transfer: 78 (Improving steadily)
 
-**Analysis:**
-This player is **consistent and stable**, with decent overall precision. However, they have significant weaknesses in:
+**Analysis:** This player is **consistent and stable**, with decent overall
+precision. However, they have significant weaknesses in:
 
 1. **Tactical vision** (score: 58) --- Missing key tactics
 2. **Opening preparation** (score: 45) --- Weak theoretical knowledge
@@ -559,8 +571,9 @@ This player is **consistent and stable**, with decent overall precision. However
 3. Review post-game analysis for missed tactics
 4. Study first 15 moves of recent games
 
-**Expected Improvement Path:**
-With focused training, Tactical Danger and Preparation scores could improve to 70+ within 30 games, raising overall playing strength significantly.
+**Expected Improvement Path:** With focused training, Tactical Danger and
+Preparation scores could improve to 70+ within 30 games, raising overall playing
+strength significantly.
 
 ## Technical Implementation Notes
 

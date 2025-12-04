@@ -1,12 +1,17 @@
 # AI Engine & Bot Architecture
 
-The AI opponent in Chess-Sensai is powered by a **fully embedded engine**, with no external executables or system-level dependencies. All chess logic runs inside the application via **WebAssembly (WASM)**, ensuring a portable, self-contained experience across platforms.
+The AI opponent in Chess-Sensai is powered by a **fully embedded engine**, with
+no external executables or system-level dependencies. All chess logic runs
+inside the application via **WebAssembly (WASM)**, ensuring a portable,
+self-contained experience across platforms.
 
 ## Engine Choice: Stockfish via WebAssembly
 
-At the core of Chess-Sensai is a **WebAssembly build of Stockfish**, one of the strongest open-source chess engines available.
+At the core of Chess-Sensai is a **WebAssembly build of Stockfish**, one of the
+strongest open-source chess engines available.
 
-- The engine is compiled to a **`stockfish.wasm`** module (plus a small JS glue layer where required).
+- The engine is compiled to a **`stockfish.wasm`** module (plus a small JS glue
+  layer where required).
 - This WASM module is bundled directly with the application, avoiding:
   - External binary downloads
   - System-installed engines
@@ -20,7 +25,8 @@ Benefits:
 
 ## WASM Integration in Buntralino
 
-Chess-Sensai uses Buntralino (Bun + Neutralinojs) as the runtime and desktop shell. The Stockfish WASM engine is integrated as follows:
+Chess-Sensai uses Buntralino (Bun + Neutralinojs) as the runtime and desktop
+shell. The Stockfish WASM engine is integrated as follows:
 
 - The **Bun backend**:
   - Loads and initializes the `stockfish.wasm` module at startup.
@@ -43,7 +49,11 @@ Chess-Sensai uses Buntralino (Bun + Neutralinojs) as the runtime and desktop she
 interface Engine {
   init(): Promise<void>;
   setPosition(fen: string, moves?: string[]): Promise<void>;
-  getBestMoves(options: { depth?: number; movetime?: number; count?: number }): Promise<BestMove[]>;
+  getBestMoves(options: {
+    depth?: number;
+    movetime?: number;
+    count?: number;
+  }): Promise<BestMove[]>;
   quit(): Promise<void>;
 }
 
@@ -56,16 +66,22 @@ interface BestMove {
 
 ## Bot Personalities & Human-Like Play
 
-Chess-Sensai supports a variety of **distinct AI bot personalities**, each designed to emulate specific skill levels, play styles, and learning environments. Rather than relying solely on raw engine strength, the system layers **human-like decision modeling** on top of the embedded Stockfish WASM engine.
+Chess-Sensai supports a variety of **distinct AI bot personalities**, each
+designed to emulate specific skill levels, play styles, and learning
+environments. Rather than relying solely on raw engine strength, the system
+layers **human-like decision modeling** on top of the embedded Stockfish WASM
+engine.
 
-Each bot is implemented as a **behavioral profile** that modifies how the engine's candidate moves are selected and executed.
+Each bot is implemented as a **behavioral profile** that modifies how the
+engine's candidate moves are selected and executed.
 
 ### Core Behavior Controls
 
 Each bot personality can adjust:
 
 - **Search Depth Limits** -- Controls tactical and strategic foresight.
-- **Move Sampling Window** -- Selects from the top *N* candidate moves rather than always choosing the absolute best.
+- **Move Sampling Window** -- Selects from the top _N_ candidate moves rather
+  than always choosing the absolute best.
 - **Evaluation Noise Injection** -- Introduces controlled inaccuracies.
 - **Blunder & Inaccuracy Rates** -- Models realistic human errors.
 - **Style Biasing** -- Aggressive, defensive, positional, tactical preferences.
@@ -91,11 +107,13 @@ Each bot personality can adjust:
   - Elevated mistake frequency.
   - Useful for training conversion and punishment of errors.
 
-These personalities allow users to **practice against realistic opponents**, not just perfect machines.
+These personalities allow users to **practice against realistic opponents**, not
+just perfect machines.
 
 ## Difficulty & Strength Scaling
 
-Chess-Sensai exposes AI strength through **transparent, player-facing difficulty systems** that map directly to engine and personality parameters.
+Chess-Sensai exposes AI strength through **transparent, player-facing difficulty
+systems** that map directly to engine and personality parameters.
 
 ### Player-Facing Controls
 
@@ -131,15 +149,18 @@ Chess-Sensai exposes AI strength through **transparent, player-facing difficulty
   - Highlights tactical and positional weaknesses.
   - Suitable for competitive preparation.
 
-This system allows the same underlying engine to support **both learning-oriented play and high-level competitive testing**.
+This system allows the same underlying engine to support **both
+learning-oriented play and high-level competitive testing**.
 
 ## No External Binaries & Offline-First Design
 
-A core architectural requirement of Chess-Sensai is to operate as a **fully self-contained desktop application** with **no external runtime dependencies**.
+A core architectural requirement of Chess-Sensai is to operate as a **fully
+self-contained desktop application** with **no external runtime dependencies**.
 
 ### Self-Contained AI Execution
 
-- The Stockfish engine is compiled to **WebAssembly (WASM)** and bundled directly with the app.
+- The Stockfish engine is compiled to **WebAssembly (WASM)** and bundled
+  directly with the app.
 - No system-installed engines.
 - No separately managed executables.
 - No OS-level process spawning for AI.

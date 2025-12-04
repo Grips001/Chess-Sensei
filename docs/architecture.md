@@ -1,11 +1,14 @@
 # Backend / Technical Architecture
 
-The technical foundation of the application is built for **speed, efficiency, and true cross-platform desktop performance**, avoiding the overhead of traditional Chromium-based solutions while maintaining modern web-based development workflows.
+The technical foundation of the application is built for **speed, efficiency,
+and true cross-platform desktop performance**, avoiding the overhead of
+traditional Chromium-based solutions while maintaining modern web-based
+development workflows.
 
 ## Core Technology Stack
 
-- **Buntralino**
-  The project is built using Buntralino as the primary application framework, combining:
+- **Buntralino** The project is built using Buntralino as the primary
+  application framework, combining:
   - The raw performance of **Bun**
   - The lightweight, native desktop shell of **Neutralinojs**
 - This architecture enables:
@@ -27,7 +30,8 @@ The technical foundation of the application is built for **speed, efficiency, an
   - Faster runtime execution
   - Lower memory overhead
   - Modern JavaScript and TypeScript support out of the box
-- All rendering and interaction remains GPU-accelerated through the OS-native window layer rather than a full browser engine.
+- All rendering and interaction remains GPU-accelerated through the OS-native
+  window layer rather than a full browser engine.
 
 ## Architecture Overview
 
@@ -51,7 +55,8 @@ The technical foundation of the application is built for **speed, efficiency, an
 ## Open Source Assets & Licensing Strategy
 
 - Since chess assets are widely available:
-  - **Open-source PNG and SVG chess piece sets will be researched and evaluated**
+  - **Open-source PNG and SVG chess piece sets will be researched and
+    evaluated**
   - Priority is given to:
     - Clean silhouettes
     - High readability at small sizes
