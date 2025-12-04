@@ -57,9 +57,10 @@ async function createMacOSBundle(
     .quiet();
   console.log(`  ✓ Bun executable built for ${archSuffix}`);
 
-  // Create .app bundle structure
+  // Create .app bundle structure in a separate directory
+  const bundleDir = path.join(distDir, `${appName}-${neuPostfix}-bundle`);
   const appBundleName = `${config.applicationName || appName}.app`;
-  const appBundlePath = path.join(distDir, `${appName}-${neuPostfix}`, appBundleName);
+  const appBundlePath = path.join(bundleDir, appBundleName);
   const contentsPath = path.join(appBundlePath, 'Contents');
   const macOSPath = path.join(contentsPath, 'MacOS');
   const resourcesPath = path.join(contentsPath, 'Resources');
@@ -67,12 +68,10 @@ async function createMacOSBundle(
   await fs.ensureDir(macOSPath);
   await fs.ensureDir(resourcesPath);
 
-  // Copy executables
+  // Copy executables - neutralino binary is a file, not a directory
+  const neuBinaryPath = path.join(distDir, `${appName}-${neuPostfix}`);
   await fs.copy(bunExePath, path.join(macOSPath, appName));
-  await fs.copy(
-    path.join(distDir, `${appName}-${neuPostfix}`),
-    path.join(macOSPath, 'neutralino')
-  );
+  await fs.copy(neuBinaryPath, path.join(macOSPath, 'neutralino'));
   await fs.copy(path.join(distDir, 'resources.neu'), path.join(macOSPath, 'resources.neu'));
 
   // Make executables... executable

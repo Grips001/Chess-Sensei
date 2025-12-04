@@ -108,15 +108,15 @@ jobs:
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
           mkdir -p release
-          # macOS build outputs to dist/chess-sensei/ with .app bundles
+          # macOS build outputs to dist/chess-sensei/*-bundle/ with .app bundles
           if [ -d "dist/chess-sensei" ]; then
             # Package x64 build
-            if [ -d "dist/chess-sensei/chess-sensei-mac_x64" ]; then
-              tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C "dist/chess-sensei/chess-sensei-mac_x64" .
+            if [ -d "dist/chess-sensei/chess-sensei-mac_x64-bundle" ]; then
+              tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C "dist/chess-sensei/chess-sensei-mac_x64-bundle" .
             fi
             # Package arm64 build
-            if [ -d "dist/chess-sensei/chess-sensei-mac_arm64" ]; then
-              tar -czvf "release/Chess-Sensei-${VERSION}-macos-arm64.tar.gz" -C "dist/chess-sensei/chess-sensei-mac_arm64" .
+            if [ -d "dist/chess-sensei/chess-sensei-mac_arm64-bundle" ]; then
+              tar -czvf "release/Chess-Sensei-${VERSION}-macos-arm64.tar.gz" -C "dist/chess-sensei/chess-sensei-mac_arm64-bundle" .
             fi
           fi
 
