@@ -1,0 +1,1880 @@
+# Chess-Sensei Development Task List
+
+This document serves as the authoritative task tracking system for Chess-Sensei
+development. It is derived directly from the project documentation and must be
+followed exactly.
+
+**Purpose:**
+
+- Keep execution strictly aligned with the documented plan
+- Preserve full project context at all times
+- Prevent scope drift, skipped steps, or undocumented assumptions
+- Enable session continuity for seamless resumption of work
+
+---
+
+## Source Documents (All 12 Required References)
+
+Every task in this document is derived from these authoritative sources:
+
+| #   | Document                                             | Purpose                                   |
+| --- | ---------------------------------------------------- | ----------------------------------------- |
+| 1   | [overview.md](overview.md)                           | Core concept, features, training philosophy |
+| 2   | [roadmap.md](roadmap.md)                             | Development phases, milestones, timeline  |
+| 3   | [architecture.md](architecture.md)                   | Technical stack, platform goals, structure |
+| 4   | [ai-engine.md](ai-engine.md)                         | Stockfish WASM, bot personalities, difficulty |
+| 5   | [ui-ux-design.md](ui-ux-design.md)                   | Visual theme, layout, interaction design  |
+| 6   | [game-modes.md](game-modes.md)                       | Training, Exam, Sandbox mode specifications |
+| 7   | [move-guidance.md](move-guidance.md)                 | Best-move system, highlighting, sync      |
+| 8   | [player-progress.md](player-progress.md)             | Composite scores, analytics, dashboards   |
+| 9   | [tracked-metrics.md](tracked-metrics.md)             | Complete metrics reference (100+ metrics) |
+| 10  | [post-game-analysis.md](post-game-analysis.md)       | Analysis UI, review tools, recommendations |
+| 11  | [data-storage.md](data-storage.md)                   | JSON formats, file structure, import/export |
+| 12  | [development.md](development.md)                     | Best practices, workflow, CI/CD           |
+
+**IMPORTANT:** All tasks must trace back to one or more of these documents.
+Deviations require approval from the user and documentation updates first.
+
+---
+
+## Current Status
+
+**Last Updated:** 2025-12-03
+
+**Current Phase:** Phase 1 - Core Chess Engine Integration
+
+**Session Resumption Point:** Beginning of Phase 1
+
+---
+
+## Phase 0: Foundation & Setup
+
+**Status:** ✅ COMPLETE
+
+**Source:** [roadmap.md](roadmap.md) - Phase 0, [architecture.md](architecture.md),
+[development.md](development.md)
+
+All foundational work has been completed:
+
+- [x] Project architecture defined
+- [x] Technology stack selected (Buntralino, Bun, Neutralinojs, Stockfish WASM)
+- [x] Comprehensive documentation written (all 12 docs)
+- [x] Repository structure established
+- [x] Development best practices documented
+- [x] Metrics framework defined
+- [x] Build environment configured
+- [x] Buntralino initialized with proper structure
+
+---
+
+## Phase 1: Core Chess Engine Integration
+
+**Status:** 🚧 IN PROGRESS
+
+**Source:** [roadmap.md](roadmap.md) - Phase 1, [ai-engine.md](ai-engine.md),
+[architecture.md](architecture.md)
+
+**Goal:** Integrate Stockfish WASM and implement basic chess functionality
+
+**Success Criteria (from roadmap.md):**
+
+- Engine integration is stable and performant
+- All chess logic correctly validated
+- Basic analysis pipeline functional
+- Unit tests pass with 100% coverage
+- Performance benchmarks meet targets (<2s per position analysis)
+
+### 1.1 Stockfish WASM Integration
+
+**Source:** [ai-engine.md](ai-engine.md) - "Engine Choice" and "WASM Integration"
+sections
+
+- [ ] **1.1.1** Research and select Stockfish WASM build
+  - Evaluate available WASM builds (stockfish.js, stockfish-nnue.wasm, etc.)
+  - Verify NNUE support for strongest play
+  - Document selection rationale
+  - Verify licensing compatibility (GPL)
+  - Target: Single `stockfish.wasm` module plus JS glue layer
+- [ ] **1.1.2** Integrate WASM module into Buntralino
+  - Add WASM files to project structure (`src/engine/`)
+  - Configure Bun backend to load WASM module at startup
+  - Maintain persistent engine instance(s) in memory
+  - Test module initialization in Bun runtime
+  - Verify deterministic behavior across platforms
+- [ ] **1.1.3** Create engine interface abstraction
+  - Implement `Engine` interface as defined in ai-engine.md:
+
+    ```typescript
+    interface Engine {
+      init(): Promise<void>;
+      setPosition(fen: string, moves?: string[]): Promise<void>;
+      getBestMoves(options: {
+        depth?: number;
+        movetime?: number;
+        count?: number;
+      }): Promise<BestMove[]>;
+      quit(): Promise<void>;
+    }
+    ```
+
+  - Create `BestMove` interface:
+
+    ```typescript
+    interface BestMove {
+      move: string;   // UCI format (e.g., "e2e4")
+      score: number;  // Centipawn evaluation
+      pv?: string[];  // Principal variation
+    }
+    ```
+
+  - Expose clean internal API for:
+    - Setting positions (via FEN + move history)
+    - Requesting best moves / analysis
+    - Controlling search depth, time, and skill level
+- [ ] **1.1.4** Implement UCI protocol communication
+  - Parse UCI commands and responses
+  - Handle `uci`, `isready`, `position`, `go`, `stop`, `quit` commands
+  - Parse `info` and `bestmove` responses
+  - Extract evaluation scores from `info score cp` or `info score mate`
+  - Support `multipv` for multiple candidate moves
+- [ ] **1.1.5** Test engine initialization and basic commands
+  - Write unit tests for engine init
+  - Write unit tests for position setting
+  - Write unit tests for basic analysis
+  - Verify no OS-level process spawning (pure WASM)
+  - Test offline functionality
+
+### 1.2 Chess Logic Foundation
+
+**Source:** [roadmap.md](roadmap.md) - Phase 1.2, [data-storage.md](data-storage.md) -
+game data formats
+
+- [ ] **1.2.1** Integrate chess.js library for move validation
+  - Install chess.js dependency
+  - Create wrapper module for chess.js (`src/shared/chess-logic.ts`)
+  - Test basic move generation
+  - Ensure compatibility with Bun runtime
+- [ ] **1.2.2** Implement board state management
+  - Create BoardState class/interface
+  - Track current position (FEN)
+  - Track move history (array of moves)
+  - Handle game termination states:
+    - Checkmate
+    - Stalemate
+    - Draw by repetition
+    - Draw by 50-move rule
+    - Draw by insufficient material
+- [ ] **1.2.3** Add FEN string parsing and generation
+  - Parse FEN to board state
+  - Generate FEN from board state
+  - Validate FEN format
+  - Support all FEN components (position, turn, castling, en passant, halfmove, fullmove)
+- [ ] **1.2.4** Implement PGN import/export
+  - Parse PGN to move list
+  - Generate PGN from game (format per data-storage.md):
+
+    ```text
+    [Event "Chess-Sensei Exam Mode"]
+    [Site "Chess-Sensei"]
+    [Date "2025.03.15"]
+    [White "Player"]
+    [Black "Club Player (1600)"]
+    [Result "0-1"]
+
+    1. e4 e5 2. Nf3 Nc6 ... 0-1
+    ```
+
+  - Handle PGN headers and annotations
+- [ ] **1.2.5** Add move legality checking
+  - Validate moves against current position
+  - Return list of legal moves for position
+  - Handle special moves:
+    - Kingside castling (O-O)
+    - Queenside castling (O-O-O)
+    - En passant captures
+    - Pawn promotion (to Q, R, B, N)
+
+### 1.3 Basic Engine Operations
+
+**Source:** [ai-engine.md](ai-engine.md) - all sections, [move-guidance.md](move-guidance.md) -
+"Integration with AI Engine"
+
+- [ ] **1.3.1** Request position evaluation
+  - Send position to engine via UCI `position` command
+  - Parse evaluation response from `info score`
+  - Convert centipawn score to human-readable format
+  - Handle mate scores (`score mate N`)
+- [ ] **1.3.2** Get best move calculation
+  - Request best move at specified depth (`go depth N`)
+  - Handle move time limits (`go movetime N`)
+  - Return structured BestMove result
+  - Support skill level adjustment for bots
+- [ ] **1.3.3** Implement move analysis (centipawn loss)
+  - Compare played move to best move
+  - Calculate centipawn loss (CPL)
+  - Classify moves per player-progress.md thresholds:
+    - **Excellent**: CPL 0-10 (100% accuracy)
+    - **Good**: CPL 11-25 (90% accuracy)
+    - **Inaccuracy**: CPL 26-50 (70% accuracy)
+    - **Mistake**: CPL 51-100 (40% accuracy)
+    - **Blunder**: CPL >100 (0% accuracy)
+- [ ] **1.3.4** Add multi-move principal variation (PV) extraction
+  - Configure engine for `multipv 3` (top 3 moves)
+  - Parse PV lines from engine output
+  - Return top N moves with evaluations
+  - Store PV for each candidate move
+  - Support move-guidance.md requirement for top 3 moves
+- [ ] **1.3.5** Test performance and optimization
+  - Benchmark analysis time per position
+  - Ensure <2s per position at depth 20 (roadmap.md target)
+  - Optimize memory usage
+  - Profile and address bottlenecks
+  - Test with complex positions (200+ legal moves)
+
+### 1.4 IPC Bridge Setup
+
+**Source:** [architecture.md](architecture.md) - "Backend / Logic Layer",
+[ai-engine.md](ai-engine.md) - "WASM Integration in Buntralino"
+
+- [ ] **1.4.1** Implement Neutralino IPC methods for engine
+  - Register `requestBestMoves` method
+  - Register `evaluatePosition` method
+  - Register `startNewGame` method
+  - Use Buntralino's `registerMethodMap()` pattern
+- [ ] **1.4.2** Define structured JSON payloads
+  - Request payload: `{ fen: string, moves?: string[], depth?: number }`
+  - Response payload: `{ moves: BestMove[], evaluation: number }`
+  - Error handling: `{ error: string, code: string }`
+- [ ] **1.4.3** Test frontend-backend communication
+  - Verify IPC calls complete successfully
+  - Test error propagation
+  - Measure latency
+
+### 1.5 Phase 1 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 1 Milestones
+
+- [ ] Engine successfully loads in Bun backend
+- [ ] Engine responds to position evaluation requests
+- [ ] Move analysis returns accurate results
+- [ ] Performance benchmarks meet targets (<2s per position analysis)
+
+---
+
+## Phase 2: Minimal UI & Chessboard
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 2, [ui-ux-design.md](ui-ux-design.md),
+[architecture.md](architecture.md) - "Frontend Layer"
+
+**Goal:** Create functional chessboard interface with piece movement
+
+**Success Criteria (from roadmap.md):**
+
+- User can play a full game against themselves
+- All moves are validated correctly
+- UI is intuitive and visually appealing
+- No major bugs or glitches
+
+### 2.1 Chessboard Rendering
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Layout Overview", "Visual Theme"
+
+- [ ] **2.1.1** Implement responsive chessboard layout
+  - Create 8x8 grid structure
+  - Board is **primary focal point**, centered and dominant
+  - Ensure proper sizing on different screen sizes
+  - Maintain square aspect ratio
+  - Maximum visual space for the board
+- [ ] **2.1.2** Render chess pieces using SVG assets
+  - Research and select open-source piece sets (per architecture.md):
+    - Clean silhouettes
+    - High readability at small sizes
+    - Compatibility with matte vector styling
+    - Permissive licensing (MIT, CC0, or equivalent)
+  - Store in `assets/pieces/`
+  - Render pieces on correct squares
+  - **Matte vector art** - no photorealism
+- [ ] **2.1.3** Add board coordinates (a-h, 1-8)
+  - Display file labels (a-h)
+  - Display rank labels (1-8)
+  - Position labels correctly based on board orientation
+- [ ] **2.1.4** Implement light/dark square styling
+  - Apply alternating square colors
+  - **High-contrast squares** (per ui-ux-design.md)
+  - **Subtle texture for visual warmth**
+  - Support board theme customization
+- [ ] **2.1.5** Apply neomorphism design system
+  - Implement **soft, raised UI surfaces**
+  - **Subtle depth and shadowing**
+  - **Matte finish to avoid harsh reflections**
+  - Apply consistent styling across components
+  - Ensure design matches ui-ux-design.md specifications
+
+### 2.2 Piece Movement
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Interaction & Feedback Design"
+
+- [ ] **2.2.1** Drag-and-drop piece movement
+  - Implement drag start on piece
+  - Show piece following cursor
+  - Drop piece on target square
+  - Snap to grid
+- [ ] **2.2.2** Click-to-move alternative
+  - Click piece to select
+  - Click destination to move
+  - Clear selection on invalid click
+- [ ] **2.2.3** Legal move highlighting
+  - Highlight valid destination squares
+  - Use distinct color for captures
+  - Show special move indicators (castling, en passant)
+  - **Soft glowing outlines instead of hard borders**
+- [ ] **2.2.4** Piece animation on move
+  - Smooth transition animation
+  - Capture animation
+  - Configurable animation speed
+  - **Quick but non-jarring transitions**
+- [ ] **2.2.5** Move sound effects
+  - Move sound
+  - Capture sound
+  - Check sound
+  - Game end sounds
+  - Store in `assets/sounds/`
+
+### 2.3 Game State Display
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Status & Feedback Area"
+
+- [ ] **2.3.1** Show current turn indicator
+  - Visual indicator for whose turn
+  - Update on move
+- [ ] **2.3.2** Display move history (notation list)
+  - Standard algebraic notation
+  - Move numbers
+  - Scrollable list for long games
+- [ ] **2.3.3** Show captured pieces
+  - Display captured pieces by color
+  - Material count difference
+- [ ] **2.3.4** Check/checkmate indicators
+  - Visual indicator when king in check
+  - Checkmate announcement
+  - Stalemate announcement
+  - **Subtle animations communicate state changes**
+- [ ] **2.3.5** Game result display
+  - Show winner
+  - Show termination reason
+  - Option to start new game
+
+### 2.4 Basic Game Controls
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Game Controls (Middle Section)"
+
+- [ ] **2.4.1** New game button
+  - Reset board to starting position
+  - Clear move history
+  - Confirm if game in progress
+- [ ] **2.4.2** Undo/redo moves
+  - Undo last move
+  - Redo undone move
+  - Keyboard shortcuts (Ctrl+Z, Ctrl+Y)
+- [ ] **2.4.3** Resign button
+  - Confirm resignation
+  - Record result
+- [ ] **2.4.4** Flip board button
+  - Rotate board 180 degrees
+  - Update coordinate labels
+  - Persist preference
+- [ ] **2.4.5** Apply control button styling
+  - **Large, touch-friendly buttons**
+  - **Soft neomorphic depth for press feedback**
+  - **Glassmorphism-style overlays for secondary menus**
+
+### 2.5 Phase 2 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 2 Milestones
+
+- [ ] Chessboard renders correctly on all screen sizes
+- [ ] Pieces can be moved legally
+- [ ] Game state updates correctly
+- [ ] UI is responsive and smooth
+
+---
+
+## Phase 3: AI Opponent & Training Mode
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 3, [ai-engine.md](ai-engine.md) -
+"Bot Personalities", [game-modes.md](game-modes.md) - "Training Mode",
+[move-guidance.md](move-guidance.md)
+
+**Goal:** Implement AI opponent and real-time best-move guidance
+
+**Success Criteria (from roadmap.md):**
+
+- Training Mode fully functional
+- Guidance system accurate and responsive
+- AI plays convincingly at all difficulty levels
+- UI is polished and user-friendly
+
+### 3.1 AI Opponent
+
+**Source:** [ai-engine.md](ai-engine.md) - "Bot Personalities & Human-Like Play",
+"Difficulty & Strength Scaling"
+
+- [ ] **3.1.1** Implement bot move selection from engine
+  - Request move from engine for bot's turn
+  - Apply move to board
+  - Handle bot thinking time
+- [ ] **3.1.2** Add configurable difficulty levels (Elo 800-2400)
+  - Map Elo to engine parameters:
+    - **Search Depth Limits**: Controls tactical foresight
+    - **Move Sampling Window**: Select from top N candidates
+    - **Evaluation Noise Injection**: Controlled inaccuracies
+    - **Blunder & Inaccuracy Rates**: Human-like errors
+  - Implement difficulty slider
+  - Store difficulty preference
+- [ ] **3.1.3** Implement bot personalities (from ai-engine.md)
+  - **Sensei**: Near-optimal play, low randomness, for serious training
+  - **Student**: Low depth, high randomness, prioritizes simple development
+  - **Club Player**: Moderate depth, occasional tactical oversights
+  - **Tactician**: High aggression, favors attacks over positional safety
+  - **Blunder-Prone**: Elevated mistake frequency, for training conversion
+- [ ] **3.1.4** Implement preset difficulty modes (from ai-engine.md)
+  - **Beginner**: Very low depth, high randomness, frequent small inaccuracies
+  - **Intermediate**: Moderate depth, selective randomness
+  - **Advanced**: High depth, low error rates
+  - **Master**: Near-engine-perfect play, minimal randomness
+- [ ] **3.1.5** Implement Training vs. Punishing modes (from ai-engine.md)
+  - **Training Mode**: Engine avoids immediate crushing continuations
+  - **Punishing Mode**: Engine fully exploits inaccuracies
+- [ ] **3.1.6** Add response time delays (human-like play)
+  - Variable thinking time based on position complexity
+  - Minimum delay for natural feel
+  - Configurable delay settings
+- [ ] **3.1.7** Test AI strength at different levels
+  - Verify Elo calibration
+  - Test personality behaviors
+  - Ensure consistent performance
+
+### 3.2 Training Mode Core
+
+**Source:** [game-modes.md](game-modes.md) - "Training Mode" section
+
+- [ ] **3.2.1** Implement mode selection screen
+  - Training Mode option with description
+  - Clear visual distinction between modes
+  - Mode comparison per game-modes.md table
+- [ ] **3.2.2** Add bot opponent selection UI
+  - List available bot personalities with descriptions
+  - Difficulty level selection
+  - Show personality characteristics
+- [ ] **3.2.3** Implement color selection (White/Black/Random)
+  - Color selection buttons
+  - Random assignment logic
+  - Store preference
+- [ ] **3.2.4** Create game initialization flow (per game-modes.md)
+  1. Click **Training Mode** from main menu
+  2. Select **bot opponent** (personality and difficulty)
+  3. Choose **color** (White, Black, or Random)
+  4. Game begins with trainer active
+- [ ] **3.2.5** Implement Training Mode state management (per game-modes.md)
+  - Guidance engine runs continuously
+  - No metric collection pipeline active
+  - Game state saved only for undo/redo
+  - **Nothing permanently stored** after game ends
+
+### 3.3 Best-Move Guidance System
+
+**Source:** [move-guidance.md](move-guidance.md) - all sections,
+[overview.md](overview.md) - "Real-Time Best-Move Guidance"
+
+- [ ] **3.3.1** Calculate top 3 moves in real-time
+  - Request multi-PV analysis from engine
+  - Parse top 3 moves with evaluations
+  - Update after every opponent move
+  - Update after player undoes a move
+- [ ] **3.3.2** Implement color-coded highlighting (from overview.md/move-guidance.md)
+  - **Blue**: Best move
+  - **Green**: Second-best move
+  - **Yellow**: Third-best move
+- [ ] **3.3.3** Implement three-way visual sync (from move-guidance.md)
+  For each recommended move, highlight in same color:
+  1. **The piece that can be moved** - highlighted on board
+  2. **The destination square** - highlighted on board
+  3. **The notation in the side panel** - highlighted in text
+- [ ] **3.3.4** Implement hover interactions (from move-guidance.md)
+  - Hovering over suggested move in notation panel:
+    - Temporarily previews board highlights
+    - Increases highlight intensity
+- [ ] **3.3.5** Implement piece selection behavior (from move-guidance.md)
+  - Selecting a piece on board:
+    - Automatically emphasizes matching suggested moves for that piece
+    - Helps player see if intended move aligns with recommendations
+- [ ] **3.3.6** Implement guidance timing (from move-guidance.md)
+  - Guidance appears **only during player's turn**
+  - Guidance hides during:
+    - Opponent's turn
+    - Game-over states
+    - Analysis mode
+- [ ] **3.3.7** Implement highlight styling (from ui-ux-design.md)
+  - **Soft glowing outlines** instead of hard borders
+  - **Matched color intensity** between piece, square, and notation
+  - All highlights **fade smoothly** in and out
+- [ ] **3.3.8** Optimize performance (guidance every move)
+  - Efficient re-analysis on position change
+  - Asynchronous calculation
+  - Smooth UI updates
+
+### 3.4 Right Panel UI
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Right Panel" section
+
+- [ ] **3.4.1** Design and implement right-side panel layout
+  - **Dedicated right-side panel** for controls and guidance
+  - Fixed width panel
+  - Responsive height
+  - Clean section separation
+  - Zero obstruction of gameplay
+- [ ] **3.4.2** Add best-move notation display (Top Section per ui-ux-design.md)
+  - Top 3 moves in standard chess notation
+  - Color-coded entries (Blue, Green, Yellow)
+  - Evaluation bars
+  - **Designed for rapid scanning**
+  - Visible only during player's turn
+- [ ] **3.4.3** Integrate game controls (Middle Section per ui-ux-design.md)
+  - New Game
+  - Undo / Takeback (if enabled by mode)
+  - Resign
+  - Offer Draw
+  - Restart
+  - Analysis / Review Toggle
+  - Settings Access
+- [ ] **3.4.4** Add status and feedback area (Bottom Section per ui-ux-design.md)
+  - Current turn indicator
+  - Check / Checkmate alerts
+  - Game state messages
+  - Optional evaluation bar
+  - Bot thinking indicator
+- [ ] **3.4.5** Implement glassmorphism styling (from ui-ux-design.md)
+  - **Semi-transparent panels with gentle blur**
+  - Soft borders
+  - Match visual theme specifications
+
+### 3.5 Phase 3 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 3 Milestones
+
+- [ ] User can play Training Mode against AI
+- [ ] Real-time guidance displays correctly
+- [ ] Visual sync between board and notation works
+- [ ] AI opponent plays at expected strength
+
+---
+
+## Phase 4: Exam Mode & Metrics Collection
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 4, [game-modes.md](game-modes.md) -
+"Exam Mode", [tracked-metrics.md](tracked-metrics.md), [data-storage.md](data-storage.md)
+
+**Goal:** Add Exam Mode with performance tracking
+
+**Success Criteria (from roadmap.md):**
+
+- Exam Mode functions correctly
+- Analysis pipeline is accurate and fast (<30s per game)
+- All metrics match specifications
+- Data storage is reliable
+
+### 4.1 Exam Mode Implementation
+
+**Source:** [game-modes.md](game-modes.md) - "Exam Mode" section
+
+- [ ] **4.1.1** Disable guidance system during Exam Mode
+  - **No real-time guidance** - trainer completely disabled
+  - Hide best-move highlights
+  - Hide notation panel suggestions
+  - Show mode indicator
+  - **Pure, unassisted play**
+- [ ] **4.1.2** Implement Exam Mode setup flow (per game-modes.md)
+  1. Click **Exam Mode** from main menu
+  2. Select **bot opponent** (personality and difficulty)
+  3. Choose **color** (White, Black, or Random)
+  4. Game begins with trainer disabled
+  5. After game, enter **Post-Game Analysis**
+- [ ] **4.1.3** Implement Exam Mode state management (per game-modes.md)
+  - Guidance engine disabled
+  - **Full metric collection pipeline active**
+  - **Complete game history saved for analysis**
+  - **All board states recorded**
+- [ ] **4.1.4** Implement full game recording
+  - Record all moves with metadata
+  - Store timestamps per move (Unix timestamp)
+  - Track time spent per move
+- [ ] **4.1.5** Save complete board positions (FEN)
+  - Generate FEN after each move
+  - Store in move record
+  - Enable position replay
+- [ ] **4.1.6** Generate PGN on game completion
+  - Standard PGN format per data-storage.md
+  - Include headers (Event, Date, Result, etc.)
+  - Store with game data
+
+### 4.2 Post-Game Analysis Pipeline
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Analysis Pipeline",
+[player-progress.md](player-progress.md) - "Metrics Collection Pipeline"
+
+- [ ] **4.2.1** Implement analysis pipeline (per post-game-analysis.md)
+  1. Game Completion (Exam Mode)
+  2. Extract all positions (FEN strings)
+  3. Batch analysis with Stockfish WASM
+  4. Calculate centipawn loss per move
+  5. Classify moves
+  6. Detect tactical motifs (fork, pin, skewer, etc.)
+  7. Identify critical moments (evaluation swings)
+  8. Calculate all metrics
+  9. Generate recommendations
+  10. Save analysis results to JSON
+  11. Render analysis UI
+- [ ] **4.2.2** Calculate centipawn loss per move
+  - Compare played move to engine best
+  - Store CPL per move
+  - Calculate average CPL
+- [ ] **4.2.3** Classify moves (per player-progress.md thresholds)
+  - **Excellent**: Within 10 centipawns of best move
+  - **Good**: Within 10-25 centipawns
+  - **Inaccuracy**: 25-75 centipawns worse
+  - **Mistake**: 75-200 centipawns worse
+  - **Blunder**: 200+ centipawns worse
+- [ ] **4.2.4** Identify critical moments
+  - Detect evaluation changes >1.0 pawn
+  - Mark as critical moment
+  - Store before/after evaluations
+  - Record description (e.g., "Lost advantage with Bd3")
+- [ ] **4.2.5** Detect tactical opportunities
+  - Identify tactical patterns: forks, pins, skewers, discovered attacks
+  - Track if player found or missed
+  - Categorize by tactic type
+  - Store position and best continuation
+- [ ] **4.2.6** Determine game phases
+  - Opening: moves 1-12 (approximately)
+  - Middlegame: moves 13-35 (approximately)
+  - Endgame: remaining moves
+  - Calculate accuracy per phase
+- [ ] **4.2.7** Configure analysis depth (per post-game-analysis.md)
+  - **Quick Analysis** (~10-30 seconds): Automatic, basic classification
+  - **Deep Analysis** (~2-5 minutes): On-demand, full metrics
+
+### 4.3 Metrics Calculation
+
+**Source:** [tracked-metrics.md](tracked-metrics.md) - all sections,
+[player-progress.md](player-progress.md) - "Master Composite Indexes"
+
+Implement all 9 composite index calculations with their component metrics:
+
+- [ ] **4.3.1** Calculate Precision Score (14 components)
+  - Overall move accuracy
+  - Opening accuracy
+  - Middlegame accuracy
+  - Endgame accuracy
+  - Average centipawn loss (CPL)
+  - Blunders per game
+  - Mistakes per game
+  - Inaccuracies per game
+  - Blunders while ahead
+  - Blunders in equal positions
+  - Blunders while behind
+  - Forced error rate
+  - Unforced error rate
+  - First inaccuracy move number
+- [ ] **4.3.2** Calculate Tactical Danger Score (13 components)
+  - Tactical opportunities created
+  - Tactical opportunities converted
+  - Missed winning tactics
+  - Missed equalizing tactics
+  - Missed forced mates
+  - Forks executed
+  - Pins exploited
+  - Skewers executed
+  - Discovered attacks
+  - Back rank threats created
+  - Sacrifices attempted
+  - Successful sacrifices
+  - Average calculation depth
+- [ ] **4.3.3** Calculate Stability Score (12 components)
+  - Time trouble frequency
+  - Average time per move
+  - Moves under 10 seconds
+  - Moves under 5 seconds
+  - Moves under 2 seconds
+  - Win rate above 2 minutes remaining
+  - Win rate under 1 minute remaining
+  - Win rate under 30 seconds remaining
+  - Post-blunder blunder rate
+  - Post-loss win rate (next 3 games)
+  - Defensive saves (draws from worse positions)
+  - Games lost from winning positions
+- [ ] **4.3.4** Calculate Conversion Score (9 components)
+  - Win rate with 1-pawn advantage
+  - Win rate with exchange advantage
+  - Win rate with queen advantage
+  - Conversion rate in rook endgames
+  - Conversion rate in pawn endgames
+  - Conversion rate in minor piece endgames
+  - Theoretical win success rate
+  - Theoretical draw hold rate
+  - Average moves to convert winning positions
+- [ ] **4.3.5** Calculate Preparation Score (9 components)
+  - Opening win/draw/loss by line
+  - Average evaluation at move 10
+  - Average evaluation at move 15
+  - Preparation retained (10+ moves)
+  - Preparation exited by opponent novelty
+  - Preparation exited by own mistake
+  - Repeated transposition frequency
+  - Opening diversity index
+  - First deviation from repertoire
+- [ ] **4.3.6** Calculate Positional & Structure Score (10 components)
+  - Isolated pawn frequency
+  - Doubled pawn frequency
+  - Backward pawn frequency
+  - Passed pawn creation success rate
+  - Bishop pair conversion rate
+  - Space advantage conversion rate
+  - Hanging pieces per game
+  - Defended pieces per position
+  - King safety violations
+  - Structural damage before move 15
+- [ ] **4.3.7** Calculate Aggression & Risk Score (8 components)
+  - Pawn thrusts per game
+  - Kingside pawn storms
+  - Opposite-side castling frequency
+  - Early sacrifices (before move 20)
+  - Material imbalance frequency
+  - High volatility positions entered
+  - Attacks launched per game
+  - Attacks successfully converted
+- [ ] **4.3.8** Calculate Simplification Preference Score (5 components)
+  - Queen trades before move 20
+  - Piece trades when ahead
+  - Piece trades when behind
+  - Simplifications from equal positions
+  - Draw acceptance rate in equal games
+- [ ] **4.3.9** Calculate Training Transfer Score (7 components)
+  - 30-game rolling blunder average
+  - 30-game rolling accuracy trend
+  - Tactical finds per game trend
+  - Endgame win rate trend
+  - Opening evaluation trend
+  - Conversion trend over time
+  - Time trouble trend over time
+- [ ] **4.3.10** Implement composite index calculation formula
+  Per player-progress.md:
+
+  ```text
+  Precision = (
+    overall_accuracy * 0.30 +
+    (100 - blunders_per_game * 10) * 0.25 +
+    (100 - avg_centipawn_loss / 2) * 0.20 +
+    opening_accuracy * 0.10 +
+    middlegame_accuracy * 0.10 +
+    endgame_accuracy * 0.05
+  )
+  ```
+
+  - Implement similar weighted formulas for all 9 indexes
+  - Score range: 0-100 for each
+
+### 4.4 Data Storage
+
+**Source:** [data-storage.md](data-storage.md) - all sections
+
+- [ ] **4.4.1** Implement directory structure (per data-storage.md)
+
+  ```text
+  Chess-Sensei/
+  ├── games/
+  │   ├── 2025/
+  │   │   ├── 01/
+  │   │   │   ├── game_uuid1.json
+  │   │   │   └── ...
+  │   │   └── ...
+  │   └── index.json
+  ├── analysis/
+  │   ├── game_uuid1_analysis.json
+  │   └── ...
+  ├── metrics/
+  │   ├── player_profile.json
+  │   ├── aggregate_stats.json
+  │   └── trends.json
+  ├── settings/
+  │   └── user_settings.json
+  ├── exports/
+  └── backups/
+  ```
+
+- [ ] **4.4.2** Implement platform-specific paths (per data-storage.md)
+  - **Windows**: `%APPDATA%\Chess-Sensei\`
+  - **macOS**: `~/Library/Application Support/Chess-Sensei/`
+  - **Linux**: `~/.local/share/chess-sensei/`
+- [ ] **4.4.3** Implement game data format (per data-storage.md)
+  - JSON structure with gameId, version, timestamp, mode
+  - Metadata: playerColor, botPersonality, botElo, opening, result, termination, duration
+  - Moves array with moveNumber, white/black objects containing:
+    - move, san, uci, fen, timestamp, timeSpent
+  - PGN string
+- [ ] **4.4.4** Implement analysis data format (per data-storage.md)
+  - JSON structure with gameId, analysisVersion, analysisTimestamp, engineVersion
+  - Summary: overallAccuracy, phase accuracies, averageCentipawnLoss, move counts
+  - MoveAnalysis array with: moveNumber, color, move, evaluations, centipawnLoss, classification, bestMove, alternativeMoves
+  - CriticalMoments array
+  - TacticalOpportunities array
+  - GamePhases object
+- [ ] **4.4.5** Implement player profile format (per data-storage.md)
+  - JSON with profileVersion, lastUpdated, totalGames, gamesAnalyzed
+  - CompositeScores object (all 9 indexes)
+  - OverallStats object
+  - Records object (winRate, streaks)
+  - Trends object
+  - DetailedMetrics object
+- [ ] **4.4.6** Implement atomic write operations
+  1. Write to temporary file
+  2. Verify write succeeded
+  3. Rename temporary file to target (atomic operation)
+  - Prevents corruption from crashes/power loss
+- [ ] **4.4.7** Implement game save flow (per data-storage.md)
+  1. Game Completion → Final state captured
+  2. Generate UUID
+  3. Create Game JSON
+  4. Save to Disk (games/YYYY/MM/)
+  5. Update Index (games/index.json)
+  6. Trigger Analysis (async)
+  7. Update Player Metrics
+  8. Backup (if enabled)
+- [ ] **4.4.8** Implement data integrity validation
+  - JSON schema validation
+  - Chess logic validation (legal moves, valid FEN)
+  - Metric range validation
+  - Corruption detection (checksum)
+  - Move corrupted files to quarantine folder
+
+### 4.5 Phase 4 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 4 Milestones
+
+- [ ] User can play Exam Mode without guidance
+- [ ] Post-game analysis completes successfully
+- [ ] All metrics calculated accurately
+- [ ] Data saved and loaded correctly
+
+---
+
+## Phase 5: Post-Game Analysis UI
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 5, [post-game-analysis.md](post-game-analysis.md)
+
+**Goal:** Build comprehensive post-game analysis interface
+
+**Success Criteria (from roadmap.md):**
+
+- Analysis UI is intuitive and informative
+- All visualizations are clear and accurate
+- Performance is smooth (no lag on long games)
+- Users find the analysis valuable
+
+### 5.1 Analysis Launch
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Analysis Launch"
+
+- [ ] **5.1.1** Implement game over screen
+  - Show result (Win/Loss/Draw)
+  - Quick stats preview:
+    - Accuracy percentage
+    - Number of blunders, mistakes, inaccuracies
+    - Game duration
+  - **"View Analysis"** button prominently displayed
+- [ ] **5.1.2** Enable analysis from game history
+  - Access any past Exam Mode game from Game History
+  - Click to open full analysis interface
+
+### 5.2 Move-by-Move Review
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Main View"
+
+- [ ] **5.2.1** Interactive board replay
+  - Full game replay with navigation controls
+  - Play/Pause auto-replay
+  - Step forward/backward through moves
+  - Jump to specific move numbers
+  - **Jump to mistakes/blunders directly**
+  - Keyboard navigation
+- [ ] **5.2.2** Move highlight colors (per post-game-analysis.md)
+  - **Green**: Excellent move
+  - **Teal**: Good move
+  - **Yellow**: Inaccuracy
+  - **Orange**: Mistake
+  - **Red**: Blunder
+- [ ] **5.2.3** Move list panel (Right Side)
+  - Full game notation (SAN)
+  - Each move annotated with:
+    - Classification symbol (✓ Excellent, ? Inaccuracy, ?? Blunder)
+    - Evaluation change (+0.5, -1.2, etc.)
+    - Color-coded background
+  - **Click any move** to jump to position
+  - Mistake moves highlighted for quick identification
+  - Scrolling synchronized with board
+- [ ] **5.2.4** Evaluation graph display (Top)
+  - Line graph of evaluation over game
+  - White advantage above line, Black below
+  - Y-axis: centipawn or win probability
+  - X-axis: move number
+  - **Visual drop-offs** show mistakes
+  - **Click graph points** to jump to position
+  - Mark critical moments
+- [ ] **5.2.5** Current position analysis panel (Bottom)
+  - **Your Move**: The move played
+  - **Move Quality**: Classification and CPL
+  - **Engine Best Move**: What engine recommended
+  - **Evaluation Before/After**
+  - **Change**: Centipawn swing
+  - **Alternative Moves Button**
+
+### 5.3 Mistake Deep Dive
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Mistake Deep Dive"
+
+- [ ] **5.3.1** Mistake detail modal
+  - Click any mistake/blunder to open details
+  - Full-screen or overlay modal
+- [ ] **5.3.2** Show "What Happened" section
+  - Position diagram before mistake
+  - Your move highlighted with arrow
+  - **Why It's a Mistake** explanation:
+    - "Hangs a pawn on e5"
+    - "Misses winning tactic Rxh7+"
+    - "Allows opponent fork on d5"
+- [ ] **5.3.3** Show "Better Alternatives" section
+  - Engine best move with arrow and notation
+  - Expected continuation (top 2-3 moves)
+  - Evaluation comparison:
+    - After your move: -1.5
+    - After best move: +0.8
+    - Difference: -2.3 pawns
+- [ ] **5.3.4** "Open in Sandbox" button
+  - Loads exact position in Sandbox Mode
+  - Enable further exploration
+  - Practice finding right move
+
+### 5.4 Alternative Lines Exploration
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Alternative Lines"
+
+- [ ] **5.4.1** Implement "Explore Alternatives" feature
+  - Available at any point in review
+  - Show top 3 engine moves for position
+  - Each with evaluation and brief continuation
+  - Visual arrows on board
+- [ ] **5.4.2** Show move comparison
+  - Where player's move ranks among all legal moves
+  - How much worse than best option
+
+### 5.5 Game Summary Report
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Game Summary Report"
+
+- [ ] **5.5.1** Game metadata section
+  - Date and time played
+  - Bot opponent (personality and Elo)
+  - Player color
+  - Opening played (detected)
+  - Game result and termination type
+  - Total moves
+  - Game duration
+- [ ] **5.5.2** Overall performance card
+  - **Accuracy Score** with breakdown:
+    - Opening Accuracy
+    - Middlegame Accuracy
+    - Endgame Accuracy
+  - **Move Quality Breakdown**:
+    - Excellent count
+    - Good count
+    - Inaccuracies count
+    - Mistakes count
+    - Blunders count
+  - **Average Centipawn Loss**
+- [ ] **5.5.3** Critical moments section
+  - Automatically identified turning points
+  - Each with: move number, type, evaluation swing, description
+  - Click to review
+- [ ] **5.5.4** Tactical opportunities section
+  - Tactics Found count
+  - Tactics Missed count
+  - List of missed tactics with details
+  - Click each to review
+- [ ] **5.5.5** Game phase breakdown
+  - Visual timeline showing phases
+  - Phase boundaries
+  - Summary per phase
+
+### 5.6 Deep Analytics Dashboard
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Deep Analytics View"
+
+- [ ] **5.6.1** Metrics scorecard for game
+  - All 9 composite scores for this game
+  - Comparison to player average
+  - Visual indicators (✓ Above average, ✗ Below)
+  - Key insight text
+- [ ] **5.6.2** Detailed metric breakdown
+  - Drill into any composite score
+  - Show individual component metrics
+  - Example: Precision Score details showing all 14 components
+- [ ] **5.6.3** Positional heatmaps
+  - Where mistakes occurred (red squares)
+  - Where played well (green squares)
+  - Tactical hotspots (yellow squares)
+  - Helps identify spatial blindspots
+- [ ] **5.6.4** Move time distribution chart
+  - Bar chart: move number vs. time spent
+  - Identify rushed moves
+  - Identify overthinking
+  - Correlation insights
+- [ ] **5.6.5** Evaluation stability graph
+  - Shows position volatility
+  - Flat = stable, Sharp swings = tactical chaos
+  - Player accuracy by stability
+- [ ] **5.6.6** Opening analysis
+  - Opening name detected
+  - Preparation depth (move number of deviation)
+  - Evaluation at moves 10 and 15
+  - Recommendations
+- [ ] **5.6.7** Endgame analysis (if applicable)
+  - Endgame type (Rook + Pawns, etc.)
+  - Material advantage at endgame start
+  - Expected vs. actual result
+  - Critical mistakes in endgame
+
+### 5.7 Training Recommendations
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Training Recommendations"
+
+- [ ] **5.7.1** Generate personalized training suggestions
+  - Based on weakness analysis
+  - Prioritized (Top Priority, Secondary Focus)
+  - Specific improvement areas
+- [ ] **5.7.2** Link to relevant training modes
+  - Suggested practice settings
+  - Difficulty recommendations
+  - Bot personality suggestions
+- [ ] **5.7.3** Highlight specific weaknesses
+  - Clear identification of problem areas
+  - Historical trend data
+  - Examples from this game
+- [ ] **5.7.4** Suggest practice positions
+  - Positions similar to mistakes
+  - Tactical training suggestions
+  - Endgame practice if relevant
+
+### 5.8 Export Options
+
+**Source:** [post-game-analysis.md](post-game-analysis.md) - "Exporting and Sharing"
+
+- [ ] **5.8.1** Export Game PGN
+  - Standard notation format
+  - Include annotations (?, ??, !, !!)
+- [ ] **5.8.2** Export Analysis Report (PDF)
+  - Full summary report
+  - Includes graphs and key positions
+  - Printable for offline review
+- [ ] **5.8.3** Export Game Data (JSON)
+  - Complete game + analysis
+  - Importable back to Chess-Sensei
+
+### 5.9 Phase 5 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 5 Milestones
+
+- [ ] Full post-game analysis UI functional
+- [ ] All data visualizations render correctly
+- [ ] User can review games effectively
+- [ ] Recommendations are actionable
+
+---
+
+## Phase 6: Player Progress Dashboard
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 6, [player-progress.md](player-progress.md)
+
+**Goal:** Create comprehensive player progress tracking and analytics
+
+**Success Criteria (from roadmap.md):**
+
+- Dashboard provides clear overview of player progress
+- All visualizations are meaningful and actionable
+- Performance is fast even with 100+ games
+- Users are motivated by progress tracking
+
+### 6.1 Progress Dashboard Overview
+
+**Source:** [player-progress.md](player-progress.md) - "Visual Analytics & Reporting"
+
+- [ ] **6.1.1** Composite index radar chart
+  - Spider/radar chart showing all 9 master scores
+  - Instantly see strengths and weaknesses
+  - Compare against previous periods
+  - Interactive hover details
+- [ ] **6.1.2** Trend graphs for all scores
+  - Line charts for each composite index over time
+  - 10-game, 30-game, and all-time views
+  - Identify improvement or regression patterns
+  - Selectable time ranges
+- [ ] **6.1.3** Game history table
+  - Recent Exam Mode games
+  - Quick stats per game (accuracy, blunders, result)
+  - Sortable columns
+  - Filter by date, result, opponent
+  - Click to open post-game analysis
+- [ ] **6.1.4** Key metrics summary cards
+  - Current accuracy percentage
+  - Recent blunder rate
+  - Win/draw/loss record
+  - Most played openings
+  - Total games played
+  - Current streaks
+
+### 6.2 Detailed Analytics Views
+
+**Source:** [player-progress.md](player-progress.md) - "Detailed Analytics Views"
+
+- [ ] **6.2.1** Drill-down for each composite score
+  - Click any score to expand
+  - Show all component metrics
+  - Historical data for each
+- [ ] **6.2.2** Accuracy by game phase charts
+  - Bar chart: Opening / Middlegame / Endgame accuracy
+  - Identify which phase needs work
+  - Trend over time
+- [ ] **6.2.3** Error distribution visualizations
+  - Pie chart: Blunders / Mistakes / Inaccuracies / Good
+  - Track error reduction over time
+  - Distribution by game phase
+- [ ] **6.2.4** Centipawn loss trends
+  - Line graph of average CPL per game
+  - By game phase
+  - By opponent difficulty
+- [ ] **6.2.5** Error context analysis
+  - When do you blunder? (Ahead / Equal / Behind)
+  - Forced vs. unforced errors
+
+### 6.3 Historical Comparison
+
+**Source:** [player-progress.md](player-progress.md) - "Historical Comparison"
+
+- [ ] **6.3.1** Compare time periods
+  - Select two periods for comparison
+  - "Last 10 games vs. previous 10"
+  - "This month vs. last month"
+  - Side-by-side metrics
+- [ ] **6.3.2** Show improvement/regression
+  - Clear trend indicators
+  - Percentage changes
+  - Visual arrows/colors
+- [ ] **6.3.3** Highlight best/worst performances
+  - Best game by accuracy
+  - Worst mistakes
+  - Notable achievements
+
+### 6.4 Heatmaps
+
+**Source:** [player-progress.md](player-progress.md) - "Heatmaps"
+
+- [ ] **6.4.1** Board position heatmaps
+  - Visualize where mistakes occur on board
+  - Identify spatial blindspots
+  - See which squares you miss tactics on
+- [ ] **6.4.2** Move number heatmaps
+  - At what move numbers do blunders occur?
+  - Identify critical pressure points
+
+### 6.5 Opponent-Adjusted Performance
+
+**Source:** [player-progress.md](player-progress.md) - "Opponent-Adjusted Performance",
+[tracked-metrics.md](tracked-metrics.md) - "Opponent Adjusted Performance"
+
+- [ ] **6.5.1** Performance vs. bot difficulty charts
+  - Accuracy by opponent Elo
+  - Win rate by difficulty
+- [ ] **6.5.2** Accuracy by opponent strength
+  - vs. higher-rated opponents
+  - vs. equal-rated opponents
+  - vs. lower-rated opponents
+- [ ] **6.5.3** Upset tracking
+  - Upset win frequency (beating stronger bots)
+  - Upset loss frequency (losing to weaker bots)
+  - Blunder rate vs. weaker opponents
+
+### 6.6 Milestones & Achievements
+
+**Source:** [player-progress.md](player-progress.md) - "Progress Milestones & Achievements"
+
+- [ ] **6.6.1** Achievement system implementation
+  - **Precision Milestones**:
+    - First game with 0 blunders
+    - 10 consecutive games with <1 blunder/game
+    - Achieve 85%+ accuracy
+  - **Tactical Milestones**:
+    - First successful sacrifice
+    - Find 5+ tactical opportunities in one game
+    - Convert 10 winning tactics in a row
+  - **Conversion Milestones**:
+    - Win rook endgame with 1-pawn advantage
+    - Hold theoretical draw
+    - Win 5 games in a row from advantageous positions
+  - **Consistency Milestones**:
+    - 10 games without time trouble
+    - Win 3 games after a loss
+    - 20 games with <5% accuracy variance
+- [ ] **6.6.2** Milestone notifications
+  - Notify on achievement unlock
+  - Celebrate milestones
+- [ ] **6.6.3** Progress badges
+  - Visual badge display
+  - Badge collection screen
+  - Rarity tiers
+
+### 6.7 Training Goals & Focus Areas
+
+**Source:** [player-progress.md](player-progress.md) - "Training Goals & Focus Areas"
+
+- [ ] **6.7.1** Suggest training focus based on metrics
+  - Identify weakest composite score
+  - Drill into specific problem metrics
+  - Provide targeted recommendations
+- [ ] **6.7.2** Example recommendation flows
+  - Low Conversion → Practice winning endgames in Sandbox
+  - High opening blunder rate → Study opening lines
+  - Poor Tactical Danger → Play against Tactician bot
+- [ ] **6.7.3** Track focus area improvement
+  - Set goals for specific scores
+  - Monitor progress toward goals
+
+### 6.8 Phase 6 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 6 Milestones
+
+- [ ] Dashboard displays all key metrics
+- [ ] Charts and graphs render correctly
+- [ ] Historical data loads efficiently
+- [ ] Trends calculated accurately
+
+---
+
+## Phase 7: Sandbox Mode
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 7, [game-modes.md](game-modes.md) -
+"Sandbox Mode"
+
+**Goal:** Implement position exploration and analysis tool
+
+**Success Criteria (from roadmap.md):**
+
+- Users can easily set up custom positions
+- Analysis results are accurate
+- UI is simple and focused
+- Useful for targeted practice
+
+### 7.1 Board Editor
+
+**Source:** [game-modes.md](game-modes.md) - "Sandbox Mode Features"
+
+- [ ] **7.1.1** Drag pieces onto board
+  - Piece palette UI
+  - Drag from palette to board
+  - Drop on target square
+- [ ] **7.1.2** Remove pieces from board
+  - Drag off board to remove
+  - Or click to select and delete
+- [ ] **7.1.3** Clear board function
+  - Button to remove all pieces
+  - Confirmation dialog
+- [ ] **7.1.4** Load position from FEN
+  - FEN input field
+  - Parse and validate FEN
+  - Display position on board
+
+### 7.2 Position Validation
+
+**Source:** [game-modes.md](game-modes.md) - "Position Validation"
+
+- [ ] **7.2.1** Check legal position rules
+  - Both sides have exactly one king
+  - Pawns not on 1st or 8th rank
+  - Valid castling rights
+- [ ] **7.2.2** Validate king placement
+  - Kings not adjacent
+  - Side not to move not giving check
+- [ ] **7.2.3** Warn about impossible positions
+  - More than 16 pieces per side
+  - Too many pawns
+  - Invalid piece combinations
+
+### 7.3 Position Analysis
+
+**Source:** [game-modes.md](game-modes.md) - "Single-move best-move display"
+
+- [ ] **7.3.1** Select color to move
+  - Toggle button for White/Black
+  - Update FEN accordingly
+- [ ] **7.3.2** Calculate best move for position
+  - Request engine analysis
+  - Display **best move only** (single blue highlight) by default
+  - Show evaluation score
+- [ ] **7.3.3** Show evaluation score
+  - Centipawn or mate score
+  - Evaluation bar
+  - Advantage indicator
+- [ ] **7.3.4** Option to show top 3 moves
+  - Toggle to enable full guidance mode
+  - Same highlighting as Training Mode
+  - Move suggestions panel
+
+### 7.4 Sandbox UI
+
+**Source:** [game-modes.md](game-modes.md) - "Sandbox Mode Setup Flow"
+
+- [ ] **7.4.1** Clean editor interface
+  - Minimalist design
+  - Focus on board
+  - Easy-to-access tools
+- [ ] **7.4.2** Piece palette for placement
+  - All piece types available (K, Q, R, B, N, P)
+  - Both colors (White, Black)
+  - Clear visual separation
+- [ ] **7.4.3** FEN import/export
+  - Display current FEN
+  - Copy to clipboard button
+  - Paste FEN to load
+- [ ] **7.4.4** Quick position setup templates
+  - Starting position
+  - Common endgames (K+R vs K, K+Q vs K, etc.)
+  - Empty board
+- [ ] **7.4.5** Implement Sandbox setup flow (per game-modes.md)
+  1. Click **Sandbox Mode** from main menu
+  2. Enter **Board Editor**
+  3. Arrange pieces on board
+  4. Click **Analyze Position**
+  5. Select **color to move**
+  6. View best-move recommendation(s)
+  7. Modify and repeat, or exit
+
+### 7.5 Sandbox State Management
+
+**Source:** [game-modes.md](game-modes.md) - "Technical Implementation Notes"
+
+- [ ] **7.5.1** Implement Sandbox state (per game-modes.md)
+  - Board editor active
+  - Single-position analysis only
+  - **No game state persistence**
+  - Position saved temporarily only
+- [ ] **7.5.2** Data flow (per game-modes.md)
+
+  ```text
+  Custom Board State → FEN Validation → Stockfish → Best Move → UI Display
+  ```
+
+### 7.6 Phase 7 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 7 Milestones
+
+- [ ] Board editor fully functional
+- [ ] Position analysis works correctly
+- [ ] UI is intuitive
+- [ ] Common positions load quickly
+
+---
+
+## Phase 8: Import/Export & Data Management
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 8, [data-storage.md](data-storage.md) -
+"Import & Export" section
+
+**Goal:** Add comprehensive data import/export functionality
+
+**Success Criteria (from roadmap.md):**
+
+- Users can backup their data easily
+- Import/export works across devices
+- No data loss during operations
+- File formats are standard and portable
+
+### 8.1 Export Functions
+
+**Source:** [data-storage.md](data-storage.md) - "Export Functionality"
+
+- [ ] **8.1.1** Export single game (PGN)
+  - Standard PGN format per example in data-storage.md
+  - Include annotations
+  - Save to user-selected location
+- [ ] **8.1.2** Export single game (JSON)
+  - Complete game + analysis JSON
+  - All moves, analysis, metrics, positions
+  - Use case: backup, deep analysis, re-import
+- [ ] **8.1.3** Export all games (batch JSON)
+  - Array of game JSON objects
+  - All Exam Mode games
+  - Progress indicator
+  - Use case: full backup, device migration
+- [ ] **8.1.4** Export player profile (JSON)
+  - Player metrics and statistics
+  - Composite scores, trends, all metrics
+  - Use case: track progress externally
+- [ ] **8.1.5** Export analysis report (PDF)
+  - Full summary report
+  - Include diagrams and graphs
+  - Printable for offline review
+
+### 8.2 Import Functions
+
+**Source:** [data-storage.md](data-storage.md) - "Import Functionality"
+
+- [ ] **8.2.1** Import single game (JSON)
+  - Load previously exported game JSON
+  - Restore game, analysis, and metrics
+  - Assign new UUID if duplicate detected
+- [ ] **8.2.2** Import game collection (batch JSON)
+  - Load multiple games at once
+  - Validate each game before import
+  - Skip duplicates (based on content hash)
+  - Update player metrics after import
+- [ ] **8.2.3** Import from PGN
+  - Parse standard PGN files
+  - Create new game entry
+  - Trigger analysis (since PGN lacks analysis data)
+  - Update metrics
+- [ ] **8.2.4** Merge player profiles
+  - Combine metrics from two devices
+  - Conflict resolution: most recent data wins
+  - Useful for multi-device use
+
+### 8.3 Export/Import UI Flow
+
+**Source:** [data-storage.md](data-storage.md) - "Export/Import UI Flow"
+
+- [ ] **8.3.1** Export flow
+  1. Navigate to Settings > Data Management
+  2. Click "Export Data"
+  3. Select export type (single game, all games, profile, everything)
+  4. Choose format (JSON, PGN, PDF)
+  5. Select destination folder
+  6. Click "Export"
+  7. Confirmation message with file location
+- [ ] **8.3.2** Import flow
+  1. Navigate to Settings > Data Management
+  2. Click "Import Data"
+  3. Select file(s) to import
+  4. Preview import (shows what will be added)
+  5. Confirm import
+  6. Progress bar during import
+  7. Summary message (X games imported, Y skipped)
+
+### 8.4 Backup & Restore
+
+**Source:** [data-storage.md](data-storage.md) - "Backups"
+
+- [ ] **8.4.1** Automatic backup system
+  - Configurable frequency (daily, weekly, after each game)
+  - Location: `backups/` folder
+  - Retention: last 7 daily, last 4 weekly
+  - Format: full copy of all data
+  - Optional zip compression
+- [ ] **8.4.2** Manual backup creation
+  - Export everything as JSON
+  - User stores wherever they want
+- [ ] **8.4.3** Restore from backup
+  - Select backup file
+  - Preview contents
+  - Confirm restore
+  - Handle conflicts
+- [ ] **8.4.4** Backup verification
+  - Validate backup integrity
+  - Report any issues
+  - Confirm completeness
+
+### 8.5 Data Management UI
+
+**Source:** [data-storage.md](data-storage.md) - "Cleanup & Maintenance"
+
+- [ ] **8.5.1** Data management settings screen
+  - Access from settings menu
+  - Clear organization
+  - All data operations available
+- [ ] **8.5.2** Export/import wizards
+  - Step-by-step guidance
+  - Format selection
+  - Progress feedback
+- [ ] **8.5.3** Backup management interface
+  - List existing backups
+  - Delete old backups
+  - Storage usage display
+- [ ] **8.5.4** Data cleanup tools
+  - Manual archive: select games older than X months
+  - Clear cache
+  - Rebuild indexes
+  - Recalculate metrics
+  - Verify data integrity
+
+### 8.6 Phase 8 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 8 Milestones
+
+- [ ] Export/import functions work correctly
+- [ ] Backup system is reliable
+- [ ] UI is straightforward
+- [ ] Data integrity maintained
+
+---
+
+## Phase 9: Polish & Optimization
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - Phase 9, [ui-ux-design.md](ui-ux-design.md) -
+"Responsiveness & Accessibility", [development.md](development.md)
+
+**Goal:** Refine UI/UX, optimize performance, fix bugs
+
+**Success Criteria (from roadmap.md):**
+
+- App feels fast and responsive
+- UI is professional and refined
+- No critical bugs remain
+- Users can learn the app easily
+
+### 9.1 UI/UX Refinements
+
+**Source:** [ui-ux-design.md](ui-ux-design.md)
+
+- [ ] **9.1.1** Improve animations and transitions
+  - Smooth page transitions
+  - Refined move animations
+  - Loading state animations
+  - **Soft haptic-style animations**
+  - **Gentle glow and depth changes**
+- [ ] **9.1.2** Refine color schemes and contrast
+  - Accessibility review
+  - Color consistency
+  - Dark/light mode polish
+  - **Calm and non-distracting** aesthetic
+- [ ] **9.1.3** Add loading states and progress indicators
+  - Analysis progress
+  - Data loading
+  - Export/import progress
+- [ ] **9.1.4** Improve error messages and help text
+  - Clear error descriptions
+  - Actionable suggestions
+  - Contextual help
+
+### 9.2 Performance Optimization
+
+**Source:** [development.md](development.md) - "Performance Optimization",
+[roadmap.md](roadmap.md) - performance targets
+
+- [ ] **9.2.1** Optimize engine analysis speed
+  - Profile analysis pipeline
+  - Reduce unnecessary calculations
+  - Batch optimizations
+  - Target: <2s per position
+- [ ] **9.2.2** Reduce memory usage
+  - Memory leak detection
+  - Efficient data structures
+  - Cache management
+  - Target: <500MB typical operation
+- [ ] **9.2.3** Improve UI rendering performance
+  - Virtual scrolling for long lists
+  - Efficient re-renders
+  - Lazy loading
+  - **Debounced UI updates** (per development.md)
+  - **Minimal main thread blocking**
+- [ ] **9.2.4** Optimize file I/O operations
+  - Batch writes
+  - Async operations
+  - Efficient serialization
+- [ ] **9.2.5** WASM module optimization
+  - Monitor module size
+  - Tree-shaking for minimal bundle
+  - Target: <10MB application size
+
+### 9.3 Accessibility Improvements
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Responsiveness & Accessibility"
+
+- [ ] **9.3.1** Implement color-blind modes
+  - **Color-blind safe color profiles**
+  - Deuteranopia support
+  - Protanopia support
+  - Custom color schemes
+- [ ] **9.3.2** Add keyboard navigation
+  - Full keyboard control
+  - Focus indicators
+  - Shortcut documentation
+- [ ] **9.3.3** Improve screen reader support
+  - ARIA labels
+  - Semantic HTML
+  - Position announcements
+- [ ] **9.3.4** Add adjustable highlight intensity
+  - **Adjustable highlight intensity** setting
+  - Border thickness options
+  - Custom colors
+- [ ] **9.3.5** Additional accessibility features
+  - **Optional text-only notation mode**
+  - **Large-piece mode for visibility**
+
+### 9.4 Responsiveness
+
+**Source:** [ui-ux-design.md](ui-ux-design.md) - "Responsiveness",
+[post-game-analysis.md](post-game-analysis.md) - "Mobile and Accessibility"
+
+- [ ] **9.4.1** Ensure responsive design
+  - Desktop: Full layout
+  - Tablet: Adaptive layout, collapsible panels
+  - Mobile: Stacked layout, swipe navigation
+- [ ] **9.4.2** Scale visualizations appropriately
+  - Graphs resize correctly
+  - Touch targets appropriate size
+
+### 9.5 Bug Fixes & Stability
+
+**Source:** [development.md](development.md) - "Testing Strategy"
+
+- [ ] **9.5.1** Fix reported bugs
+  - Bug tracking system
+  - Priority triage
+  - Verification testing
+- [ ] **9.5.2** Improve error handling
+  - Graceful degradation
+  - User-friendly messages
+  - Recovery options
+  - **Fallback to in-memory storage if disk unavailable** (per data-storage.md)
+- [ ] **9.5.3** Add crash reporting (opt-in)
+  - Anonymous reports
+  - User consent required
+  - Useful diagnostics
+- [ ] **9.5.4** Stress testing with edge cases
+  - Long games (200+ moves)
+  - Rapid moves
+  - Large game databases (100+ games per data-storage.md)
+  - Memory pressure tests
+
+### 9.6 Testing
+
+**Source:** [development.md](development.md) - "Testing Strategy"
+
+- [ ] **9.6.1** Unit tests for core logic
+- [ ] **9.6.2** Integration tests for engine communication
+- [ ] **9.6.3** End-to-end tests for critical user flows
+- [ ] **9.6.4** Performance benchmarks for engine operations
+
+### 9.7 Documentation Updates
+
+**Source:** [development.md](development.md) - "Documentation Standards"
+
+- [ ] **9.7.1** User manual/help system
+  - In-app documentation
+  - Feature explanations
+  - Searchable help
+- [ ] **9.7.2** In-app tooltips
+  - Contextual help
+  - First-use hints
+  - Dismissible tips
+- [ ] **9.7.3** Tutorial/onboarding flow
+  - First-run experience
+  - Feature introduction
+  - Interactive guide
+- [ ] **9.7.4** FAQ section
+  - Common questions
+  - Troubleshooting
+  - Best practices
+
+### 9.8 Phase 9 Milestones Verification
+
+**Source:** [roadmap.md](roadmap.md) - Phase 9 Milestones
+
+- [ ] All major bugs fixed
+- [ ] Performance targets met
+- [ ] Accessibility standards achieved
+- [ ] User experience polished
+
+---
+
+## v1.0: Public Release
+
+**Status:** 📋 PLANNED
+
+**Source:** [roadmap.md](roadmap.md) - "v1.0: Public Release",
+[development.md](development.md) - "Release Process"
+
+**Target:** After Phase 9 completion
+
+### Release Checklist
+
+**Source:** [roadmap.md](roadmap.md) - "Release Activities"
+
+- [ ] Final QA testing
+  - Full feature regression
+  - Cross-platform testing (Windows, macOS, Linux)
+  - Performance benchmarks
+- [ ] Create release builds (per development.md)
+  - Windows: `.exe` installer
+  - macOS: `.app` / `.dmg`
+  - Linux: `.AppImage` / `.deb`
+- [ ] Publish to distribution channels
+  - GitHub Releases
+  - Project website
+- [ ] Launch marketing materials
+  - Screenshots
+  - Feature descriptions
+  - Demo video
+- [ ] Release announcement
+  - Social media
+  - Chess communities
+  - Press release
+- [ ] Monitor initial feedback
+  - Issue tracking
+  - Community channels
+  - User support
+- [ ] Prepare hotfix process
+  - Quick response capability
+  - Patch release workflow
+
+### v1.0 Feature Verification
+
+**Source:** [roadmap.md](roadmap.md) - "v1.0 Feature Set"
+
+All features must be stable and tested:
+
+- [ ] Training Mode with real-time guidance
+- [ ] Exam Mode with performance tracking
+- [ ] Sandbox Mode for position exploration
+- [ ] AI opponents with multiple personalities
+- [ ] Comprehensive post-game analysis
+- [ ] Player progress dashboard
+- [ ] Import/export functionality
+- [ ] Cross-platform desktop support (Windows, macOS, Linux)
+
+### v1.0 Quality Standards
+
+**Source:** [roadmap.md](roadmap.md) - "Quality Standards" and "Success Metrics"
+
+- [ ] All features stable and tested
+- [ ] Documentation complete
+- [ ] Performance targets met:
+  - <2s analysis time per position
+  - <30s post-game analysis per game
+- [ ] Accessibility standards achieved
+- [ ] No critical bugs
+- [ ] <1% crash rate
+- [ ] Sub-10MB application size (per architecture.md)
+
+---
+
+## Session Continuity Protocol
+
+When resuming work on this project:
+
+1. **Read this document first** to understand current state
+2. **Check "Current Status" section** for exact resumption point
+3. **Review the current phase tasks** to see what's next
+4. **Consult source documentation** for detailed specifications
+5. **Update this document** as tasks are completed
+6. **Mark tasks with [x]** when done
+7. **Update "Last Updated" date** when making changes
+8. **Update "Session Resumption Point"** at end of each session
+
+### Task Status Legend
+
+- `[ ]` - Not started
+- `[~]` - In progress (use sparingly, prefer atomic tasks)
+- `[x]` - Complete
+
+### Deviation Protocol
+
+If any deviation from this plan is required:
+
+1. Document the reason in this file
+2. Update affected tasks
+3. Ensure alignment with source documentation
+4. **If source docs need updating, update them first**
+
+---
+
+## Quick Reference
+
+### Key Files by Phase
+
+**Phase 1:**
+
+- `src/engine/` - Engine integration code
+- `src/shared/` - Shared types and interfaces
+
+**Phase 2:**
+
+- `src/frontend/` - UI components
+- `assets/pieces/` - Chess piece SVGs
+- `assets/sounds/` - Audio files
+
+**Phase 3:**
+
+- `src/backend/` - Bot logic, game management
+- `src/frontend/` - Training Mode UI
+
+**Phase 4:**
+
+- `src/backend/` - Analysis pipeline, metrics
+- Data stored in platform-specific user data directory
+
+**Phase 5-9:**
+
+- Build upon existing structure
+- See individual phase tasks for details
+
+### Performance Targets
+
+**Source:** [roadmap.md](roadmap.md), [architecture.md](architecture.md)
+
+| Metric               | Target    |
+| -------------------- | --------- |
+| Engine analysis      | <2 seconds per position |
+| Post-game analysis   | <30 seconds per game |
+| UI responsiveness    | <100ms for interactions |
+| Memory usage         | <500MB typical |
+| Application size     | <10MB |
+| Crash rate           | <1% |
+
+### All 12 Source Documents
+
+| Document | Key Content |
+| -------- | ----------- |
+| [overview.md](overview.md) | Core concept, top 3 moves, training philosophy |
+| [roadmap.md](roadmap.md) | All phases, milestones, success criteria |
+| [architecture.md](architecture.md) | Buntralino, Bun, Neutralino, file structure |
+| [ai-engine.md](ai-engine.md) | Stockfish WASM, UCI, bot personalities, difficulty |
+| [ui-ux-design.md](ui-ux-design.md) | Neomorphism, glassmorphism, right panel, accessibility |
+| [game-modes.md](game-modes.md) | Training/Exam/Sandbox specs, state management |
+| [move-guidance.md](move-guidance.md) | Color coding, three-way sync, hover behavior |
+| [player-progress.md](player-progress.md) | 9 composite indexes, dashboard, achievements |
+| [tracked-metrics.md](tracked-metrics.md) | 100+ individual metrics by category |
+| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations |
+| [data-storage.md](data-storage.md) | JSON formats, file paths, import/export, backups |
+| [development.md](development.md) | Git workflow, testing, CI/CD, release process |

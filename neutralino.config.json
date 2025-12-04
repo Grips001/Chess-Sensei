@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
-  "applicationId": "com.chess-sensai.app",
+  "applicationId": "com.chess-sensei.app",
   "version": "0.1.0",
-  "applicationName": "Chess-Sensai",
+  "applicationName": "Chess-Sensei",
   "author": "Jhon D. Vise",
   "description": "A modern chess training application with real-time AI-assisted move guidance",
   "defaultMode": "window",
@@ -19,7 +19,7 @@
   "nativeAllowList": ["events.*", "app.*", "os.*", "debug.log"],
   "modes": {
     "window": {
-      "title": "Chess-Sensai",
+      "title": "Chess-Sensei",
       "width": 1200,
       "height": 800,
       "minWidth": 400,
@@ -37,7 +37,7 @@
     }
   },
   "cli": {
-    "binaryName": "chess-sensai",
+    "binaryName": "chess-sensei",
     "resourcesPath": "/app/",
     "extensionsPath": "/extensions/",
     "binaryVersion": "5.6.0",

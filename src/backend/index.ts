@@ -1,5 +1,5 @@
 /**
- * Chess-Sensai Backend Entry Point
+ * Chess-Sensei Backend Entry Point
  *
  * This file initializes the Bun backend and sets up IPC with the frontend.
  */
@@ -12,7 +12,7 @@ let viteHost: string | null = null;
 
 import { create, events, registerMethodMap } from 'buntralino';
 
-console.log('Chess-Sensai Backend initialized');
+console.log('Chess-Sensei Backend initialized');
 
 /**
  * Function map that allows running named functions with `buntralino.run` on the client (Neutralino) side.
@@ -25,7 +25,7 @@ console.log('Chess-Sensai Backend initialized');
  */
 const functionMap = {
   sayHello: async (payload: { message: string }) => {
-    return `Chess-Sensai Backend: ${payload.message}`;
+    return `Chess-Sensei Backend: ${payload.message}`;
   },
 };
 

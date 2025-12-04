@@ -1,6 +1,6 @@
-# Chess-Sensai Setup Complete
+# Chess-Sensei Setup Complete
 
-The Chess-Sensai project has been successfully initialized as a Buntralino
+The Chess-Sensei project has been successfully initialized as a Buntralino
 application.
 
 ## What Was Done
@@ -14,10 +14,10 @@ application.
 
 ### 2. Directory Structure
 
-Created the following structure as per [architecture.md](docs/architecture.md):
+Created the following structure as per [architecture.md](source-docs/architecture.md):
 
 ```text
-Chess-Sensai/
+Chess-Sensei/
 ├── src/
 │   ├── frontend/        # Neutralino UI code (Vite + TypeScript)
 │   ├── backend/         # Bun-powered services
@@ -25,7 +25,8 @@ Chess-Sensai/
 │   ├── shared/          # Shared types and utilities
 │   └── assets/          # Internal source assets
 ├── assets/              # Chess pieces, icons, sounds
-├── docs/                # Comprehensive documentation
+├── source-docs/         # Design & development specifications
+├── documents/           # End-user documentation
 ├── public/              # Static files
 └── Configuration files
 ```
@@ -41,7 +42,7 @@ Chess-Sensai/
 
 - Created README files in each source directory
 - Added CONTRIBUTING.md with development guidelines
-- All comprehensive docs already in `docs/` folder
+- All comprehensive docs already in `source-docs/` folder
 
 ### 5. Initial Code
 
@@ -78,7 +79,7 @@ This builds the frontend and packages the backend into executables.
 **Phase:** Foundation Complete (Phase 0) ✓ **Next:** Phase 1 - Core Chess Engine
 Integration
 
-See [roadmap.md](docs/roadmap.md) for full development plan.
+See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
@@ -104,9 +105,9 @@ According to the roadmap, Phase 1 involves:
 
 ## Development Resources
 
-- **Documentation:** See `docs/` folder for comprehensive guides
-- **Architecture:** [docs/architecture.md](docs/architecture.md)
-- **Roadmap:** [docs/roadmap.md](docs/roadmap.md)
+- **Documentation:** See `source-docs/` folder for comprehensive guides
+- **Architecture:** [source-docs/architecture.md](source-docs/architecture.md)
+- **Roadmap:** [source-docs/roadmap.md](source-docs/roadmap.md)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Useful Commands
@@ -152,7 +153,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensai is now ready for active development. Phase 0 is complete, and the
+Chess-Sensei is now ready for active development. Phase 0 is complete, and the
 foundation is solid.
 
 Start with Phase 1: Chess Engine Integration!

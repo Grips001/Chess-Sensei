@@ -1,8 +1,8 @@
-# Chess-Sensai
+# Chess-Sensei
 
 A modern chess training application designed to help players improve
 decision-making through real-time AI-assisted move guidance---without
-restricting player freedom. Chess-Sensai blends traditional chess gameplay with
+restricting player freedom. Chess-Sensei blends traditional chess gameplay with
 real-time visual coaching, offering immediate strategic insight through
 non-intrusive training.
 
@@ -10,7 +10,7 @@ non-intrusive training.
 
 ### Real-Time Best-Move Guidance (Key Differentiator)
 
-The defining feature of Chess-Sensai is its **visual best-move guidance
+The defining feature of Chess-Sensei is its **visual best-move guidance
 system**:
 
 - **Top 3 moves highlighted** in real-time during your turn
@@ -50,43 +50,50 @@ system**:
 
 ## Documentation
 
-Comprehensive documentation is available in the [`docs/`](docs/) directory:
+### Design & Development Specifications
+
+Comprehensive design documentation is available in the [`source-docs/`](source-docs/) directory:
 
 ### Core Concept & Design
 
-- [**Overview**](docs/overview.md) --- Game concept, core features, and training
+- [**Overview**](source-docs/overview.md) --- Game concept, core features, and training
   philosophy
-- [**UI/UX Design**](docs/ui-ux-design.md) --- Visual theme, layout, and
+- [**UI/UX Design**](source-docs/ui-ux-design.md) --- Visual theme, layout, and
   interaction patterns
-- [**Game Modes**](docs/game-modes.md) --- Training, Exam, and Sandbox modes
+- [**Game Modes**](source-docs/game-modes.md) --- Training, Exam, and Sandbox modes
   explained
 
 ### Technical Architecture
 
-- [**Architecture**](docs/architecture.md) --- Technical stack, platform goals,
+- [**Architecture**](source-docs/architecture.md) --- Technical stack, platform goals,
   and system design
-- [**AI Engine**](docs/ai-engine.md) --- Stockfish WASM integration, bot
+- [**AI Engine**](source-docs/ai-engine.md) --- Stockfish WASM integration, bot
   personalities, and difficulty scaling
-- [**Move Guidance**](docs/move-guidance.md) --- Best-move guidance system and
+- [**Move Guidance**](source-docs/move-guidance.md) --- Best-move guidance system and
   visual highlighting
 
 ### Player Progress & Analytics
 
-- [**Player Progress**](docs/player-progress.md) --- Metrics tracking, composite
+- [**Player Progress**](source-docs/player-progress.md) --- Metrics tracking, composite
   scores, and visual analytics
-- [**Tracked Metrics**](docs/tracked-metrics.md) --- Complete list of all
+- [**Tracked Metrics**](source-docs/tracked-metrics.md) --- Complete list of all
   performance metrics
-- [**Post-Game Analysis**](docs/post-game-analysis.md) --- Review tools, mistake
+- [**Post-Game Analysis**](source-docs/post-game-analysis.md) --- Review tools, mistake
   analysis, and deep analytics
 
 ### Data & Development
 
-- [**Data Storage**](docs/data-storage.md) --- Local storage, import/export, and
+- [**Data Storage**](source-docs/data-storage.md) --- Local storage, import/export, and
   data management
-- [**Development**](docs/development.md) --- Best practices, GitHub workflow,
+- [**Development**](source-docs/development.md) --- Best practices, GitHub workflow,
   and contributing guidelines
-- [**Roadmap**](docs/roadmap.md) --- Development phases, milestones, and future
+- [**Roadmap**](source-docs/roadmap.md) --- Development phases, milestones, and future
   plans
+
+### End-User Documentation
+
+User guides and operational documentation will be available in the
+[`documents/`](documents/) directory as features are implemented.
 
 ## Project Status
 
@@ -97,7 +104,7 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 - ✅ Comprehensive documentation written
 - 🚧 Phase 1: Core Chess Engine Integration (Next)
 
-See [roadmap.md](docs/roadmap.md) for detailed development plan and current
+See [roadmap.md](source-docs/roadmap.md) for detailed development plan and current
 progress.
 
 ## Getting Started
@@ -111,8 +118,8 @@ progress.
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/Chess-Sensai.git
-cd Chess-Sensai
+git clone https://github.com/YOUR_USERNAME/Chess-Sensei.git
+cd Chess-Sensei
 
 # Install dependencies
 bun install
@@ -128,7 +135,7 @@ See [SETUP.md](SETUP.md) for complete setup documentation.
 Interested in contributing? Check out our guidelines:
 
 - [**CONTRIBUTING.md**](CONTRIBUTING.md) --- Contribution workflow and standards
-- [**docs/development.md**](docs/development.md) --- Development best practices
+- [**source-docs/development.md**](source-docs/development.md) --- Development best practices
 
 Key resources:
 
@@ -144,7 +151,7 @@ Key resources:
 
 ## Philosophy
 
-Chess-Sensai prioritizes:
+Chess-Sensei prioritizes:
 
 - **Learning without intimidation** --- guidance, not enforcement
 - **Performance over convenience** --- native desktop feel

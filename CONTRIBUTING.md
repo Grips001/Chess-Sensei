@@ -1,6 +1,6 @@
-# Contributing to Chess-Sensai
+# Contributing to Chess-Sensei
 
-Thank you for your interest in contributing to Chess-Sensai! This document
+Thank you for your interest in contributing to Chess-Sensei! This document
 provides guidelines and information for contributors.
 
 ## Getting Started
@@ -16,8 +16,8 @@ provides guidelines and information for contributors.
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Chess-Sensai.git
-   cd Chess-Sensai
+   git clone https://github.com/YOUR_USERNAME/Chess-Sensei.git
+   cd Chess-Sensei
    ```
 
 2. Install dependencies:
@@ -35,7 +35,7 @@ provides guidelines and information for contributors.
 ## Project Structure
 
 ```text
-Chess-Sensai/
+Chess-Sensei/
 ├── src/
 │   ├── frontend/     # Neutralino UI code
 │   ├── backend/      # Bun-powered services
@@ -43,7 +43,8 @@ Chess-Sensai/
 │   ├── shared/       # Shared types and utilities
 │   └── assets/       # Internal assets
 ├── assets/           # Chess pieces, icons, sounds
-├── docs/             # Technical documentation
+├── source-docs/      # Design & development specifications
+├── documents/        # End-user documentation
 └── public/           # Static files
 ```
 
@@ -96,7 +97,7 @@ feat: add real-time best-move highlighting system
 
 ## Documentation
 
-All major features should be documented in the [`docs/`](docs/) directory. See
+All major features should be documented in the [`source-docs/`](source-docs/) directory. See
 existing documentation for style and structure guidelines.
 
 ## Testing
@@ -109,7 +110,7 @@ existing documentation for style and structure guidelines.
 
 ## Questions?
 
-- Check the [documentation](docs/)
+- Check the [documentation](source-docs/)
 - Open an issue for clarification
 - Join discussions in pull requests
 
