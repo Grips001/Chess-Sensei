@@ -112,8 +112,7 @@ User guides and operational documentation will be available in the
   - IPC bridge between frontend and backend
 - 🚧 Phase 2: Minimal UI & Chessboard (Next)
 
-See [roadmap.md](source-docs/roadmap.md) for detailed development plan and
-current progress.
+See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md) for detailed development plan and current progress.
 
 ## Getting Started
 
