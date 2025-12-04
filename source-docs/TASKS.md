@@ -71,6 +71,8 @@ All foundational work has been completed:
 - [x] Metrics framework defined
 - [x] Build environment configured
 - [x] Buntralino initialized with proper structure
+- [x] Code quality tools configured (ESLint, Stylelint, Prettier, Markdownlint)
+- [x] Windows build workaround implemented (rcedit instead of resedit)
 
 ---
 
@@ -330,7 +332,7 @@ Integration" sections
 
 ## Phase 2: Minimal UI & Chessboard
 
-**Status:** 📋 PLANNED
+**Status:** 🚧 Next Phase
 
 **Source:** [roadmap.md](roadmap.md) - Phase 2,
 [ui-ux-design.md](ui-ux-design.md), [architecture.md](architecture.md) -
@@ -1943,10 +1945,13 @@ If any deviation from this plan is required:
 
 ### Key Files by Phase
 
-**Phase 1:**
+**Phase 0-1:**
 
-- `src/engine/` - Engine integration code
+- `src/engine/` - Engine integration code (Stockfish WASM)
 - `src/shared/` - Shared types and interfaces
+- `src/backend/` - IPC handlers and server
+- `scripts/` - Build scripts (Windows build workaround)
+- `documents/` - End-user documentation (building.md, engine-integration.md)
 
 **Phase 2:**
 
@@ -1984,17 +1989,17 @@ If any deviation from this plan is required:
 
 ### All 12 Source Documents
 
-| Document                                       | Key Content                                            |
-| ---------------------------------------------- | ------------------------------------------------------ |
-| [overview.md](overview.md)                     | Core concept, top 3 moves, training philosophy         |
-| [roadmap.md](roadmap.md)                       | All phases, milestones, success criteria               |
-| [architecture.md](architecture.md)             | Buntralino, Bun, Neutralino, file structure            |
-| [ai-engine.md](ai-engine.md)                   | Stockfish WASM, UCI, bot personalities, difficulty     |
-| [ui-ux-design.md](ui-ux-design.md)             | Neomorphism, glassmorphism, right panel, accessibility |
-| [game-modes.md](game-modes.md)                 | Training/Exam/Sandbox specs, state management          |
-| [move-guidance.md](move-guidance.md)           | Color coding, three-way sync, hover behavior           |
-| [player-progress.md](player-progress.md)       | 9 composite indexes, dashboard, achievements           |
-| [tracked-metrics.md](tracked-metrics.md)       | 100+ individual metrics by category                    |
-| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations        |
-| [data-storage.md](data-storage.md)             | JSON formats, file paths, import/export, backups       |
-| [development.md](development.md)               | Git workflow, testing, CI/CD, release process          |
+| Document                                       | Key Content                                                |
+| ---------------------------------------------- | ---------------------------------------------------------- |
+| [overview.md](overview.md)                     | Core concept, top 3 moves, training philosophy             |
+| [roadmap.md](roadmap.md)                       | All phases, milestones, success criteria                   |
+| [architecture.md](architecture.md)             | Buntralino, Bun, Neutralino, project structure, code tools |
+| [ai-engine.md](ai-engine.md)                   | Stockfish WASM, UCI, bot personalities, difficulty         |
+| [ui-ux-design.md](ui-ux-design.md)             | Neomorphism, glassmorphism, right panel, accessibility     |
+| [game-modes.md](game-modes.md)                 | Training/Exam/Sandbox specs, state management              |
+| [move-guidance.md](move-guidance.md)           | Color coding, three-way sync, hover behavior               |
+| [player-progress.md](player-progress.md)       | 9 composite indexes, dashboard, achievements               |
+| [tracked-metrics.md](tracked-metrics.md)       | 100+ individual metrics by category                        |
+| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations            |
+| [data-storage.md](data-storage.md)             | JSON formats, file paths, import/export, backups           |
+| [development.md](development.md)               | Git workflow, linting tools, CI/CD, release process        |

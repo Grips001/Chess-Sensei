@@ -24,11 +24,20 @@ Development follows modern GitHub best practices:
 
 ### Repository Structure
 
-- `/app` → frontend UI
-- `/backend` → Bun-powered services
-- `/engine` → chess engine + AI logic
-- `/assets` → chess pieces, UI icons, sounds
-- `/source-docs` → technical documentation
+```text
+Chess-Sensei/
+├── src/
+│   ├── frontend/     # Neutralino UI code (Vite + TypeScript)
+│   ├── backend/      # Bun-powered services and IPC handlers
+│   ├── engine/       # Chess engine + AI logic (Stockfish WASM)
+│   ├── shared/       # Shared types and utilities
+│   └── assets/       # Internal source assets
+├── scripts/          # Build scripts (Windows build workaround)
+├── assets/           # Chess pieces, icons, sounds
+├── source-docs/      # Design & development specifications
+├── documents/        # End-user documentation
+└── public/           # Static files
+```
 
 ### Development Workflow
 
@@ -45,10 +54,33 @@ Development follows modern GitHub best practices:
 
 ### Linting and Formatting
 
-- Consistent code style enforced across the project
-- Automated formatting on commit
-- ESLint/TSLint for static analysis
-- Type checking in CI/CD pipeline
+The project uses a comprehensive linting stack:
+
+- **ESLint** (v9+ flat config) - TypeScript/JavaScript linting
+- **Stylelint** (v16+) - CSS linting
+- **Prettier** (v3+) - Code formatting for all file types
+- **Markdownlint** - Documentation consistency
+
+Commands:
+
+```bash
+bun run lint        # Run all linters
+bun run lint:fix    # Auto-fix issues
+bun run format      # Format with Prettier
+
+# Individual linters
+bun run lint:ts     # ESLint only
+bun run lint:css    # Stylelint only
+bun run lint:md     # Markdownlint only
+bun run lint:format # Prettier check
+```
+
+Configuration files (gitignored for local customization):
+
+- `eslint.config.mjs` - ESLint flat config
+- `.prettierrc.json` - Prettier settings
+- `.markdownlint.json` - Markdownlint rules
+- `.stylelintrc.json` - Stylelint rules
 
 ### Testing Strategy
 
@@ -179,8 +211,14 @@ Follow conventional commits specification:
 1. Clone the repository
 2. Install dependencies: `bun install`
 3. Run development server: `bun run dev`
-4. Run tests: `bun test`
-5. Build for production: `bun run build`
+4. Run linters: `bun run lint`
+5. Build for production:
+   - Frontend only: `bun run build`
+   - Full app (all platforms): `bun run build:app`
+   - Windows (with rcedit workaround): `bun run build:windows`
+
+See [documents/building.md](../documents/building.md) for detailed build
+instructions and troubleshooting.
 
 ## Continuous Integration
 

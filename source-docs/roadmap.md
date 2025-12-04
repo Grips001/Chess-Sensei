@@ -649,19 +649,19 @@ driven by user feedback and demand.
 
 ## Milestones Summary
 
-| Phase    | Description                     | Duration  | Status     |
-| -------- | ------------------------------- | --------- | ---------- |
-| Phase 0  | Foundation & Setup              | 2 weeks   | ✓ Complete |
-| Phase 1  | Core Chess Engine Integration   | 4-6 weeks | 🚧 Next    |
-| Phase 2  | Minimal UI & Chessboard         | 3-4 weeks | 📋 Planned |
-| Phase 3  | AI Opponent & Training Mode     | 4-5 weeks | 📋 Planned |
-| Phase 4  | Exam Mode & Metrics Collection  | 3-4 weeks | 📋 Planned |
-| Phase 5  | Post-Game Analysis UI           | 4-5 weeks | 📋 Planned |
-| Phase 6  | Player Progress Dashboard       | 3-4 weeks | 📋 Planned |
-| Phase 7  | Sandbox Mode                    | 2-3 weeks | 📋 Planned |
-| Phase 8  | Import/Export & Data Management | 2-3 weeks | 📋 Planned |
-| Phase 9  | Polish & Optimization           | 3-4 weeks | 📋 Planned |
-| **v1.0** | **Public Release**              | -         | 📋 Q3 2025 |
+| Phase    | Description                     | Duration  | Status      |
+| -------- | ------------------------------- | --------- | ----------- |
+| Phase 0  | Foundation & Setup              | 2 weeks   | ✅ Complete |
+| Phase 1  | Core Chess Engine Integration   | 4-6 weeks | ✅ Complete |
+| Phase 2  | Minimal UI & Chessboard         | 3-4 weeks | 🚧 Next     |
+| Phase 3  | AI Opponent & Training Mode     | 4-5 weeks | 📋 Planned  |
+| Phase 4  | Exam Mode & Metrics Collection  | 3-4 weeks | 📋 Planned  |
+| Phase 5  | Post-Game Analysis UI           | 4-5 weeks | 📋 Planned  |
+| Phase 6  | Player Progress Dashboard       | 3-4 weeks | 📋 Planned  |
+| Phase 7  | Sandbox Mode                    | 2-3 weeks | 📋 Planned  |
+| Phase 8  | Import/Export & Data Management | 2-3 weeks | 📋 Planned  |
+| Phase 9  | Polish & Optimization           | 3-4 weeks | 📋 Planned  |
+| **v1.0** | **Public Release**              | -         | 📋 Q3 2025  |
 
 **Total Estimated Development Time:** 6-9 months (from Phase 1 start)
 

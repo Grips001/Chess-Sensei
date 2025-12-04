@@ -79,6 +79,36 @@ development workflows.
   - Explicit user opt-in for any telemetry
 - No third-party trackers or analytics baked into the core product.
 
+## Project Structure
+
+The codebase follows a layered architecture:
+
+```text
+Chess-Sensei/
+├── src/
+│   ├── frontend/     # Neutralino UI code (Vite + TypeScript)
+│   ├── backend/      # Bun-powered services and IPC handlers
+│   ├── engine/       # Chess engine + AI logic (Stockfish WASM)
+│   ├── shared/       # Shared types and utilities (chess-logic, IPC types)
+│   └── assets/       # Internal source assets
+├── scripts/          # Build scripts (Windows build workaround)
+├── assets/           # Chess pieces, icons, sounds
+├── source-docs/      # Design & development specifications
+├── documents/        # End-user documentation
+└── public/           # Static files
+```
+
+## Code Quality Tools
+
+The project uses automated code quality enforcement:
+
+- **ESLint** (v9+) - TypeScript/JavaScript linting with flat config
+- **Stylelint** (v16+) - CSS linting
+- **Prettier** (v3+) - Code formatting for all file types
+- **Markdownlint** - Documentation consistency
+
+Run `bun run lint` to check all files, `bun run lint:fix` to auto-fix issues.
+
 ## Packaging & Distribution
 
 - Native binary packaging per OS:
@@ -87,6 +117,15 @@ development workflows.
   - `.AppImage` or `.deb` for Linux
 - Auto-updater architecture designed but disabled by default.
 - Offline-first execution model.
+
+### Windows Build Workaround
+
+The standard Buntralino build uses `resedit` for Windows executable patching,
+which has compatibility issues with Bun-compiled executables. Chess-Sensei uses
+a custom build script (`scripts/build-windows.ts`) that uses `rcedit` instead.
+
+Use `bun run build:windows` for Windows builds. See
+[documents/building.md](../documents/building.md) for details.
 
 ## Technical Philosophy Summary
 
