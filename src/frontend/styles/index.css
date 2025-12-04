@@ -587,6 +587,13 @@ body {
   font-size: 14px;
 }
 
+/* Hidden states for guidance elements */
+.guidance-loading.hidden,
+.guidance-empty.hidden,
+.guidance-move-list.hidden {
+  display: none;
+}
+
 /* Piece container */
 .piece {
   width: 85%;
