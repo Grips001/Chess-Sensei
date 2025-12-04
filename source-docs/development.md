@@ -164,18 +164,107 @@ Follow conventional commits specification:
 
 ### Versioning
 
-- Semantic versioning (MAJOR.MINOR.PATCH)
-- Changelog maintained for each release
-- Git tags for all releases
+Chess-Sensei follows [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** (1.0.0) - Breaking changes, major rewrites
+- **MINOR** (0.1.0) - New features, backward compatible
+- **PATCH** (0.0.1) - Bug fixes, minor improvements
+
+Current versioning scheme:
+
+- **v0.x.x** - Pre-release development (Phase 0-9)
+- **v1.0.0** - First stable public release
+- **v1.x.x** - Post-release updates and improvements
+
+### Version Tags
+
+Version tags correspond to completed development phases:
+
+| Version | Phase                            | Status      |
+| ------- | -------------------------------- | ----------- |
+| v0.0.0  | Phase 0: Foundation              | Complete    |
+| v0.1.0  | Phase 1: Engine Integration      | Complete    |
+| v0.2.0  | Phase 2: UI & Chessboard         | Complete    |
+| v0.3.0  | Phase 3: AI Opponent & Training  | Complete    |
+| v0.4.0  | Phase 4: Exam Mode & Metrics     | Planned     |
+| v1.0.0  | Full Release (Phase 9 complete)  | Planned     |
+
+### Creating a Release
+
+#### Automated Releases (Recommended)
+
+Releases are automated via GitHub Actions. To create a release:
+
+1. **Update version** in `package.json`:
+
+   ```bash
+   # Edit package.json version field
+   "version": "0.3.0"
+   ```
+
+2. **Update CHANGELOG.md** with release notes
+
+3. **Commit changes**:
+
+   ```bash
+   git add package.json CHANGELOG.md
+   git commit -m "chore: prepare release v0.3.0"
+   ```
+
+4. **Create and push tag**:
+
+   ```bash
+   git tag -a v0.3.0 -m "Phase 3: AI Opponent & Training Mode"
+   git push origin main
+   git push origin v0.3.0
+   ```
+
+5. **GitHub Actions automatically**:
+   - Builds for Windows, macOS, and Linux
+   - Creates release archives
+   - Publishes GitHub Release with artifacts
+   - Generates release notes with checksums
+
+#### Manual Release (if needed)
+
+1. Build locally:
+
+   ```bash
+   bun run build
+   bun run build:app        # Linux/macOS
+   bun run build:windows    # Windows
+   ```
+
+2. Create release manually on GitHub
+3. Upload build artifacts
+
+### Release Artifacts
+
+Each release includes:
+
+- `Chess-Sensei-{version}-windows-x64.zip` - Windows executable
+- `Chess-Sensei-{version}-linux-x64.tar.gz` - Linux binary
+- `Chess-Sensei-{version}-macos-x64.tar.gz` - macOS application
+
+### Pre-release Versions
+
+For alpha/beta releases, use suffix tags:
+
+- `v0.4.0-alpha.1` - Alpha release
+- `v0.4.0-beta.1` - Beta release
+- `v0.4.0-rc.1` - Release candidate
+
+Pre-release tags automatically mark the GitHub release as "pre-release".
 
 ### Build and Distribution
 
-- Automated build process for all platforms
+- Automated build process for all platforms via GitHub Actions
 - Platform-specific packaging:
-  - Windows: `.exe` installer
-  - macOS: `.app` / `.dmg`
-  - Linux: `.AppImage` / `.deb`
+  - Windows: `.zip` archive with `.exe`
+  - macOS: `.tar.gz` archive with `.app`
+  - Linux: `.tar.gz` archive with binary
 - Release notes published with each version
+- SHA256 checksums included for verification
 - Optional auto-update mechanism (disabled by default)
 
 ## Contributing Guidelines

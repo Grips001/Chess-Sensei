@@ -43,12 +43,15 @@ chess engines in the world.
 
 ### Can I play against the computer?
 
-**Not yet!** The AI opponent is coming in **Phase 3** (next major update).
-Currently, you can:
+**Yes!** Training Mode includes AI opponents with 5 unique personalities:
 
-- Play against yourself
-- Use undo/redo to explore variations
-- Practice tactics and openings
+- **Sensei** (~2200 Elo) - Strong, consistent play
+- **Student** (~1000 Elo) - Beginner-friendly
+- **Club Player** (~1400 Elo) - Intermediate challenge
+- **Tactician** (~1600 Elo) - Aggressive, tactical style
+- **Blunder-Prone** (~1200 Elo) - Makes mistakes to exploit
+
+You can also adjust difficulty from Beginner (800 Elo) to Master (2400 Elo).
 
 ### Can I play against other people online?
 
@@ -91,12 +94,15 @@ Puzzle mode is planned for **Phase 5** of development.
 
 ### Are there training exercises?
 
-Training mode with targeted exercises is coming in **Phase 3**, including:
+**Yes!** Training Mode (Phase 3) is now available with:
 
-- Opening training
-- Tactical pattern recognition
-- Endgame practice
-- Positional understanding
+- Real-time best-move guidance (top 3 moves highlighted)
+- AI opponents with adjustable difficulty
+- Color-coded move suggestions (Blue/Green/Yellow)
+- Human-like thinking delays for natural gameplay
+
+Additional training features (opening trainer, puzzles) are planned for future
+phases.
 
 ## Gameplay Questions
 
@@ -324,7 +330,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 - ✅ Fully offline
 - ✅ Free and open-source
 - ✅ Privacy-focused (no data collection)
-- ✅ AI training features (coming in Phase 3)
+- ✅ AI training features with real-time guidance
 - ❌ No online play
 - ❌ Smaller feature set (for now)
 
@@ -342,7 +348,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 - ✅ Fully offline
 - ✅ Desktop application
-- ✅ AI-powered training (coming)
+- ✅ AI-powered training with real-time guidance
 - ❌ No online play
 
 ### Chess-Sensei vs Arena/ChessBase?
@@ -364,15 +370,14 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ## Roadmap Questions
 
-### When is the AI opponent coming?
+### What's in the current release?
 
-**Phase 3** is next in development, which includes:
+**Phase 3 (v0.3.0)** is complete and includes:
 
-- AI opponent with multiple difficulty levels
-- Real-time move suggestions
-- Training mode exercises
-
-Expected: Q1-Q2 2025 (tentative, subject to change)
+- AI opponent with 5 bot personalities
+- Difficulty levels from 800 to 2400 Elo
+- Real-time best-move guidance (top 3 moves)
+- Training Mode with full game flow
 
 ### What features are planned?
 
@@ -380,9 +385,9 @@ See the full roadmap in [source-docs/roadmap.md](../source-docs/roadmap.md).
 
 **Upcoming phases:**
 
-- **Phase 3:** AI Opponent & Training Mode
-- **Phase 4:** Analytics & Progress Tracking
-- **Phase 5:** Game Modes & Advanced Features
+- **Phase 4:** Exam Mode & Metrics Collection
+- **Phase 5:** Post-Game Analysis UI
+- **Phase 6:** Player Progress Dashboard
 
 ### Can I request a feature?
 

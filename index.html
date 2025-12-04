@@ -30,12 +30,33 @@
           <div id="game-alert" class="game-alert hidden">
             <!-- Check, checkmate, stalemate alerts will appear here -->
           </div>
+          <div id="bot-thinking-indicator" class="bot-thinking-indicator hidden">
+            <div class="thinking-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span class="thinking-text">Bot is thinking...</span>
+          </div>
           <div id="turn-indicator">
             <div class="turn-label">Current Turn:</div>
             <div class="turn-display">
               <div class="turn-piece" id="turn-piece-icon"></div>
               <div class="turn-text" id="turn-text">White to move</div>
             </div>
+          </div>
+        </div>
+        <div class="panel-section guidance-panel hidden" id="guidance-panel">
+          <h3 class="guidance-panel-title">Best Moves</h3>
+          <div id="guidance-content">
+            <div class="guidance-loading hidden" id="guidance-loading">
+              <div class="guidance-loading-spinner"></div>
+              Analyzing position...
+            </div>
+            <div class="guidance-move-list" id="guidance-move-list">
+              <!-- Guidance moves will be rendered here by JavaScript -->
+            </div>
+            <div class="guidance-empty hidden" id="guidance-empty">No moves available</div>
           </div>
         </div>
         <div class="panel-section">
@@ -88,6 +109,15 @@
         </div>
       </div>
     </div>
+    <!-- Promotion Dialog -->
+    <div id="promotion-dialog-overlay" class="promotion-dialog-overlay hidden">
+      <div class="promotion-dialog">
+        <h3 class="promotion-dialog-title">Promote Pawn</h3>
+        <div class="promotion-pieces" id="promotion-pieces">
+          <!-- Pieces will be populated dynamically based on color -->
+        </div>
+      </div>
+    </div>
     <!-- Game Result Modal -->
     <div id="game-result-overlay" class="game-result-overlay hidden">
       <div class="game-result-modal">
@@ -96,6 +126,133 @@
         <p class="game-result-reason" id="result-reason"></p>
         <div class="game-result-buttons">
           <button class="game-result-button" id="new-game-button">New Game</button>
+        </div>
+      </div>
+    </div>
+    <!-- Mode Selection Screen -->
+    <div id="mode-selection-overlay" class="mode-selection-overlay">
+      <div class="mode-selection-container">
+        <div class="mode-selection-header">
+          <h1 class="mode-selection-title">Chess-Sensei</h1>
+          <p class="mode-selection-subtitle">Your Personal Chess Training Partner</p>
+        </div>
+        <div class="mode-selection-cards">
+          <!-- Training Mode Card -->
+          <div class="mode-card available" data-mode="training">
+            <div class="mode-card-icon">♟</div>
+            <h2 class="mode-card-title">Training Mode</h2>
+            <p class="mode-card-description">Practice with real-time guidance and hints.</p>
+            <ul class="mode-card-features">
+              <li>Real-time best-move suggestions</li>
+              <li>Color-coded move highlighting</li>
+              <li>Adjustable bot difficulty</li>
+              <li>No performance tracking</li>
+            </ul>
+            <button class="mode-card-button">Start Training</button>
+          </div>
+          <!-- Exam Mode Card -->
+          <div class="mode-card disabled" data-mode="exam">
+            <div class="mode-card-icon">📝</div>
+            <h2 class="mode-card-title">Exam Mode</h2>
+            <p class="mode-card-description">Test your skills without assistance.</p>
+            <ul class="mode-card-features">
+              <li>No hints or guidance</li>
+              <li>Full performance tracking</li>
+              <li>Post-game analysis</li>
+              <li>Progress metrics saved</li>
+            </ul>
+            <button class="mode-card-button" disabled>Coming Soon</button>
+          </div>
+          <!-- Sandbox Mode Card -->
+          <div class="mode-card disabled" data-mode="sandbox">
+            <div class="mode-card-icon">🧪</div>
+            <h2 class="mode-card-title">Sandbox Mode</h2>
+            <p class="mode-card-description">Free play and experimentation.</p>
+            <ul class="mode-card-features">
+              <li>Play against yourself</li>
+              <li>Set up custom positions</li>
+              <li>Test variations</li>
+              <li>No restrictions</li>
+            </ul>
+            <button class="mode-card-button" disabled>Coming Soon</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Training Setup Screen -->
+    <div id="training-setup-overlay" class="training-setup-overlay hidden">
+      <div class="training-setup-container">
+        <div class="training-setup-header">
+          <button class="back-button" id="setup-back-button">← Back</button>
+          <h2 class="training-setup-title">Training Mode Setup</h2>
+        </div>
+        <!-- Bot Selection -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Choose Your Opponent</h3>
+          <div class="bot-selection-grid" id="bot-selection-grid">
+            <!-- Bot cards will be populated by JavaScript -->
+          </div>
+        </div>
+        <!-- Difficulty Preset -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Difficulty Level</h3>
+          <div class="difficulty-selector">
+            <button class="difficulty-button" data-preset="beginner">
+              <span class="difficulty-label">Beginner</span>
+              <span class="difficulty-elo">~800 Elo</span>
+            </button>
+            <button class="difficulty-button selected" data-preset="intermediate">
+              <span class="difficulty-label">Intermediate</span>
+              <span class="difficulty-elo">~1400 Elo</span>
+            </button>
+            <button class="difficulty-button" data-preset="advanced">
+              <span class="difficulty-label">Advanced</span>
+              <span class="difficulty-elo">~2000 Elo</span>
+            </button>
+            <button class="difficulty-button" data-preset="master">
+              <span class="difficulty-label">Master</span>
+              <span class="difficulty-elo">~2400 Elo</span>
+            </button>
+          </div>
+        </div>
+        <!-- Color Selection -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Choose Your Color</h3>
+          <div class="color-selector">
+            <button class="color-button selected" data-color="white">
+              <div class="color-piece white-king"></div>
+              <span class="color-label">White</span>
+              <span class="color-hint">Play first</span>
+            </button>
+            <button class="color-button" data-color="random">
+              <div class="color-piece random-icon">?</div>
+              <span class="color-label">Random</span>
+              <span class="color-hint">Let fate decide</span>
+            </button>
+            <button class="color-button" data-color="black">
+              <div class="color-piece black-king"></div>
+              <span class="color-label">Black</span>
+              <span class="color-hint">Play second</span>
+            </button>
+          </div>
+        </div>
+        <!-- Options -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Options</h3>
+          <div class="setup-options">
+            <label class="setup-option">
+              <input type="checkbox" id="guidance-enabled" checked />
+              <span class="option-label">Show move guidance</span>
+            </label>
+            <label class="setup-option">
+              <input type="checkbox" id="time-delays-enabled" checked />
+              <span class="option-label">Human-like bot timing</span>
+            </label>
+          </div>
+        </div>
+        <!-- Start Game Button -->
+        <div class="setup-actions">
+          <button class="start-game-button" id="start-training-button">Start Game</button>
         </div>
       </div>
     </div>

@@ -14,12 +14,16 @@ import {
   IPC_METHODS,
   isErrorResponse,
   STARTPOS_FEN,
+  type BestMove,
   type BestMovesResponse,
   type EvaluationResponse,
   type EngineStatusResponse,
+  type ErrorResponse,
 } from '../shared/ipc-types';
-import { ChessGame, type Piece, type PieceSymbol } from '../shared/chess-logic';
+import { ChessGame, type Piece, type PieceSymbol, type Square } from '../shared/chess-logic';
 import { SoundManager } from './sound-manager';
+import { createTrainingMode, type TrainingConfig } from './training-mode';
+import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 
 console.log('Chess-Sensei Frontend initialized');
 
@@ -28,6 +32,12 @@ const game = new ChessGame();
 
 // Initialize sound manager
 const soundManager = new SoundManager();
+
+// Initialize training mode
+const { manager: trainingManager, ui: trainingUI } = createTrainingMode();
+
+// Initialize move guidance
+const guidanceManager = createMoveGuidance();
 
 // Track drag and selection state
 let draggedPiece: { element: HTMLElement; square: string } | null = null;
@@ -44,7 +54,7 @@ let redoStack: string[] = [];
 function updateTurnIndicator(): void {
   const turnText = document.getElementById('turn-text');
   const turnPieceIcon = document.getElementById('turn-piece-icon');
-  const turnDisplay = document.querySelector('.turn-display');
+  const turnDisplay = document.querySelector('.turn-display') as HTMLElement | null;
 
   if (!turnText || !turnPieceIcon || !turnDisplay) return;
 
@@ -255,6 +265,156 @@ function showConfirmDialog(title: string, message: string, onConfirm: () => void
 
   yesBtn.addEventListener('click', handleYes);
   cancelBtn.addEventListener('click', handleCancel);
+}
+
+// Pending promotion move state
+let pendingPromotion: { from: string; to: string } | null = null;
+
+/**
+ * Check if a move is a pawn promotion
+ * A pawn promotes when it reaches the last rank (rank 8 for white, rank 1 for black)
+ */
+function isPromotionMove(from: string, to: string): boolean {
+  const piece = game.getPiece(from as Square);
+  if (!piece || piece.type !== 'p') return false;
+
+  const toRank = to[1];
+  // White pawn promotes on rank 8, black pawn promotes on rank 1
+  return (piece.color === 'w' && toRank === '8') || (piece.color === 'b' && toRank === '1');
+}
+
+/**
+ * Show promotion dialog for piece selection
+ */
+function showPromotionDialog(from: string, to: string): void {
+  const overlay = document.getElementById('promotion-dialog-overlay');
+  const piecesContainer = document.getElementById('promotion-pieces');
+
+  if (!overlay || !piecesContainer) return;
+
+  // Store pending promotion
+  pendingPromotion = { from, to };
+
+  // Determine piece color
+  const piece = game.getPiece(from as Square);
+  const colorPrefix = piece?.color === 'w' ? 'w' : 'b';
+
+  // Promotion options: Queen, Rook, Bishop, Knight
+  const promotionPieces = [
+    { symbol: 'q', name: 'Queen' },
+    { symbol: 'r', name: 'Rook' },
+    { symbol: 'b', name: 'Bishop' },
+    { symbol: 'n', name: 'Knight' },
+  ];
+
+  // Clear and populate pieces
+  piecesContainer.innerHTML = '';
+  for (const promo of promotionPieces) {
+    const pieceBtn = document.createElement('button');
+    pieceBtn.className = 'promotion-piece';
+    pieceBtn.title = promo.name;
+    pieceBtn.dataset.piece = promo.symbol;
+
+    // Create piece image
+    const img = document.createElement('img');
+    img.src = `/assets/pieces/${colorPrefix}${promo.symbol.toUpperCase()}.svg`;
+    img.alt = promo.name;
+    img.style.width = '44px';
+    img.style.height = '44px';
+    pieceBtn.appendChild(img);
+
+    pieceBtn.addEventListener('click', () => handlePromotionChoice(promo.symbol));
+    piecesContainer.appendChild(pieceBtn);
+  }
+
+  // Show dialog
+  overlay.classList.remove('hidden');
+}
+
+/**
+ * Handle promotion piece selection
+ */
+function handlePromotionChoice(piece: string): void {
+  const overlay = document.getElementById('promotion-dialog-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+
+  if (!pendingPromotion) return;
+
+  const { from, to } = pendingPromotion;
+  pendingPromotion = null;
+
+  // Execute the promotion move with the selected piece
+  executeMove(from, to, piece);
+}
+
+/**
+ * Execute a move (with optional promotion piece)
+ */
+function executeMove(from: string, to: string, promotion?: string): void {
+  try {
+    const moveStr = promotion ? `${from}${to}${promotion}` : `${from}${to}`;
+    const move = game.makeMove(moveStr);
+    if (move) {
+      console.log('Move made:', move.san);
+
+      // Clear redo stack on new move (can't redo after making a new move)
+      redoStack = [];
+
+      // Play appropriate sound
+      if (move.isCheckmate) {
+        soundManager.play('checkmate');
+      } else if (move.isCheck) {
+        soundManager.play('check');
+      } else if (move.isCastling) {
+        soundManager.play('castle');
+      } else if (move.promotion) {
+        soundManager.play('promotion');
+      } else if (move.captured) {
+        soundManager.play('capture');
+      } else {
+        soundManager.play('move');
+      }
+
+      // Check for stalemate or draw
+      if (game.isStalemate() || game.isDraw()) {
+        soundManager.play('stalemate');
+      }
+
+      // Add animation to moving piece
+      const toSquare = document.querySelector(`[data-square="${to}"]`);
+      const fromSquare = document.querySelector(`[data-square="${from}"]`);
+
+      if (toSquare && fromSquare) {
+        const piece = fromSquare.querySelector('.piece') as HTMLElement;
+
+        // If capture, animate the captured piece
+        if (move.captured) {
+          const capturedPiece = toSquare.querySelector('.piece') as HTMLElement;
+          if (capturedPiece) {
+            capturedPiece.classList.add('captured');
+          }
+        }
+
+        // Animate the moving piece
+        if (piece) {
+          piece.classList.add('moving');
+        }
+      }
+
+      // Render board after animation and handle Training Mode
+      setTimeout(
+        async () => {
+          await handlePostMoveUpdates();
+        },
+        move.captured ? 250 : 300
+      );
+    }
+  } catch (error) {
+    console.error('Invalid move:', error);
+    clearSelection();
+  }
 }
 
 /**
@@ -680,85 +840,395 @@ function highlightLegalMoves(fromSquare: string): void {
 }
 
 /**
+ * Handle post-move updates and check if bot should play
+ * Per Task 3.2.5: Training Mode state management
+ */
+async function handlePostMoveUpdates(): Promise<void> {
+  clearSelection();
+  renderChessboard();
+  updateTurnIndicator();
+  updateMoveHistory();
+  updateCapturedPieces();
+  updateGameAlert();
+  updateUndoRedoButtons();
+
+  // Show game result modal if game is over
+  if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+    // Hide guidance on game over
+    showGuidancePanel(false);
+    guidanceManager.clearGuidance();
+    updateGuidanceHighlights();
+    setTimeout(() => {
+      showGameResult();
+    }, 1000);
+    return;
+  }
+
+  // Check if bot should make a move in Training Mode
+  if (trainingManager.isActive()) {
+    const shouldBotMove = trainingManager.updatePosition(game.getFen());
+    if (shouldBotMove) {
+      // Hide guidance during bot's turn
+      showGuidancePanel(false);
+      await requestBotMove();
+      // Update guidance after bot move (it will now be player's turn)
+      await updateGuidance();
+    } else {
+      // It's player's turn, update guidance
+      await updateGuidance();
+    }
+  }
+}
+
+/**
+ * Request and execute a bot move
+ * Per Task 3.2.5: Training Mode state management
+ */
+async function requestBotMove(): Promise<void> {
+  if (!trainingManager.isActive() || trainingManager.isPlayerTurn()) {
+    return;
+  }
+
+  // Show thinking indicator
+  showBotThinking(true);
+
+  try {
+    const botMove = await trainingManager.requestBotMove(game.getFen());
+    if (botMove) {
+      // Execute the bot's move
+      const move = game.makeMove(botMove);
+      if (move) {
+        console.log('Bot move:', move.san);
+
+        // Play appropriate sound
+        if (move.isCheckmate) {
+          soundManager.play('checkmate');
+        } else if (move.isCheck) {
+          soundManager.play('check');
+        } else if (move.isCastling) {
+          soundManager.play('castle');
+        } else if (move.captured) {
+          soundManager.play('capture');
+        } else {
+          soundManager.play('move');
+        }
+
+        // Update UI
+        renderChessboard();
+        updateTurnIndicator();
+        updateMoveHistory();
+        updateCapturedPieces();
+        updateGameAlert();
+
+        // Show game result if game is over
+        if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+          setTimeout(() => {
+            showGameResult();
+          }, 1000);
+        }
+
+        // Update training mode state
+        trainingManager.updatePosition(game.getFen());
+      }
+    }
+  } catch (error) {
+    console.error('Error getting bot move:', error);
+  } finally {
+    showBotThinking(false);
+  }
+}
+
+/**
+ * Show/hide bot thinking indicator
+ */
+function showBotThinking(show: boolean): void {
+  const indicator = document.getElementById('bot-thinking-indicator');
+  if (indicator) {
+    indicator.classList.toggle('hidden', !show);
+  }
+}
+
+// ========================================
+// Move Guidance UI Functions
+// Per Task 3.3: Best-Move Guidance System
+// ========================================
+
+/**
+ * Show/hide guidance panel
+ * Per Task 3.3.6: Guidance timing (player's turn only)
+ */
+function showGuidancePanel(show: boolean): void {
+  const panel = document.getElementById('guidance-panel');
+  if (panel) {
+    panel.classList.toggle('hidden', !show);
+  }
+}
+
+/**
+ * Update guidance loading state
+ */
+function showGuidanceLoading(show: boolean): void {
+  const loading = document.getElementById('guidance-loading');
+  const moveList = document.getElementById('guidance-move-list');
+  const empty = document.getElementById('guidance-empty');
+
+  if (loading) loading.classList.toggle('hidden', !show);
+  if (moveList) moveList.classList.toggle('hidden', show);
+  if (empty) empty.classList.add('hidden');
+}
+
+/**
+ * Render guidance moves in the panel
+ * Per Task 3.4.2: Add best-move notation display
+ */
+function renderGuidanceMoves(moves: GuidanceMove[]): void {
+  const moveList = document.getElementById('guidance-move-list');
+  const empty = document.getElementById('guidance-empty');
+
+  if (!moveList) return;
+
+  if (moves.length === 0) {
+    moveList.innerHTML = '';
+    if (empty) empty.classList.remove('hidden');
+    return;
+  }
+
+  if (empty) empty.classList.add('hidden');
+
+  moveList.innerHTML = moves
+    .map((move, index) => {
+      // Convert UCI to SAN for display
+      const san = ChessGame.uciToSan(game.getFen(), move.uci) || move.uci;
+      const colorClass = `move-${move.color}`;
+      const rankClass = `rank-${index + 1}`;
+
+      return `
+        <div class="guidance-move-entry"
+             data-index="${index}"
+             data-from="${move.from}"
+             data-to="${move.to}">
+          <div class="guidance-move-rank ${rankClass}">${index + 1}</div>
+          <div class="guidance-move-notation ${colorClass}">${san}</div>
+          <div class="guidance-move-eval">${move.formattedScore}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+  // Add hover listeners for guidance moves
+  const entries = moveList.querySelectorAll('.guidance-move-entry');
+  entries.forEach((entry) => {
+    entry.addEventListener('mouseenter', () => {
+      const index = parseInt(entry.getAttribute('data-index') || '-1');
+      handleGuidanceHover(index);
+    });
+    entry.addEventListener('mouseleave', () => {
+      handleGuidanceHover(-1);
+    });
+  });
+}
+
+/**
+ * Handle hover on guidance move
+ * Per Task 3.3.4: Implement hover interactions
+ */
+function handleGuidanceHover(index: number): void {
+  guidanceManager.setHoveredMove(index);
+  updateGuidanceHighlights();
+
+  // Update hover state in panel
+  const entries = document.querySelectorAll('.guidance-move-entry');
+  entries.forEach((entry, i) => {
+    entry.classList.toggle('hovered', i === index);
+  });
+}
+
+/**
+ * Update guidance highlights on the board
+ * Per Task 3.3.2: Implement color-coded highlighting
+ * Per Task 3.3.3: Implement three-way visual sync
+ * Supports multiple colors on same square (nested highlights)
+ */
+function updateGuidanceHighlights(): void {
+  // Remove all existing guidance highlights
+  const squares = document.querySelectorAll('.square');
+  squares.forEach((square) => {
+    square.classList.remove(
+      'guidance-highlight',
+      'guidance-blue',
+      'guidance-green',
+      'guidance-yellow',
+      'guidance-secondary-blue',
+      'guidance-secondary-green',
+      'guidance-secondary-yellow',
+      'guidance-source',
+      'guidance-hovered'
+    );
+    // Remove any tertiary highlight elements
+    const tertiary = square.querySelector('.guidance-tertiary');
+    if (tertiary) tertiary.remove();
+  });
+
+  // Remove guidance classes from pieces
+  const pieces = document.querySelectorAll('.piece');
+  pieces.forEach((piece) => {
+    piece.classList.remove(
+      'guidance-piece',
+      'guidance-piece-blue',
+      'guidance-piece-green',
+      'guidance-piece-yellow',
+      'guidance-emphasized'
+    );
+  });
+
+  if (!guidanceManager.isActive()) return;
+
+  const moves = guidanceManager.getMoves();
+  const state = guidanceManager.getState();
+
+  // Track colors per square for multi-color support
+  const squareColors: Map<string, string[]> = new Map();
+
+  // First pass: collect all colors for each square
+  moves.forEach((move) => {
+    // Source squares
+    if (!squareColors.has(move.from)) {
+      squareColors.set(move.from, []);
+    }
+    squareColors.get(move.from)!.push(move.color);
+
+    // Destination squares
+    if (!squareColors.has(move.to)) {
+      squareColors.set(move.to, []);
+    }
+    squareColors.get(move.to)!.push(move.color);
+  });
+
+  // Second pass: apply highlights with multi-color support
+  moves.forEach((move) => {
+    // Highlight source square (piece location)
+    const sourceSquare = document.querySelector(`.square[data-square="${move.from}"]`);
+    if (sourceSquare) {
+      const colors = squareColors.get(move.from) || [];
+      applyMultiColorHighlight(sourceSquare, colors, true);
+
+      if (state.hoveredIndex >= 0 && moves[state.hoveredIndex]?.from === move.from) {
+        sourceSquare.classList.add('guidance-hovered');
+      }
+
+      // Highlight the piece itself (use primary color)
+      const piece = sourceSquare.querySelector('.piece');
+      if (piece) {
+        piece.classList.add('guidance-piece', `guidance-piece-${colors[0]}`);
+        if (state.hoveredIndex >= 0 && moves[state.hoveredIndex]?.from === move.from) {
+          piece.classList.add('guidance-emphasized');
+        }
+      }
+    }
+
+    // Highlight destination square
+    const destSquare = document.querySelector(`.square[data-square="${move.to}"]`);
+    if (destSquare) {
+      const colors = squareColors.get(move.to) || [];
+      applyMultiColorHighlight(destSquare, colors, false);
+
+      if (state.hoveredIndex >= 0 && moves[state.hoveredIndex]?.to === move.to) {
+        destSquare.classList.add('guidance-hovered');
+      }
+    }
+  });
+}
+
+/**
+ * Apply multi-color highlight to a square
+ * Uses nested rings: outer (::before), middle (::after), inner (injected element)
+ */
+function applyMultiColorHighlight(square: Element, colors: string[], isSource: boolean): void {
+  // Always add base highlight class
+  square.classList.add('guidance-highlight');
+
+  if (isSource) {
+    square.classList.add('guidance-source');
+  }
+
+  // Deduplicate colors while preserving order (first occurrence wins)
+  const uniqueColors = [...new Set(colors)];
+
+  // Primary color (outermost ring via ::before)
+  if (uniqueColors.length >= 1) {
+    square.classList.add(`guidance-${uniqueColors[0]}`);
+  }
+
+  // Secondary color (middle ring via ::after)
+  if (uniqueColors.length >= 2) {
+    square.classList.add(`guidance-secondary-${uniqueColors[1]}`);
+  }
+
+  // Tertiary color (innermost ring via injected element)
+  if (uniqueColors.length >= 3) {
+    const tertiary = document.createElement('div');
+    tertiary.className = `guidance-tertiary tertiary-${uniqueColors[2]}`;
+    square.appendChild(tertiary);
+  }
+}
+
+/**
+ * Request and update guidance for current position
+ * Per Task 3.3.1: Calculate top 3 moves in real-time
+ * Per Task 3.3.8: Optimize performance
+ */
+async function updateGuidance(): Promise<void> {
+  // Only show guidance in Training Mode when guidance is enabled
+  const config = trainingManager.getConfig();
+  if (!trainingManager.isActive() || !config.guidanceEnabled) {
+    showGuidancePanel(false);
+    guidanceManager.deactivate();
+    return;
+  }
+
+  // Hide guidance on opponent's turn or game over
+  if (!trainingManager.isPlayerTurn() || game.isGameOver()) {
+    showGuidancePanel(false);
+    guidanceManager.clearGuidance();
+    updateGuidanceHighlights();
+    return;
+  }
+
+  // Activate and show guidance
+  guidanceManager.activate();
+  showGuidancePanel(true);
+  showGuidanceLoading(true);
+
+  // Request guidance moves
+  await guidanceManager.requestGuidance(game.getFen());
+
+  // Update UI
+  showGuidanceLoading(false);
+  renderGuidanceMoves(guidanceManager.getMoves());
+  updateGuidanceHighlights();
+}
+
+/**
  * Attempt to make a move
  * Per Task 2.2.4: Piece animation on move
  * Per Task 2.2.5: Move sound effects
+ * Per Task 3.2.5: Training Mode integration
  */
 function attemptMove(from: string, to: string): void {
-  try {
-    const move = game.makeMove({ from: from as any, to: to as any });
-    if (move) {
-      console.log('Move made:', move.san);
-
-      // Clear redo stack on new move (can't redo after making a new move)
-      redoStack = [];
-
-      // Play appropriate sound
-      if (move.isCheckmate) {
-        soundManager.play('checkmate');
-      } else if (move.isCheck) {
-        soundManager.play('check');
-      } else if (move.isCastling) {
-        soundManager.play('castle');
-      } else if (move.promotion) {
-        soundManager.play('promotion');
-      } else if (move.captured) {
-        soundManager.play('capture');
-      } else {
-        soundManager.play('move');
-      }
-
-      // Check for stalemate or draw
-      if (game.isStalemate() || game.isDraw()) {
-        soundManager.play('stalemate');
-      }
-
-      // Add animation to moving piece
-      const toSquare = document.querySelector(`[data-square="${to}"]`);
-      const fromSquare = document.querySelector(`[data-square="${from}"]`);
-
-      if (toSquare && fromSquare) {
-        const piece = fromSquare.querySelector('.piece') as HTMLElement;
-
-        // If capture, animate the captured piece
-        if (move.captured) {
-          const capturedPiece = toSquare.querySelector('.piece') as HTMLElement;
-          if (capturedPiece) {
-            capturedPiece.classList.add('captured');
-          }
-        }
-
-        // Animate the moving piece
-        if (piece) {
-          piece.classList.add('moving');
-        }
-      }
-
-      // Render board after animation
-      setTimeout(
-        () => {
-          clearSelection();
-          renderChessboard();
-          updateTurnIndicator();
-          updateMoveHistory();
-          updateCapturedPieces();
-          updateGameAlert();
-          updateUndoRedoButtons();
-
-          // Show game result modal if game is over
-          if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-            setTimeout(() => {
-              showGameResult();
-            }, 1000); // Delay modal to let alert animation play first
-          }
-        },
-        move.captured ? 250 : 300
-      );
-    }
-  } catch (error) {
-    console.error('Invalid move:', error);
-    clearSelection();
+  // In Training Mode, only allow moves on player's turn
+  if (trainingManager.isActive() && !trainingManager.isPlayerTurn()) {
+    console.log('Not your turn - waiting for bot');
+    return;
   }
+
+  // Check if this is a pawn promotion - show dialog to let user choose piece
+  if (isPromotionMove(from, to)) {
+    showPromotionDialog(from, to);
+    return;
+  }
+
+  // Execute the move normally
+  executeMove(from, to);
 }
 
 /**
@@ -952,12 +1422,12 @@ async function testIPCCommunication(): Promise<void> {
     fen: STARTPOS_FEN,
     depth: 10,
     count: 3,
-  })) as BestMovesResponse;
+  })) as BestMovesResponse | ErrorResponse;
 
   if (isErrorResponse(bestMovesResult)) {
     console.error('   Error:', bestMovesResult.error);
   } else {
-    console.log('   Top 3 moves:', bestMovesResult.moves.map((m) => m.move).join(', '));
+    console.log('   Top 3 moves:', bestMovesResult.moves.map((m: BestMove) => m.move).join(', '));
   }
   displayResults('4. requestBestMoves (top 3)', bestMovesResult);
 
@@ -1002,6 +1472,51 @@ async function testIPCCommunication(): Promise<void> {
   console.log('\n=== IPC Communication Tests Complete ===');
 }
 
+/**
+ * Start a Training Mode game
+ * Per Task 3.2.4: Create game initialization flow
+ */
+async function startTrainingGame(
+  config: TrainingConfig,
+  playerColor: 'white' | 'black'
+): Promise<void> {
+  // Reset the game
+  game.reset();
+  redoStack = [];
+
+  // Flip board if playing as black
+  if (playerColor === 'black' && !boardFlipped) {
+    boardFlipped = true;
+  } else if (playerColor === 'white' && boardFlipped) {
+    boardFlipped = false;
+  }
+
+  // Render the fresh board
+  renderChessboard();
+  updateTurnIndicator();
+  updateMoveHistory();
+  updateCapturedPieces();
+  updateGameAlert();
+  updateUndoRedoButtons();
+
+  console.log(`Training Mode started: Playing as ${playerColor}`);
+
+  // If playing as black, bot makes the first move
+  if (playerColor === 'black') {
+    // Hide guidance until it's player's turn
+    showGuidancePanel(false);
+    // Small delay before bot's first move
+    setTimeout(async () => {
+      await requestBotMove();
+      // After bot's first move, update guidance for player
+      await updateGuidance();
+    }, 500);
+  } else if (config.guidanceEnabled) {
+    // Playing as white, show guidance immediately
+    await updateGuidance();
+  }
+}
+
 // Initialize application
 (async () => {
   // Render the chessboard immediately
@@ -1011,15 +1526,40 @@ async function testIPCCommunication(): Promise<void> {
   updateTurnIndicator();
   updateGameAlert();
 
+  // Initialize Training Mode UI
+  trainingUI.initialize();
+
+  // Set up Training Mode callbacks
+  trainingUI.onGameStart = (config, playerColor) => {
+    startTrainingGame(config, playerColor);
+  };
+
   // Wire up "New Game" buttons
   const newGameButton = document.getElementById('new-game-button');
   if (newGameButton) {
-    newGameButton.addEventListener('click', startNewGame);
+    newGameButton.addEventListener('click', () => {
+      // In Training Mode, show mode selection instead of just resetting
+      if (trainingManager.isActive()) {
+        trainingManager.stop();
+      }
+      trainingUI.show();
+    });
   }
 
   const newGameControl = document.getElementById('new-game-control');
   if (newGameControl) {
-    newGameControl.addEventListener('click', handleNewGameControl);
+    newGameControl.addEventListener('click', () => {
+      // Show confirmation if game is in progress
+      if (game.getHistory().length > 0) {
+        handleNewGameControl();
+      } else {
+        // No game in progress, show mode selection
+        if (trainingManager.isActive()) {
+          trainingManager.stop();
+        }
+        trainingUI.show();
+      }
+    });
   }
 
   // Wire up "Resign" button
@@ -1069,5 +1609,5 @@ async function testIPCCommunication(): Promise<void> {
   // Make test function available globally for debugging (Phase 1 tests)
   (window as unknown as { testIPC: () => Promise<void> }).testIPC = testIPCCommunication;
 
-  console.log('Phase 2: UI rendering complete');
+  console.log('Phase 3: Training Mode UI initialized');
 })();

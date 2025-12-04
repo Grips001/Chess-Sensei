@@ -9,6 +9,7 @@
  */
 
 import type { BestMove, PositionEvaluation, MoveAnalysis } from './engine-types';
+import type { BotProfile, BotPersonality, AIPlayMode, DifficultyPreset } from './bot-types';
 
 // Re-export engine types for convenience
 export type { BestMove, PositionEvaluation, MoveAnalysis };
@@ -20,6 +21,9 @@ export {
   classifyMove,
   STARTPOS_FEN,
 } from './engine-types';
+
+// Re-export bot types for convenience
+export type { BotProfile, BotPersonality, AIPlayMode, DifficultyPreset };
 
 /**
  * Request payload for position-based operations
@@ -113,6 +117,75 @@ export interface EngineStatusResponse {
 }
 
 /**
+ * Request payload for configuring bot opponent
+ * Per Task 3.1: AI Opponent implementation
+ */
+export interface ConfigureBotRequest {
+  /** Bot personality (sensei, student, club_player, tactician, blunder_prone) */
+  personality?: BotPersonality;
+  /** Target Elo rating (800-2400) - overrides personality's default */
+  targetElo?: number;
+  /** Difficulty preset (beginner, intermediate, advanced, master) */
+  difficultyPreset?: DifficultyPreset;
+  /** AI play mode (training or punishing) */
+  playMode?: AIPlayMode;
+  /** Whether to use response time delays for human-like play */
+  useTimeDelays?: boolean;
+}
+
+/**
+ * Request payload for bot move selection
+ */
+export interface BotMoveRequest {
+  /** Position in FEN notation */
+  fen: string;
+  /** Optional moves from FEN position (UCI format) */
+  moves?: string[];
+}
+
+/**
+ * Response payload for bot move
+ */
+export interface BotMoveResponse {
+  /** Selected move in UCI format */
+  move: string;
+  /** Engine evaluation of the move */
+  score: number;
+  /** Thinking time to display (ms) */
+  thinkingTime: number;
+  /** Whether the move was intentionally weakened */
+  wasWeakened: boolean;
+  /** Classification of the move */
+  classification: 'best' | 'good' | 'inaccuracy' | 'mistake' | 'blunder';
+  /** Success flag */
+  success: true;
+}
+
+/**
+ * Response payload for bot profiles list
+ */
+export interface BotProfilesResponse {
+  /** Available bot profiles */
+  profiles: BotProfile[];
+  /** Success flag */
+  success: true;
+}
+
+/**
+ * Response payload for current bot config
+ */
+export interface BotConfigResponse {
+  /** Current bot profile */
+  profile: BotProfile | null;
+  /** Current play mode */
+  playMode: AIPlayMode | null;
+  /** Whether time delays are enabled */
+  useTimeDelays: boolean;
+  /** Success flag */
+  success: true;
+}
+
+/**
  * IPC Method Names
  * All available backend methods that can be called via buntralino.run()
  */
@@ -133,6 +206,18 @@ export const IPC_METHODS = {
   SET_SKILL_LEVEL: 'setSkillLevel',
   /** Get engine initialization status */
   GET_ENGINE_STATUS: 'getEngineStatus',
+
+  // Phase 3: AI Opponent Methods
+  /** Configure bot opponent personality, difficulty, and play mode */
+  CONFIGURE_BOT: 'configureBot',
+  /** Get move from AI opponent */
+  GET_BOT_MOVE: 'getBotMove',
+  /** Get all available bot personalities */
+  GET_BOT_PROFILES: 'getBotProfiles',
+  /** Get current bot configuration */
+  GET_CURRENT_BOT_CONFIG: 'getCurrentBotConfig',
+  /** Get difficulty presets */
+  GET_DIFFICULTY_PRESETS: 'getDifficultyPresets',
 } as const;
 
 /**

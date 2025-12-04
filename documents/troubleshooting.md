@@ -384,10 +384,9 @@ Have an idea for improvement?
 Current known limitations (will be addressed in future updates):
 
 1. **Pawn promotion:** Only promotes to Queen (custom selection coming)
-2. **No AI opponent:** Self-play only (AI coming in Phase 3)
-3. **No game saving:** Games are session-only (save/load coming in Phase 4)
-4. **No volume control:** Fixed at 50% (settings panel coming soon)
-5. **No time controls:** Untimed games only (chess clock coming in Phase 5)
+2. **No game saving:** Games are session-only (save/load coming in Phase 4)
+3. **No volume control:** Fixed at 50% (settings panel coming soon)
+4. **No time controls:** Untimed games only (chess clock coming in Phase 5)
 
 ## Still Having Problems?
 

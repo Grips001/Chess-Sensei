@@ -16,6 +16,7 @@ let viteHost: string | null = null;
 
 import { create, events, registerMethodMap } from 'buntralino';
 import { createEngine, StockfishEngine } from '../engine/stockfish-engine';
+import { AIOpponent } from './ai-opponent';
 import type {
   BestMove,
   PositionEvaluation,
@@ -23,11 +24,21 @@ import type {
   GetBestMovesOptions,
 } from '../shared/engine-types';
 import { formatScore } from '../shared/engine-types';
+import type { BotPersonality, BotProfile, AIPlayMode, DifficultyPreset } from '../shared/bot-types';
+import {
+  BOT_PERSONALITIES,
+  DIFFICULTY_PRESETS,
+  createBotProfileFromElo,
+  applyDifficultyPreset,
+} from '../shared/bot-types';
 
 console.log('Chess-Sensei Backend initialized');
 
 // Global engine instance (persistent in memory per ai-engine.md)
 let engine: StockfishEngine | null = null;
+
+// Global AI opponent instance
+let aiOpponent: AIOpponent | null = null;
 
 /**
  * Initialize the chess engine
@@ -112,6 +123,64 @@ interface ErrorResponse {
   code: string;
   /** Success flag */
   success: false;
+}
+
+/** Request payload for configuring bot opponent */
+interface ConfigureBotRequest {
+  /** Bot personality (sensei, student, club_player, tactician, blunder_prone) */
+  personality?: BotPersonality;
+  /** Target Elo rating (800-2400) - overrides personality's default */
+  targetElo?: number;
+  /** Difficulty preset (beginner, intermediate, advanced, master) */
+  difficultyPreset?: DifficultyPreset;
+  /** AI play mode (training or punishing) */
+  playMode?: AIPlayMode;
+  /** Whether to use response time delays for human-like play */
+  useTimeDelays?: boolean;
+}
+
+/** Request payload for bot move selection */
+interface BotMoveRequest {
+  /** Position in FEN notation */
+  fen: string;
+  /** Optional moves from FEN position (UCI format) */
+  moves?: string[];
+}
+
+/** Response payload for bot move */
+interface BotMoveResponse {
+  /** Selected move in UCI format */
+  move: string;
+  /** Engine evaluation of the move */
+  score: number;
+  /** Thinking time to display (ms) */
+  thinkingTime: number;
+  /** Whether the move was intentionally weakened */
+  wasWeakened: boolean;
+  /** Classification of the move */
+  classification: 'best' | 'good' | 'inaccuracy' | 'mistake' | 'blunder';
+  /** Success flag */
+  success: true;
+}
+
+/** Response payload for bot profiles list */
+interface BotProfilesResponse {
+  /** Available bot profiles */
+  profiles: BotProfile[];
+  /** Success flag */
+  success: true;
+}
+
+/** Response payload for current bot config */
+interface BotConfigResponse {
+  /** Current bot profile */
+  profile: BotProfile | null;
+  /** Current play mode */
+  playMode: AIPlayMode | null;
+  /** Whether time delays are enabled */
+  useTimeDelays: boolean;
+  /** Success flag */
+  success: true;
 }
 
 /**
@@ -312,6 +381,162 @@ const functionMap = {
   }> => {
     return {
       initialized: engine?.isInitialized() ?? false,
+      success: true,
+    };
+  },
+
+  // ============================================
+  // Phase 3: AI Opponent Methods
+  // ============================================
+
+  /**
+   * Configure the AI opponent
+   * Per Task 3.1.1: Implement bot move selection from engine
+   * Per Task 3.1.2: Add configurable difficulty levels
+   * Per Task 3.1.3: Implement bot personalities
+   * Per Task 3.1.4: Implement preset difficulty modes
+   * Per Task 3.1.5: Implement Training vs. Punishing modes
+   */
+  configureBot: async (
+    payload: ConfigureBotRequest
+  ): Promise<BotConfigResponse | ErrorResponse> => {
+    try {
+      if (!engine) {
+        await initializeEngine();
+      }
+
+      // Start with a base profile
+      let profile: BotProfile;
+
+      if (payload.targetElo) {
+        // Create profile from Elo rating
+        profile = createBotProfileFromElo(payload.targetElo, payload.personality);
+      } else if (payload.personality) {
+        // Use predefined personality
+        profile = { ...BOT_PERSONALITIES[payload.personality] };
+      } else {
+        // Default to club player
+        profile = { ...BOT_PERSONALITIES.club_player };
+      }
+
+      // Apply difficulty preset if specified
+      if (payload.difficultyPreset) {
+        profile = applyDifficultyPreset(profile, payload.difficultyPreset);
+      }
+
+      // Create or update AI opponent
+      const playMode = payload.playMode ?? 'training';
+      const useTimeDelays = payload.useTimeDelays ?? true;
+
+      aiOpponent = new AIOpponent(engine!, {
+        profile,
+        playMode,
+        useTimeDelays,
+      });
+
+      console.log(`Bot configured: ${profile.name} (Elo ${profile.targetElo}), mode: ${playMode}`);
+
+      return {
+        profile: aiOpponent.getProfile(),
+        playMode,
+        useTimeDelays,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'CONFIGURE_BOT_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Get move from AI opponent for the current position
+   * Per Task 3.1.1: Implement bot move selection from engine
+   * Per Task 3.1.6: Add response time delays
+   */
+  getBotMove: async (payload: BotMoveRequest): Promise<BotMoveResponse | ErrorResponse> => {
+    try {
+      if (!engine) {
+        await initializeEngine();
+      }
+
+      // Create default opponent if not configured
+      if (!aiOpponent) {
+        aiOpponent = new AIOpponent(engine!, {
+          profile: BOT_PERSONALITIES.club_player,
+          playMode: 'training',
+          useTimeDelays: true,
+        });
+      }
+
+      const startTime = Date.now();
+      const result = await aiOpponent.selectMove(payload.fen, payload.moves);
+      const actualTime = Date.now() - startTime;
+
+      // Wait for thinking time delay if enabled
+      await aiOpponent.waitForThinkingTime(result.thinkingTime, actualTime);
+
+      return {
+        move: result.move,
+        score: result.score,
+        thinkingTime: result.thinkingTime,
+        wasWeakened: result.wasWeakened,
+        classification: result.classification,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'BOT_MOVE_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Get all available bot personalities
+   * Per Task 3.1.3: Implement bot personalities
+   */
+  getBotProfiles: async (): Promise<BotProfilesResponse> => {
+    return {
+      profiles: Object.values(BOT_PERSONALITIES),
+      success: true,
+    };
+  },
+
+  /**
+   * Get current bot configuration
+   */
+  getCurrentBotConfig: async (): Promise<BotConfigResponse> => {
+    if (!aiOpponent) {
+      return {
+        profile: null,
+        playMode: null,
+        useTimeDelays: true,
+        success: true,
+      };
+    }
+
+    return {
+      profile: aiOpponent.getProfile(),
+      playMode: (aiOpponent as any).config?.playMode ?? 'training',
+      useTimeDelays: (aiOpponent as any).config?.useTimeDelays ?? true,
+      success: true,
+    };
+  },
+
+  /**
+   * Get difficulty presets
+   * Per Task 3.1.4: Implement preset difficulty modes
+   */
+  getDifficultyPresets: async (): Promise<{
+    presets: Record<DifficultyPreset, Partial<BotProfile>>;
+    success: true;
+  }> => {
+    return {
+      presets: DIFFICULTY_PRESETS,
       success: true,
     };
   },

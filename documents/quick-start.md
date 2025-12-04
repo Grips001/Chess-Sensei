@@ -127,8 +127,10 @@ piece selection coming soon!
 
 ### Can I play against the computer?
 
-AI opponent is coming in Phase 3 (next major update)! Currently, you can play
-against yourself or a friend.
+**Yes!** Training Mode includes AI opponents. Select "Training Mode" from the
+mode selection screen, choose a bot personality (Sensei, Student, Club Player,
+Tactician, or Blunder-Prone), and start playing! You'll also see real-time
+best-move guidance.
 
 ### How do I save my game?
 

@@ -1,0 +1,214 @@
+# GitHub Actions workflow for building and releasing Chess-Sensei
+# Triggers on version tags (v*) and creates cross-platform releases
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on v0.3.0, v1.0.0, etc.
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v0.3.0)'
+        required: true
+        type: string
+
+env:
+  BUN_VERSION: '1.1.0'
+
+jobs:
+  # Build job - runs on each platform
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            artifact: chess-sensei-windows
+          - os: ubuntu-latest
+            platform: linux
+            artifact: chess-sensei-linux
+          - os: macos-latest
+            platform: macos
+            artifact: chess-sensei-macos
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build frontend assets
+        run: bun run build
+
+      - name: Build application (Windows)
+        if: matrix.platform == 'windows'
+        run: bun run build:windows
+
+      - name: Build application (Linux/macOS)
+        if: matrix.platform != 'windows'
+        run: bun run build:app
+
+      - name: List build output
+        shell: bash
+        run: |
+          echo "Build output:"
+          ls -la dist/ || echo "No dist directory"
+
+      - name: Package Windows build
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}" -replace '^v', ''
+          New-Item -ItemType Directory -Force -Path "release"
+          # Copy the Windows executable and resources
+          if (Test-Path "dist/Chess-Sensei") {
+            Compress-Archive -Path "dist/Chess-Sensei/*" -DestinationPath "release/Chess-Sensei-$version-windows-x64.zip"
+          } elseif (Test-Path "dist") {
+            Compress-Archive -Path "dist/*" -DestinationPath "release/Chess-Sensei-$version-windows-x64.zip"
+          }
+
+      - name: Package Linux build
+        if: matrix.platform == 'linux'
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          mkdir -p release
+          if [ -d "dist/Chess-Sensei" ]; then
+            tar -czvf "release/Chess-Sensei-${VERSION}-linux-x64.tar.gz" -C dist Chess-Sensei
+          elif [ -d "dist" ]; then
+            tar -czvf "release/Chess-Sensei-${VERSION}-linux-x64.tar.gz" -C dist .
+          fi
+
+      - name: Package macOS build
+        if: matrix.platform == 'macos'
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          mkdir -p release
+          if [ -d "dist/Chess-Sensei" ]; then
+            tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C dist Chess-Sensei
+          elif [ -d "dist" ]; then
+            tar -czvf "release/Chess-Sensei-${VERSION}-macos-x64.tar.gz" -C dist .
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  # Release job - creates GitHub release with all artifacts
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -name "*"
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          find artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.dmg" \) -exec cp {} release-files/ \;
+          echo "Release files:"
+          ls -la release-files/
+
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cat << 'EOF' > release-notes.md
+          ## Chess-Sensei v${{ steps.version.outputs.version }}
+
+          ### Installation
+
+          1. Download the appropriate file for your operating system below
+          2. Extract the archive
+          3. Run the Chess-Sensei executable
+
+          ### Checksums
+
+          ```
+          EOF
+          cd release-files
+          sha256sum * >> ../release-notes.md || shasum -a 256 * >> ../release-notes.md
+          echo '```' >> ../release-notes.md
+          cat << 'EOF' >> ../release-notes.md
+
+          ### System Requirements
+
+          - **Windows**: Windows 10 or later (x64)
+          - **macOS**: macOS 10.15 or later (x64)
+          - **Linux**: Modern Linux distribution (x64)
+
+          ### What's New
+
+          See [CHANGELOG.md](https://github.com/Grips001/Chess-Sensei/blob/main/CHANGELOG.md) for detailed changes.
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Chess-Sensei v${{ steps.version.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
+          files: release-files/*
+          generate_release_notes: true
+          append_body: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Optional: Cleanup old artifacts
+  cleanup:
+    name: Cleanup
+    needs: release
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Delete artifacts
+        uses: geekyeggo/delete-artifact@v5
+        with:
+          name: |
+            chess-sensei-windows
+            chess-sensei-linux
+            chess-sensei-macos
+          failOnError: false

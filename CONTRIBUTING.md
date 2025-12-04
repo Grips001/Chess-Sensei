@@ -157,4 +157,5 @@ together.
 ## License
 
 By contributing, you agree that your contributions will be licensed under the
-project's license (TBD).
+[MIT License](LICENSE). See [ATTRIBUTIONS.md](ATTRIBUTIONS.md) for third-party
+license information.

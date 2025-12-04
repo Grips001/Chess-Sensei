@@ -114,41 +114,35 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 1 Complete ✓ **Next:** Phase 2 - Minimal UI & Chessboard
+**Phase:** Phase 3 Complete ✓ **Version:** v0.3.0 **Next:** Phase 4 - Exam Mode
 
-### Phase 1 Achievements
+### Completed Phases
 
-- ✅ Stockfish WASM integrated and working
-- ✅ Chess.js for move validation
-- ✅ Engine interface with UCI protocol
-- ✅ Move analysis (centipawn loss, classification)
-- ✅ IPC bridge between frontend and backend
-- ✅ Performance benchmarks met (<2s per position)
+- ✅ **Phase 1:** Stockfish WASM, chess.js, UCI protocol, IPC bridge
+- ✅ **Phase 2:** Chessboard UI, drag-and-drop, game controls, sound effects
+- ✅ **Phase 3:** AI opponent (5 bot personalities), Training Mode, real-time
+  best-move guidance
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 2 involves:
+According to the roadmap, Phase 4 involves:
 
-1. **Chessboard Rendering**
-   - Implement responsive 8x8 grid layout
-   - Render chess pieces using SVG assets
-   - Board orientation (flip for black)
+1. **Exam Mode**
+   - Timed games without guidance
+   - Performance evaluation
+   - Exam scoring system
 
-2. **Piece Interaction**
-   - Drag-and-drop piece movement
-   - Click-to-select, click-to-move
-   - Legal move highlighting
+2. **Metrics Collection**
+   - Move accuracy tracking
+   - Centipawn loss statistics
+   - Session analytics
 
-3. **Game State Display**
-   - Move history panel
-   - Captured pieces display
-   - Turn indicator and game status
-
-4. **Basic Game Controls**
-   - New game, undo/redo
-   - Board flip toggle
+3. **Progress Tracking**
+   - Game history storage
+   - Performance trends
+   - Improvement metrics
 
 ## Development Resources
 
@@ -219,7 +213,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 1 (Core Chess Engine
-Integration) is complete, and the foundation is solid.
+Chess-Sensei is ready for active development. Phase 3 (AI Opponent & Training
+Mode) is complete with version v0.3.0.
 
-Next up: Phase 2 - Minimal UI & Chessboard!
+Next up: Phase 4 - Exam Mode & Metrics Collection!

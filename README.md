@@ -90,6 +90,7 @@ Comprehensive design documentation is available in the
   workflow, and contributing guidelines
 - [**Roadmap**](source-docs/roadmap.md) --- Development phases, milestones, and
   future plans
+- [**Changelog**](CHANGELOG.md) --- Version history and release notes
 
 ### End-User Documentation
 
@@ -98,7 +99,7 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 2 Complete ✓ → Phase 3 Next
+**Current Phase:** Phase 3 Complete ✓ → Phase 4 Next
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
@@ -120,19 +121,51 @@ User guides and operational documentation will be available in the
   - Sound effects for moves, captures, and game events
   - Responsive layout that adapts to window size
   - Complete end-user documentation (User Guide, FAQ, Troubleshooting)
-- 🚧 Phase 3: AI Opponent & Training Mode (Next)
+- ✅ Phase 3: AI Opponent & Training Mode complete
+  - 5 bot personalities (Sensei, Student, Club Player, Tactician, Blunder-Prone)
+  - Configurable difficulty levels (Elo 800-2400)
+  - Real-time best-move guidance with color-coded highlights (Blue/Green/Yellow)
+  - Three-way visual sync (piece, square, notation panel)
+  - Multi-color highlights for overlapping move destinations
+  - Training Mode setup flow with bot and color selection
+  - Human-like thinking delays for natural gameplay
+  - Complete end-user documentation (Training Mode Guide)
+- 🚧 Phase 4: Exam Mode & Metrics Collection (Next)
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
 
-## Getting Started
+## Download
+
+### Pre-built Releases
+
+Download the latest release for your platform from
+[**GitHub Releases**](https://github.com/Grips001/Chess-Sensei/releases):
+
+| Platform | File                                   |
+| -------- | -------------------------------------- |
+| Windows  | `Chess-Sensei-{version}-windows-x64.zip` |
+| macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
+| Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
+
+**Current Version:** v0.3.0 (Phase 3: AI Opponent & Training Mode)
+
+### Installation
+
+1. Download the appropriate file for your operating system
+2. Extract the archive
+3. Run the Chess-Sensei executable
+
+No installation required --- Chess-Sensei is a portable application.
+
+## Building from Source
 
 ### Prerequisites
 
 - [Bun](https://bun.sh) v1.0 or higher
 - Git
 
-### Installation
+### Development Setup
 
 ```bash
 # Clone the repository

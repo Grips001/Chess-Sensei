@@ -309,28 +309,38 @@ practice!
 
 ## What's Next?
 
-Chess-Sensei is under active development! Upcoming features include:
+Chess-Sensei is under active development!
 
-### Phase 3: AI Opponent & Training Mode
+### Current Release: Phase 3 (v0.3.0)
 
-- Play against AI with adjustable difficulty
-- Real-time move suggestions
-- Best-move guidance system
-- Training mode with targeted exercises
+Training Mode is now available with:
 
-### Phase 4: Analytics & Progress Tracking
+- **AI Opponent** - 5 bot personalities (Sensei, Student, Club Player, Tactician,
+  Blunder-Prone)
+- **Adjustable Difficulty** - From 800 to 2400 Elo
+- **Real-time Best-Move Guidance** - Top 3 moves highlighted (Blue/Green/Yellow)
+- **Human-like Bot Timing** - Natural gameplay feel
 
-- Track your performance over time
-- Analyze your games with engine assistance
-- View detailed statistics and improvement metrics
-- Identify patterns in your play
+See [Training Mode Guide](training-mode-guide.md) for details.
 
-### Phase 5: Game Modes & Features
+### Upcoming Features
 
-- Timed games with chess clocks
-- Puzzle mode for tactical training
-- Opening trainer
-- Game database and PGN import/export
+#### Phase 4: Exam Mode & Metrics Collection
+
+- Timed games without guidance (test your skills)
+- Performance metrics and accuracy tracking
+- Session statistics
+
+#### Phase 5: Post-Game Analysis UI
+
+- Move-by-move analysis with engine insights
+- Mistake identification
+- Performance visualization
+
+#### Phase 6: Player Progress Dashboard
+
+- Track improvement over time
+- Detailed statistics and trends
 
 Stay tuned for updates!
 
