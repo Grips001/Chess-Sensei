@@ -23,6 +23,10 @@ Documentation here will include:
 
 - **[Quick Start Guide](quick-start.md)** - Get started in under 2 minutes
 - **[User Guide](user-guide.md)** - Complete guide to all Chess-Sensei features
+- **[Training Mode Guide](training-mode-guide.md)** - AI opponents and move
+  guidance
+- **[Exam Mode & Metrics](exam-mode-metrics.md)** - Test skills and view
+  performance scores
 - **[FAQ](faq.md)** - Frequently asked questions and answers
 - **[Troubleshooting](troubleshooting.md)** - Common problems and solutions
 

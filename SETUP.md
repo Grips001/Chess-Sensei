@@ -87,7 +87,8 @@ This starts the Vite dev server and launches the Neutralino window.
 
 The build process has two stages:
 
-1. **Vite build** - Compiles frontend and copies `public/assets/` to `app/assets/`
+1. **Vite build** - Compiles frontend and copies `public/assets/` to
+   `app/assets/`
 2. **Platform build** - Packages the app for distribution
 
 ```bash
@@ -124,7 +125,8 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 3 Complete ✓ **Version:** v0.3.2 **Next:** Phase 4 - Exam Mode
+**Phase:** Phase 4 Complete ✓ **Version:** v0.4.0 **Next:** Phase 5 - Post-Game
+Analysis UI
 
 ### Completed Phases
 
@@ -132,27 +134,29 @@ bun run format
 - ✅ **Phase 2:** Chessboard UI, drag-and-drop, game controls, sound effects
 - ✅ **Phase 3:** AI opponent (5 bot personalities), Training Mode, real-time
   best-move guidance
+- ✅ **Phase 4:** Exam Mode, post-game analysis pipeline, metrics calculation,
+  data storage
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 4 involves:
+According to the roadmap, Phase 5 involves:
 
-1. **Exam Mode**
-   - Timed games without guidance
-   - Performance evaluation
-   - Exam scoring system
+1. **Move-by-Move Review**
+   - Interactive board replay
+   - Color-coded move list
+   - Evaluation graph display
 
-2. **Metrics Collection**
-   - Move accuracy tracking
-   - Centipawn loss statistics
-   - Session analytics
+2. **Mistake Deep Dive**
+   - Mistake detail modal
+   - Better alternatives display
+   - Evaluation comparison
 
-3. **Progress Tracking**
-   - Game history storage
-   - Performance trends
-   - Improvement metrics
+3. **Game Summary Report**
+   - Overall performance card
+   - Move quality breakdown
+   - Critical moments timeline
 
 ## Development Resources
 
@@ -223,7 +227,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 3 (AI Opponent & Training
-Mode) is complete with version v0.3.2.
+Chess-Sensei is ready for active development. Phase 4 (Exam Mode & Metrics
+Collection) is complete with version v0.4.0.
 
-Next up: Phase 4 - Exam Mode & Metrics Collection!
+Next up: Phase 5 - Post-Game Analysis UI!

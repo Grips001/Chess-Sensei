@@ -218,6 +218,30 @@ export const IPC_METHODS = {
   GET_CURRENT_BOT_CONFIG: 'getCurrentBotConfig',
   /** Get difficulty presets */
   GET_DIFFICULTY_PRESETS: 'getDifficultyPresets',
+
+  // Phase 4: Analysis Pipeline Methods
+  /** Analyze an Exam Mode game (batch analysis, CPL, classification) */
+  ANALYZE_GAME: 'analyzeGame',
+  /** Get analysis depth configuration */
+  GET_ANALYSIS_CONFIG: 'getAnalysisConfig',
+  /** Calculate metrics from game analysis (9 composite scores) */
+  CALCULATE_METRICS: 'calculateMetrics',
+
+  // Phase 4: Data Storage Methods
+  /** Initialize data storage directory structure */
+  INITIALIZE_STORAGE: 'initializeStorage',
+  /** Save game data to local storage */
+  SAVE_GAME: 'saveGame',
+  /** Save analysis data to local storage */
+  SAVE_ANALYSIS: 'saveAnalysis',
+  /** Get list of saved games */
+  GET_GAMES_LIST: 'getGamesList',
+  /** Load a saved game by ID */
+  LOAD_GAME: 'loadGame',
+  /** Load analysis for a game by ID */
+  LOAD_ANALYSIS: 'loadAnalysis',
+  /** Get the storage base path */
+  GET_STORAGE_PATH: 'getStoragePath',
 } as const;
 
 /**

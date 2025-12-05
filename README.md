@@ -99,7 +99,7 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 3 Complete ✓ → Phase 4 Next
+**Current Phase:** Phase 4 Complete ✓ → Phase 5 Next
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
@@ -130,7 +130,15 @@ User guides and operational documentation will be available in the
   - Training Mode setup flow with bot and color selection
   - Human-like thinking delays for natural gameplay
   - Complete end-user documentation (Training Mode Guide)
-- 🚧 Phase 4: Exam Mode & Metrics Collection (Next)
+- ✅ Phase 4: Exam Mode & Metrics Collection complete
+  - Exam Mode with disabled guidance for testing skills
+  - Full game recording with timestamps and FEN positions
+  - Post-game analysis pipeline with batch move analysis
+  - Comprehensive metrics calculation (9 composite scores)
+  - Local JSON data storage with atomic writes
+  - Platform-specific storage paths (Windows, macOS, Linux)
+  - Complete metrics documentation (documents/exam-mode-metrics.md)
+- 🚧 Phase 5: Post-Game Analysis UI (Next)
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
@@ -142,13 +150,13 @@ for detailed development plan and current progress.
 Download the latest release for your platform from
 [**GitHub Releases**](https://github.com/Grips001/Chess-Sensei/releases):
 
-| Platform | File                                   |
-| -------- | -------------------------------------- |
-| Windows  | `Chess-Sensei-{version}-windows-x64.zip` |
+| Platform | File                                      |
+| -------- | ----------------------------------------- |
+| Windows  | `Chess-Sensei-{version}-windows-x64.zip`  |
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.3.2 (Phase 3: AI Opponent & Training Mode)
+**Current Version:** v0.4.0 (Phase 4: Exam Mode & Metrics Collection)
 
 ### Installation
 

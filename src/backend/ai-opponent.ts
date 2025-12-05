@@ -56,6 +56,13 @@ export class AIOpponent {
   }
 
   /**
+   * Get the current bot configuration
+   */
+  getConfig(): BotConfig {
+    return this.config;
+  }
+
+  /**
    * Select a move for the bot to play
    *
    * @param fen - Current position in FEN notation

@@ -262,8 +262,6 @@ export class ChessGame {
    * @throws Error if move is illegal
    */
   makeMove(move: string): MoveResult {
-    const _beforeFen = this.chess.fen();
-
     // Try to make the move
     let result: Move;
     try {

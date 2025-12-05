@@ -14,6 +14,7 @@
  */
 
 import * as fs from 'fs-extra';
+import * as nodefs from 'node:fs/promises';
 import * as path from 'path';
 import { $ } from 'bun';
 import { createICO, HERMITE } from '@ctjs/png2icons';
@@ -57,27 +58,36 @@ function getIconPath(config: NeutralinoConfig): string {
 /**
  * Convert subsystem to GUI (hide console window)
  * This is the same as makeWindowsBinGui in buntralino-cli
+ *
+ * Uses node:fs/promises for low-level file descriptor operations
+ * to avoid TypeScript 5.6+ Buffer/ArrayBufferView type incompatibilities
+ * with fs-extra's type definitions.
  */
 async function makeWindowsBinGui(exePath: string): Promise<void> {
   const IMAGE_SUBSYSTEM_GUI = 2;
   const HEADER_OFFSET_LOCATION = 0x3c;
   const SUBSYSTEM_OFFSET = 0x5c;
 
-  const fd = await fs.open(exePath, 'r+');
-  const buffer = Buffer.alloc(4);
+  const fh = await nodefs.open(exePath, 'r+');
+  try {
+    const buffer = new Uint8Array(4);
 
-  // Read PE header offset from 0x3C
-  await fs.read(fd, buffer, 0, 4, HEADER_OFFSET_LOCATION);
-  const peHeaderOffset = buffer.readUInt32LE(0);
+    // Read PE header offset from 0x3C
+    await fh.read(buffer, 0, 4, HEADER_OFFSET_LOCATION);
+    const dataView = new DataView(buffer.buffer);
+    const peHeaderOffset = dataView.getUint32(0, true); // little-endian
 
-  // Seek to the subsystem field in the PE header
-  const subsystemOffset = peHeaderOffset + SUBSYSTEM_OFFSET;
-  const subsystemBuffer = Buffer.alloc(2);
-  subsystemBuffer.writeUInt16LE(IMAGE_SUBSYSTEM_GUI, 0);
+    // Seek to the subsystem field in the PE header
+    const subsystemOffset = peHeaderOffset + SUBSYSTEM_OFFSET;
+    const subsystemBuffer = new Uint8Array(2);
+    const subsystemView = new DataView(subsystemBuffer.buffer);
+    subsystemView.setUint16(0, IMAGE_SUBSYSTEM_GUI, true); // little-endian
 
-  // Write the new subsystem value
-  await fs.write(fd, subsystemBuffer, 0, 2, subsystemOffset);
-  await fs.close(fd);
+    // Write the new subsystem value
+    await fh.write(subsystemBuffer, 0, 2, subsystemOffset);
+  } finally {
+    await fh.close();
+  }
 }
 
 /**
@@ -111,7 +121,8 @@ async function patchWithRcedit(exePath: string, config: NeutralinoConfig): Promi
       const ico = createICO(pngBuffer, HERMITE, 0, true, true);
       if (ico) {
         const icoPath = path.join(tempFolder, 'app.ico');
-        await fs.writeFile(icoPath, ico as unknown as Buffer);
+        // Convert Buffer to Uint8Array to satisfy TypeScript 5.6+ type requirements
+        await fs.writeFile(icoPath, new Uint8Array(ico));
         rceditOptions.icon = icoPath;
       }
     }
@@ -226,7 +237,10 @@ async function buildWindows(): Promise<void> {
   await fs.ensureDir(stockfishDestDir);
   await Promise.all([
     fs.copy(path.join(stockfishSrcDir, STOCKFISH_JS), path.join(stockfishDestDir, STOCKFISH_JS)),
-    fs.copy(path.join(stockfishSrcDir, STOCKFISH_WASM), path.join(stockfishDestDir, STOCKFISH_WASM)),
+    fs.copy(
+      path.join(stockfishSrcDir, STOCKFISH_WASM),
+      path.join(stockfishDestDir, STOCKFISH_WASM)
+    ),
   ]);
   console.log('  ✓ Stockfish engine files copied');
 

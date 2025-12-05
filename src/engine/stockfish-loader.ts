@@ -138,7 +138,6 @@ export async function loadStockfish(): Promise<StockfishInstance> {
   // This works in both development and compiled mode because:
   // - Development: loads from node_modules
   // - Compiled: loads from stockfish/ directory next to executable
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const StockfishModule = require(jsPath);
 
   // The stockfish.js module exports a factory function via module.exports = e

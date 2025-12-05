@@ -79,7 +79,10 @@ async function buildLinux(): Promise<void> {
   await fs.ensureDir(stockfishDestDir);
   await Promise.all([
     fs.copy(path.join(stockfishSrcDir, STOCKFISH_JS), path.join(stockfishDestDir, STOCKFISH_JS)),
-    fs.copy(path.join(stockfishSrcDir, STOCKFISH_WASM), path.join(stockfishDestDir, STOCKFISH_WASM)),
+    fs.copy(
+      path.join(stockfishSrcDir, STOCKFISH_WASM),
+      path.join(stockfishDestDir, STOCKFISH_WASM)
+    ),
   ]);
   console.log('  ✓ Stockfish engine files copied');
 

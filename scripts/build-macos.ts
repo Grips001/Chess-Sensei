@@ -86,7 +86,10 @@ async function createMacOSBundle(
   await fs.ensureDir(stockfishDestDir);
   await Promise.all([
     fs.copy(path.join(stockfishSrcDir, STOCKFISH_JS), path.join(stockfishDestDir, STOCKFISH_JS)),
-    fs.copy(path.join(stockfishSrcDir, STOCKFISH_WASM), path.join(stockfishDestDir, STOCKFISH_WASM)),
+    fs.copy(
+      path.join(stockfishSrcDir, STOCKFISH_WASM),
+      path.join(stockfishDestDir, STOCKFISH_WASM)
+    ),
   ]);
   console.log(`  ✓ Stockfish engine files copied for ${archSuffix}`);
 
@@ -129,7 +132,8 @@ async function createMacOSBundle(
       const pngBuffer = await fs.readFile(iconPath);
       const icns = createICNS(pngBuffer, HERMITE, 0);
       if (icns) {
-        await fs.writeFile(path.join(resourcesPath, 'AppIcon.icns'), icns as unknown as Buffer);
+        // Convert Buffer to Uint8Array to satisfy TypeScript 5.6+ type requirements
+        await fs.writeFile(path.join(resourcesPath, 'AppIcon.icns'), new Uint8Array(icns));
         console.log(`  ✓ App icon created for ${archSuffix}`);
       }
     } catch (e) {

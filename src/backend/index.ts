@@ -20,6 +20,27 @@ let devMode = false;
 import { create, events, registerMethodMap } from 'buntralino';
 import { createEngine, StockfishEngine } from '../engine/stockfish-engine';
 import { AIOpponent } from './ai-opponent';
+import {
+  createAnalysisPipeline,
+  AnalysisPipeline,
+  QUICK_ANALYSIS_DEPTH,
+  DEEP_ANALYSIS_DEPTH,
+  type ExamGameData,
+  type GameAnalysis,
+} from './analysis-pipeline';
+import {
+  createMetricsCalculator,
+  MetricsCalculator,
+  type GameMetrics,
+  type CompositeScores,
+} from './metrics-calculator';
+import {
+  createDataStorage,
+  DataStorage,
+  type StoredGameData,
+  type StoredAnalysisData,
+  type GameIndexEntry,
+} from './data-storage';
 import type {
   BestMove,
   PositionEvaluation,
@@ -46,6 +67,15 @@ let engine: StockfishEngine | null = null;
 
 // Global AI opponent instance
 let aiOpponent: AIOpponent | null = null;
+
+// Global analysis pipeline instance
+let analysisPipeline: AnalysisPipeline | null = null;
+
+// Global metrics calculator instance
+let metricsCalculator: MetricsCalculator | null = null;
+
+// Global data storage instance
+let dataStorage: DataStorage | null = null;
 
 /**
  * Initialize the chess engine
@@ -186,6 +216,116 @@ interface BotConfigResponse {
   playMode: AIPlayMode | null;
   /** Whether time delays are enabled */
   useTimeDelays: boolean;
+  /** Success flag */
+  success: true;
+}
+
+// ============================================
+// Phase 4: Analysis Pipeline Types
+// ============================================
+
+/** Request payload for game analysis */
+interface AnalyzeGameRequest {
+  /** Complete game data from Exam Mode */
+  gameData: ExamGameData;
+  /** Whether to run deep analysis (default: false for quick analysis) */
+  deepAnalysis?: boolean;
+}
+
+/** Response payload for game analysis */
+interface GameAnalysisResponse {
+  /** Complete analysis result */
+  analysis: GameAnalysis;
+  /** Success flag */
+  success: true;
+}
+
+/** Request payload for metrics calculation */
+interface CalculateMetricsRequest {
+  /** Game analysis to calculate metrics from */
+  analysis: GameAnalysis;
+  /** Player's color */
+  playerColor: 'white' | 'black';
+  /** Bot's Elo rating */
+  botElo: number;
+  /** Game result */
+  result: '1-0' | '0-1' | '1/2-1/2';
+}
+
+/** Response payload for metrics calculation */
+interface GameMetricsResponse {
+  /** Calculated game metrics */
+  metrics: GameMetrics;
+  /** Composite scores (0-100) */
+  compositeScores: CompositeScores;
+  /** Success flag */
+  success: true;
+}
+
+// ============================================
+// Phase 4: Data Storage Types
+// ============================================
+
+/** Request payload for saving a game */
+interface SaveGameRequest {
+  /** Game data to save */
+  gameData: ExamGameData;
+}
+
+/** Response payload for save game */
+interface SaveGameResponse {
+  /** Path where game was saved */
+  path: string;
+  /** Success flag */
+  success: true;
+}
+
+/** Request payload for saving analysis */
+interface SaveAnalysisRequest {
+  /** Analysis data to save */
+  analysis: GameAnalysis;
+}
+
+/** Response payload for save analysis */
+interface SaveAnalysisResponse {
+  /** Path where analysis was saved */
+  path: string;
+  /** Success flag */
+  success: true;
+}
+
+/** Response payload for games list */
+interface GamesListResponse {
+  /** List of game index entries */
+  games: GameIndexEntry[];
+  /** Success flag */
+  success: true;
+}
+
+/** Request payload for loading a game */
+interface LoadGameRequest {
+  /** Game ID to load */
+  gameId: string;
+}
+
+/** Response payload for loading a game */
+interface LoadGameResponse {
+  /** Loaded game data */
+  game: StoredGameData;
+  /** Success flag */
+  success: true;
+}
+
+/** Request payload for loading analysis */
+interface LoadAnalysisRequest {
+  /** Game ID to load analysis for */
+  gameId: string;
+}
+
+/** Response payload for loading analysis */
+interface LoadAnalysisResponse {
+  /** Loaded analysis data */
+  analysis: StoredAnalysisData;
   /** Success flag */
   success: true;
 }
@@ -526,10 +666,11 @@ const functionMap = {
       };
     }
 
+    const config = aiOpponent.getConfig();
     return {
       profile: aiOpponent.getProfile(),
-      playMode: (aiOpponent as any).config?.playMode ?? 'training',
-      useTimeDelays: (aiOpponent as any).config?.useTimeDelays ?? true,
+      playMode: config.playMode,
+      useTimeDelays: config.useTimeDelays,
       success: true,
     };
   },
@@ -546,6 +687,306 @@ const functionMap = {
       presets: DIFFICULTY_PRESETS,
       success: true,
     };
+  },
+
+  // ============================================
+  // Phase 4: Analysis Pipeline Methods
+  // ============================================
+
+  /**
+   * Analyze an Exam Mode game
+   * Per Task 4.2.1: Implement analysis pipeline
+   *
+   * This runs the full post-game analysis pipeline:
+   * 1. Extract all positions
+   * 2. Batch analysis with Stockfish
+   * 3. Calculate centipawn loss per move
+   * 4. Classify moves
+   * 5. Detect tactical motifs
+   * 6. Identify critical moments
+   * 7. Determine game phases
+   * 8. Calculate summary metrics
+   */
+  analyzeGame: async (
+    payload: AnalyzeGameRequest
+  ): Promise<GameAnalysisResponse | ErrorResponse> => {
+    try {
+      if (!engine) {
+        await initializeEngine();
+      }
+
+      // Create or reuse analysis pipeline
+      if (!analysisPipeline) {
+        analysisPipeline = createAnalysisPipeline(engine!, {
+          depth: payload.deepAnalysis ? DEEP_ANALYSIS_DEPTH : QUICK_ANALYSIS_DEPTH,
+          deepAnalysis: payload.deepAnalysis ?? false,
+        });
+      } else {
+        // Update config for this analysis
+        analysisPipeline.setDeepAnalysis(payload.deepAnalysis ?? false);
+      }
+
+      console.log(
+        `Starting ${payload.deepAnalysis ? 'deep' : 'quick'} analysis for game ${payload.gameData.gameId}`
+      );
+
+      const analysis = await analysisPipeline.analyzeGame(payload.gameData);
+
+      console.log(
+        `Analysis complete: ${analysis.summary.totalMoves} moves, ` +
+          `${analysis.summary.overallAccuracy}% accuracy, ` +
+          `${analysis.summary.blunders} blunders, ${analysis.summary.mistakes} mistakes`
+      );
+
+      return {
+        analysis,
+        success: true,
+      };
+    } catch (error) {
+      console.error('Analysis error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'ANALYSIS_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Get analysis configuration info
+   */
+  getAnalysisConfig: async (): Promise<{
+    quickDepth: number;
+    deepDepth: number;
+    success: true;
+  }> => {
+    return {
+      quickDepth: QUICK_ANALYSIS_DEPTH,
+      deepDepth: DEEP_ANALYSIS_DEPTH,
+      success: true,
+    };
+  },
+
+  /**
+   * Calculate metrics from game analysis
+   * Per Task 4.3: Implement metrics calculation
+   *
+   * Calculates all 9 composite indexes:
+   * 1. Precision Score
+   * 2. Tactical Danger Score
+   * 3. Stability Score
+   * 4. Conversion Score
+   * 5. Preparation Score
+   * 6. Positional & Structure Score
+   * 7. Aggression & Risk Score
+   * 8. Simplification Preference Score
+   * 9. Training Transfer Score
+   */
+  calculateMetrics: async (
+    payload: CalculateMetricsRequest
+  ): Promise<GameMetricsResponse | ErrorResponse> => {
+    try {
+      // Create metrics calculator if needed
+      if (!metricsCalculator) {
+        metricsCalculator = createMetricsCalculator();
+      }
+
+      // Calculate game-level metrics
+      const metrics = metricsCalculator.calculateGameMetrics(
+        payload.analysis,
+        payload.playerColor,
+        payload.botElo,
+        payload.result
+      );
+
+      // Determine if player was winning at any point
+      const playerMoves = payload.analysis.moveAnalysis.filter(
+        (m) => m.color === payload.playerColor
+      );
+      const wasWinning = playerMoves.some((m) => m.evaluationBefore >= 200);
+
+      // Determine if player won
+      const playerWon =
+        (payload.result === '1-0' && payload.playerColor === 'white') ||
+        (payload.result === '0-1' && payload.playerColor === 'black');
+
+      // Calculate composite scores
+      const compositeScores = metricsCalculator.calculateCompositeScores(
+        metrics,
+        wasWinning,
+        playerWon
+      );
+
+      console.log(
+        `Metrics calculated: Precision=${compositeScores.precision}, ` +
+          `Tactical=${compositeScores.tacticalDanger}, ` +
+          `Stability=${compositeScores.stability}`
+      );
+
+      return {
+        metrics,
+        compositeScores,
+        success: true,
+      };
+    } catch (error) {
+      console.error('Metrics calculation error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'METRICS_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  // ============================================
+  // Phase 4: Data Storage Methods
+  // ============================================
+
+  /**
+   * Initialize data storage
+   * Per Task 4.4.1: Initialize directory structure
+   */
+  initializeStorage: async (): Promise<{ success: true } | ErrorResponse> => {
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      await dataStorage.initialize();
+      return { success: true };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'STORAGE_INIT_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Save game data
+   * Per Task 4.4.7: Implement game save flow
+   */
+  saveGame: async (payload: SaveGameRequest): Promise<SaveGameResponse | ErrorResponse> => {
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const path = await dataStorage.saveGame(payload.gameData);
+      return { path, success: true };
+    } catch (error) {
+      console.error('Save game error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'SAVE_GAME_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Save analysis data
+   * Per Task 4.4.7: Trigger analysis save
+   */
+  saveAnalysis: async (
+    payload: SaveAnalysisRequest
+  ): Promise<SaveAnalysisResponse | ErrorResponse> => {
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const path = await dataStorage.saveAnalysis(payload.analysis);
+      return { path, success: true };
+    } catch (error) {
+      console.error('Save analysis error:', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'SAVE_ANALYSIS_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Get list of saved games
+   */
+  getGamesList: async (): Promise<GamesListResponse | ErrorResponse> => {
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const games = await dataStorage.getGamesList();
+      return { games, success: true };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'GET_GAMES_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Load a saved game
+   */
+  loadGame: async (payload: LoadGameRequest): Promise<LoadGameResponse | ErrorResponse> => {
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const game = await dataStorage.loadGame(payload.gameId);
+      if (!game) {
+        return {
+          error: `Game not found: ${payload.gameId}`,
+          code: 'GAME_NOT_FOUND',
+          success: false,
+        };
+      }
+      return { game, success: true };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'LOAD_GAME_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Load analysis for a game
+   */
+  loadAnalysis: async (
+    payload: LoadAnalysisRequest
+  ): Promise<LoadAnalysisResponse | ErrorResponse> => {
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const analysis = await dataStorage.loadAnalysis(payload.gameId);
+      if (!analysis) {
+        return {
+          error: `Analysis not found for game: ${payload.gameId}`,
+          code: 'ANALYSIS_NOT_FOUND',
+          success: false,
+        };
+      }
+      return { analysis, success: true };
+    } catch (error) {
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'LOAD_ANALYSIS_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Get storage base path
+   */
+  getStoragePath: async (): Promise<{ path: string; success: true }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+    }
+    return { path: dataStorage.getStorageBasePath(), success: true };
   },
 };
 

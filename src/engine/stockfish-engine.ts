@@ -74,17 +74,6 @@ function parseInfoLine(line: string): Partial<PositionEvaluation & { multipv: nu
 }
 
 /**
- * Parse bestmove line
- */
-function _parseBestMove(line: string): string | null {
-  if (!line.startsWith('bestmove ')) {
-    return null;
-  }
-  const tokens = line.split(' ');
-  return tokens[1] || null;
-}
-
-/**
  * Stockfish Engine implementation
  */
 export class StockfishEngine implements Engine {

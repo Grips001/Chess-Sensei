@@ -140,7 +140,7 @@ export const GAME_MODE_INFO: Record<
       'Post-game analysis',
       'Progress metrics saved',
     ],
-    available: false, // Phase 4
+    available: true, // Enabled in Phase 4
   },
   sandbox: {
     name: 'Sandbox Mode',

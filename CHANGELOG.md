@@ -3,16 +3,64 @@
 All notable changes to Chess-Sensei will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Planned
 
-- Exam Mode with performance tracking (Phase 4)
 - Post-game analysis UI (Phase 5)
 - Player progress dashboard (Phase 6)
 - Sandbox Mode for position exploration (Phase 7)
+
+## [0.4.0] - 2025-12-04
+
+### Added
+
+- **Exam Mode**
+  - Play without guidance to test your skills
+  - Full game recording with move timestamps
+  - Complete position tracking (FEN) for each move
+  - PGN generation on game completion
+  - Exam Mode enabled in game mode selection
+
+- **Post-Game Analysis Pipeline**
+  - Batch analysis of all moves after game completion
+  - Centipawn loss calculation per move
+  - Move classification (Excellent/Good/Inaccuracy/Mistake/Blunder)
+  - Critical moment detection (evaluation swings > 100cp)
+  - Tactical opportunity identification (missed/found)
+
+- **Metrics Calculation System**
+  - 9 composite scores calculated per game:
+    - Precision Score (move accuracy)
+    - Tactical Danger Score (tactical awareness)
+    - Stability Score (consistency under pressure)
+    - Conversion Score (winning position conversion)
+    - Preparation Score (time management)
+    - Positional & Structure Score (strategic play)
+    - Aggression & Risk Score (playing style)
+    - Simplification Preference Score (trading patterns)
+    - Training Transfer Score (improvement trends)
+  - Game-level and player profile metrics
+
+- **Data Storage System**
+  - JSON-based local storage
+  - Platform-specific storage paths (Windows, macOS, Linux)
+  - Atomic file writes for data integrity
+  - Player profile persistence
+  - Game history storage
+
+- **Documentation**
+  - Exam Mode metrics guide (`documents/exam-mode-metrics.md`)
+
+### Technical
+
+- New files: `src/backend/exam-mode.ts`, `src/backend/analysis-pipeline.ts`
+- New files: `src/backend/metrics-calculator.ts`, `src/backend/data-storage.ts`
+- Updated game-state.ts with Exam Mode availability
+- TypeScript 5.6+ compatibility fixes for build scripts
 
 ## [0.3.2] - 2025-12-04
 
@@ -44,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **AI Opponent System**
-  - 5 unique bot personalities: Sensei, Student, Club Player, Tactician, Blunder-Prone
+  - 5 unique bot personalities: Sensei, Student, Club Player, Tactician,
+    Blunder-Prone
   - Configurable difficulty levels from Elo 800 to 2400
   - Human-like thinking delays for natural gameplay
   - Training vs. Punishing play modes
@@ -181,7 +230,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.2...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.2.0...v0.3.0
