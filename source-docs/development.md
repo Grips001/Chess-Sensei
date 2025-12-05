@@ -187,6 +187,7 @@ Version tags correspond to completed development phases:
 | v0.2.0  | Phase 2: UI & Chessboard        | Complete |
 | v0.3.0  | Phase 3: AI Opponent & Training | Complete |
 | v0.4.0  | Phase 4: Exam Mode & Metrics    | Complete |
+| v0.5.1  | Phase 5: Post-Game Analysis UI  | Complete |
 | v1.0.0  | Full Release (Phase 9 complete) | Planned  |
 
 ### Creating a Release
@@ -199,7 +200,7 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    # Edit package.json version field
-   "version": "0.4.0"
+   "version": "0.5.1"
    ```
 
 2. **Update CHANGELOG.md** with release notes
@@ -208,15 +209,15 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    git add package.json CHANGELOG.md
-   git commit -m "chore: prepare release v0.4.0"
+   git commit -m "chore: prepare release v0.5.1"
    ```
 
 4. **Create and push tag**:
 
    ```bash
-   git tag -a v0.4.0 -m "Phase 4: Exam Mode & Metrics Collection"
+   git tag -a v0.5.1 -m "Phase 5: Post-Game Analysis UI"
    git push origin main
-   git push origin v0.4.0
+   git push origin v0.5.1
    ```
 
 5. **GitHub Actions automatically**:
@@ -250,9 +251,9 @@ Each release includes:
 
 For alpha/beta releases, use suffix tags:
 
-- `v0.4.0-alpha.1` - Alpha release
-- `v0.4.0-beta.1` - Beta release
-- `v0.4.0-rc.1` - Release candidate
+- `v0.6.0-alpha.1` - Alpha release
+- `v0.6.0-beta.1` - Beta release
+- `v0.6.0-rc.1` - Release candidate
 
 Pre-release tags automatically mark the GitHub release as "pre-release".
 
