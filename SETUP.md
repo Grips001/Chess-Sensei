@@ -125,8 +125,8 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 4 Complete ✓ **Version:** v0.4.0 **Next:** Phase 5 - Post-Game
-Analysis UI
+**Phase:** Phase 5 Complete ✓ **Version:** v0.5.1 **Next:** Phase 6 - Player
+Progress Dashboard
 
 ### Completed Phases
 
@@ -136,27 +136,29 @@ Analysis UI
   best-move guidance
 - ✅ **Phase 4:** Exam Mode, post-game analysis pipeline, metrics calculation,
   data storage
+- ✅ **Phase 5:** Post-game analysis UI, evaluation graph, export options,
+  advanced debug logging
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 5 involves:
+According to the roadmap, Phase 6 involves:
 
-1. **Move-by-Move Review**
-   - Interactive board replay
-   - Color-coded move list
-   - Evaluation graph display
+1. **Progress Dashboard**
+   - Composite index radar chart
+   - Trend graphs for all scores
+   - Game history table
 
-2. **Mistake Deep Dive**
-   - Mistake detail modal
-   - Better alternatives display
-   - Evaluation comparison
+2. **Detailed Analytics Views**
+   - Drill-down for each composite score
+   - Accuracy by game phase charts
+   - Error distribution visualizations
 
-3. **Game Summary Report**
-   - Overall performance card
-   - Move quality breakdown
-   - Critical moments timeline
+3. **Historical Comparison**
+   - Compare time periods
+   - Show improvement/regression
+   - Highlight best/worst performances
 
 ## Development Resources
 
@@ -227,7 +229,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 4 (Exam Mode & Metrics
-Collection) is complete with version v0.4.0.
+Chess-Sensei is ready for active development. Phase 5 (Post-Game Analysis UI) is
+complete with version v0.5.1.
 
-Next up: Phase 5 - Post-Game Analysis UI!
+Next up: Phase 6 - Player Progress Dashboard!
