@@ -108,14 +108,14 @@ Note: This may fail on Windows due to the pe-library issue described above.
 
 ## Build Scripts
 
-| Script                  | Description                                   |
-| ----------------------- | --------------------------------------------- |
-| `bun run dev`           | Development mode with hot reload              |
-| `bun run build`         | Build frontend assets only (Vite → app/)      |
-| `bun run build:windows` | Windows build with rcedit (includes Vite)     |
-| `bun run build:linux`   | Linux x64 build (includes Vite)               |
-| `bun run build:macos`   | macOS x64/arm64 build (includes Vite)         |
-| `bun run build:app`     | Full app build via Buntralino (legacy)        |
+| Script                  | Description                               |
+| ----------------------- | ----------------------------------------- |
+| `bun run dev`           | Development mode with hot reload          |
+| `bun run build`         | Build frontend assets only (Vite → app/)  |
+| `bun run build:windows` | Windows build with rcedit (includes Vite) |
+| `bun run build:linux`   | Linux x64 build (includes Vite)           |
+| `bun run build:macos`   | macOS x64/arm64 build (includes Vite)     |
+| `bun run build:app`     | Full app build via Buntralino (legacy)    |
 
 ## Build Output Structure
 

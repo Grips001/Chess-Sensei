@@ -132,14 +132,20 @@ Castling is only legal when ALL of these are true:
 conditions isn't met. Most commonly, the king or rook has already moved earlier
 in the game.
 
-### Pawn Won't Promote to Desired Piece
+### Pawn Promotion Dialog Not Appearing
 
-**Problem:** Pawn automatically promotes to Queen, but I want a different piece.
+**Problem:** The promotion dialog doesn't show when my pawn reaches the end.
 
-**Current Limitation:** Auto-promotion to Queen is the current behavior. Custom
-piece selection for promotion is planned for a future update.
+**Solutions:**
 
-**Workaround:** None currently. All promotions become Queens.
+1. **Ensure the move is legal** - The pawn must be able to legally advance to
+   the last rank
+2. **Check for check** - If your king is in check, you may not be able to
+   promote
+3. **Restart if needed** - If the dialog is stuck, try starting a new game
+
+The promotion dialog should appear automatically, letting you choose Queen,
+Rook, Bishop, or Knight.
 
 ### En Passant Not Working
 
@@ -384,10 +390,14 @@ Have an idea for improvement?
 
 Current known limitations (will be addressed in future updates):
 
-1. **Pawn promotion:** Only promotes to Queen (custom selection coming)
-2. **No game saving:** Games are session-only (save/load coming in Phase 4)
-3. **No volume control:** Fixed at 50% (settings panel coming soon)
-4. **No time controls:** Untimed games only (chess clock coming in Phase 5)
+1. **No volume control:** Fixed at 50% (settings panel coming soon)
+2. **No time controls:** Untimed games only (chess clock coming in Phase 5)
+
+**Resolved:**
+
+- **Phase 3:** Pawn promotion now supports all piece choices (Queen, Rook,
+  Bishop, Knight)
+- **Phase 4:** Game data is now saved automatically for Exam Mode games
 
 ## Still Having Problems?
 

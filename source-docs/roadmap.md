@@ -166,7 +166,8 @@ foundation
 
 - [x] Implement bot move selection from engine
 - [x] Add configurable difficulty levels (Elo 800-2400)
-- [x] Implement bot personalities (Sensei, Student, Club Player, Tactician, Blunder-Prone)
+- [x] Implement bot personalities (Sensei, Student, Club Player, Tactician,
+      Blunder-Prone)
 - [x] Add response time delays (human-like play)
 - [x] Test AI strength at different levels
 
@@ -210,68 +211,68 @@ foundation
 
 ## Phase 4: Exam Mode & Metrics Collection
 
-**Status:** 🚧 Next Phase
+**Status:** ✅ COMPLETE
 
 **Goal:** Add Exam Mode with performance tracking
 
-**Estimated Duration:** 3-4 weeks
+**Completed:** 2025-12-04
 
 ### Exam Mode & Metrics Collection Features
 
 #### 4.1 Exam Mode Implementation
 
-- [ ] Disable guidance system during Exam Mode
-- [ ] Implement full game recording
-- [ ] Store all moves with timestamps
-- [ ] Save complete board positions (FEN)
-- [ ] Generate PGN on game completion
+- [x] Disable guidance system during Exam Mode
+- [x] Implement full game recording
+- [x] Store all moves with timestamps
+- [x] Save complete board positions (FEN)
+- [x] Generate PGN on game completion
 
 #### 4.2 Post-Game Analysis Pipeline
 
-- [ ] Batch analysis of all moves after game
-- [ ] Calculate centipawn loss per move
-- [ ] Classify moves (excellent, good, inaccuracy, mistake, blunder)
-- [ ] Identify critical moments (evaluation swings)
-- [ ] Detect tactical opportunities (missed/found)
+- [x] Batch analysis of all moves after game
+- [x] Calculate centipawn loss per move
+- [x] Classify moves (excellent, good, inaccuracy, mistake, blunder)
+- [x] Identify critical moments (evaluation swings)
+- [x] Detect tactical opportunities (missed/found)
 
 #### 4.3 Metrics Calculation
 
-- [ ] Implement all composite index calculations
-- [ ] Calculate Precision Score
-- [ ] Calculate Tactical Danger Score
-- [ ] Calculate Stability Score
-- [ ] Calculate Conversion Score
-- [ ] Calculate Preparation Score
-- [ ] Calculate Positional & Structure Score
-- [ ] Calculate Aggression & Risk Score
-- [ ] Calculate Simplification Preference Score
-- [ ] Calculate Training Transfer Score
+- [x] Implement all composite index calculations
+- [x] Calculate Precision Score
+- [x] Calculate Tactical Danger Score
+- [x] Calculate Stability Score
+- [x] Calculate Conversion Score
+- [x] Calculate Preparation Score
+- [x] Calculate Positional & Structure Score
+- [x] Calculate Aggression & Risk Score
+- [x] Calculate Simplification Preference Score
+- [x] Calculate Training Transfer Score
 
 #### 4.4 Data Storage
 
-- [ ] Implement JSON storage structure
-- [ ] Save game data to local file system
-- [ ] Save analysis results
-- [ ] Update player profile with new metrics
-- [ ] Implement data integrity validation
+- [x] Implement JSON storage structure
+- [x] Save game data to local file system
+- [x] Save analysis results
+- [x] Update player profile with new metrics
+- [x] Implement data integrity validation
 
 ### Exam Mode & Metrics Collection Milestones
 
-- ✓ User can play Exam Mode without guidance
-- ✓ Post-game analysis completes successfully
-- ✓ All metrics calculated accurately
-- ✓ Data saved and loaded correctly
+- [x] User can play Exam Mode without guidance
+- [x] Post-game analysis completes successfully
+- [x] All metrics calculated accurately
+- [x] Data saved and loaded correctly
 
 ### Exam Mode & Metrics Collection Success Criteria
 
-- Exam Mode functions correctly
-- Analysis pipeline is accurate and fast (<30s per game)
-- All metrics match specifications
-- Data storage is reliable
+- [x] Exam Mode functions correctly
+- [x] Analysis pipeline is accurate and fast (<30s per game)
+- [x] All metrics match specifications
+- [x] Data storage is reliable
 
 ## Phase 5: Post-Game Analysis UI
 
-**Status:** 📋 Planned
+**Status:** 🚧 Next Phase
 
 **Goal:** Build comprehensive post-game analysis interface
 
@@ -658,8 +659,8 @@ driven by user feedback and demand.
 | Phase 1  | Core Chess Engine Integration   | 4-6 weeks | ✅ Complete |
 | Phase 2  | Minimal UI & Chessboard         | 3-4 weeks | ✅ Complete |
 | Phase 3  | AI Opponent & Training Mode     | 4-5 weeks | ✅ Complete |
-| Phase 4  | Exam Mode & Metrics Collection  | 3-4 weeks | 🚧 Next     |
-| Phase 5  | Post-Game Analysis UI           | 4-5 weeks | 📋 Planned  |
+| Phase 4  | Exam Mode & Metrics Collection  | 3-4 weeks | ✅ Complete |
+| Phase 5  | Post-Game Analysis UI           | 4-5 weeks | 🚧 Next     |
 | Phase 6  | Player Progress Dashboard       | 3-4 weeks | 📋 Planned  |
 | Phase 7  | Sandbox Mode                    | 2-3 weeks | 📋 Planned  |
 | Phase 8  | Import/Export & Data Management | 2-3 weeks | 📋 Planned  |
@@ -724,7 +725,7 @@ For questions about the roadmap or development priorities, please:
 
 - Open a GitHub issue
 - Review existing documentation
-- Check the FAQ (coming soon)
+- Check the [FAQ](../documents/faq.md)
 
 We're excited to bring Chess-Sensei to life and help chess players around the
 world improve their game!

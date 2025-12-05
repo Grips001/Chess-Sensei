@@ -69,24 +69,32 @@ Time controls are planned for **Phase 5**. Current games are untimed.
 
 ### Can I save my games?
 
-Game save/load functionality is coming in **Phase 4**. Currently, games only
-exist during the current session.
+**Yes!** Game data is now saved automatically in **Phase 4** (v0.4.0). Your
+games are stored locally with complete move history and analysis results.
 
-**Workaround:** You can screenshot the position or copy moves from the move
-history panel (manual process).
+Games are saved to platform-specific locations:
+
+- **Windows:** `%APPDATA%\Chess-Sensei\`
+- **macOS:** `~/Library/Application Support/Chess-Sensei/`
+- **Linux:** `~/.local/share/Chess-Sensei/`
 
 ### Can I import/export PGN files?
 
-PGN import/export is planned for **Phase 4**. Not yet available.
+PGN generation is available as of **Phase 4** (v0.4.0). Games completed in Exam
+Mode automatically generate PGN notation.
+
+Full PGN import/export with file management is planned for **Phase 8**.
 
 ### Does it analyze my games?
 
-Post-game analysis features are coming in **Phase 4**, including:
+**Yes!** Post-game analysis is available as of **Phase 4** (v0.4.0):
 
-- Move-by-move analysis
-- Mistake identification
-- Alternative move suggestions
-- Performance metrics
+- Move-by-move analysis with centipawn loss calculation
+- Move classification (Excellent/Good/Inaccuracy/Mistake/Blunder)
+- Critical moment detection (evaluation swings > 100cp)
+- 9 composite performance metrics
+
+The analysis UI for reviewing games is coming in **Phase 5**.
 
 ### Can I solve chess puzzles?
 
@@ -149,10 +157,9 @@ red (captures).
 
 When a pawn reaches the opposite end:
 
-- It **automatically promotes to a Queen**
-- You'll hear a promotion sound
-
-**Note:** Custom piece selection (Knight, Bishop, Rook) coming in future update!
+1. A promotion dialog appears with piece choices
+2. Select Queen, Rook, Bishop, or Knight
+3. The pawn transforms and a promotion sound plays
 
 ### What is en passant?
 
@@ -173,9 +180,10 @@ Press **Ctrl+Y** or click **Redo** to replay undone moves.
 
 ### What happens if I close the app during a game?
 
-The game is lost. There's no auto-save currently.
+In **Exam Mode**, your completed games are automatically saved with full
+analysis.
 
-**Coming in Phase 4:** Automatic game state saving!
+For in-progress games, auto-resume functionality is planned for a future update.
 
 ## Interface Questions
 
@@ -372,8 +380,12 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 3 (v0.3.2)** is complete and includes:
+**Phase 4 (v0.4.0)** is complete and includes:
 
+- Exam Mode - play without guidance to test skills
+- Post-game analysis pipeline with move classification
+- 9 composite score calculations (Precision, Tactics, Stability, etc.)
+- Local JSON data storage with player profiles
 - AI opponent with 5 bot personalities
 - Difficulty levels from 800 to 2400 Elo
 - Real-time best-move guidance (top 3 moves)
@@ -385,9 +397,9 @@ See the full roadmap in [source-docs/roadmap.md](../source-docs/roadmap.md).
 
 **Upcoming phases:**
 
-- **Phase 4:** Exam Mode & Metrics Collection
 - **Phase 5:** Post-Game Analysis UI
 - **Phase 6:** Player Progress Dashboard
+- **Phase 7:** Sandbox Mode
 
 ### Can I request a feature?
 

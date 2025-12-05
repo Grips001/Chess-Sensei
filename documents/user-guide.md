@@ -80,11 +80,9 @@ To castle:
 
 When a pawn reaches the opposite end of the board:
 
-1. The move will automatically promote to a Queen
-2. A special promotion sound will play
-
-**Note:** Currently, pawns auto-promote to Queens. Custom piece selection is
-planned for a future update.
+1. A promotion dialog appears with four piece options
+2. Click Queen, Rook, Bishop, or Knight to choose
+3. The pawn transforms and a special promotion sound plays
 
 #### En Passant
 
@@ -304,19 +302,30 @@ Currently, you can play against yourself:
 2. Make moves for both White and Black
 3. Use this to practice tactics, openings, and endgames
 
-**Coming Soon:** AI opponent with multiple difficulty levels for realistic
-practice!
+**Training Mode Available:** Play against AI opponents with 5 personalities
+(Sensei, Student, Club Player, Tactician, Blunder-Prone) and multiple difficulty
+levels. See [Training Mode Guide](training-mode-guide.md).
 
 ## What's Next?
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 3 (v0.3.2)
+### Current Release: Phase 4 (v0.4.0)
 
-Training Mode is now available with:
+Exam Mode and Metrics Collection are now available:
 
-- **AI Opponent** - 5 bot personalities (Sensei, Student, Club Player, Tactician,
-  Blunder-Prone)
+- **Exam Mode** - Play without guidance to test your skills
+- **Game Recording** - Full move history with timestamps
+- **Post-Game Analysis** - Automatic move classification and evaluation
+- **9 Composite Scores** - Precision, Tactics, Stability, Conversion, and more
+- **Local Data Storage** - Your progress saved securely on your device
+
+See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details on metrics.
+
+Training Mode continues to be available with:
+
+- **AI Opponent** - 5 bot personalities (Sensei, Student, Club Player,
+  Tactician, Blunder-Prone)
 - **Adjustable Difficulty** - From 800 to 2400 Elo
 - **Real-time Best-Move Guidance** - Top 3 moves highlighted (Blue/Green/Yellow)
 - **Human-like Bot Timing** - Natural gameplay feel
@@ -325,22 +334,18 @@ See [Training Mode Guide](training-mode-guide.md) for details.
 
 ### Upcoming Features
 
-#### Phase 4: Exam Mode & Metrics Collection
-
-- Timed games without guidance (test your skills)
-- Performance metrics and accuracy tracking
-- Session statistics
-
 #### Phase 5: Post-Game Analysis UI
 
 - Move-by-move analysis with engine insights
-- Mistake identification
-- Performance visualization
+- Mistake identification and visualization
+- Evaluation graph display
+- Game summary report
 
 #### Phase 6: Player Progress Dashboard
 
 - Track improvement over time
 - Detailed statistics and trends
+- Radar charts for composite scores
 
 Stay tuned for updates!
 

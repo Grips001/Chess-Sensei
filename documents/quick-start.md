@@ -35,7 +35,8 @@ Get up and running with Chess-Sensei in under 2 minutes!
 ### Special Moves Work Automatically
 
 - **Castling:** Select king, click castling square
-- **Pawn Promotion:** Auto-promotes to Queen when reaching the end
+- **Pawn Promotion:** Choose Queen, Rook, Bishop, or Knight when reaching the
+  end
 - **En Passant:** Highlighted as a legal move when available
 
 ## Essential Controls
@@ -122,8 +123,8 @@ Yes! Press **Ctrl+Z** or click the **Undo** button.
 
 ### How do I promote a pawn?
 
-Pawns automatically promote to a Queen when they reach the opposite end. Custom
-piece selection coming soon!
+When a pawn reaches the opposite end, a dialog appears letting you choose Queen,
+Rook, Bishop, or Knight.
 
 ### Can I play against the computer?
 
@@ -134,8 +135,10 @@ best-move guidance.
 
 ### How do I save my game?
 
-Game save/load functionality is planned for Phase 4. For now, games are only
-stored in memory during the current session.
+**Exam Mode games are saved automatically!** As of Phase 4 (v0.4.0), completed
+Exam Mode games are stored locally with full analysis data.
+
+See [FAQ](faq.md#can-i-save-my-games) for storage location details.
 
 ## Next Steps
 

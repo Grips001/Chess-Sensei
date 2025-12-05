@@ -151,7 +151,7 @@
             <button class="mode-card-button">Start Training</button>
           </div>
           <!-- Exam Mode Card -->
-          <div class="mode-card disabled" data-mode="exam">
+          <div class="mode-card available" data-mode="exam">
             <div class="mode-card-icon">📝</div>
             <h2 class="mode-card-title">Exam Mode</h2>
             <p class="mode-card-description">Test your skills without assistance.</p>
@@ -161,7 +161,7 @@
               <li>Post-game analysis</li>
               <li>Progress metrics saved</li>
             </ul>
-            <button class="mode-card-button" disabled>Coming Soon</button>
+            <button class="mode-card-button">Start Exam</button>
           </div>
           <!-- Sandbox Mode Card -->
           <div class="mode-card disabled" data-mode="sandbox">
@@ -253,6 +253,92 @@
         <!-- Start Game Button -->
         <div class="setup-actions">
           <button class="start-game-button" id="start-training-button">Start Game</button>
+        </div>
+      </div>
+    </div>
+    <!-- Exam Setup Screen -->
+    <div id="exam-setup-overlay" class="training-setup-overlay hidden">
+      <div class="training-setup-container">
+        <div class="training-setup-header">
+          <button class="back-button" id="exam-setup-back-button">← Back</button>
+          <h2 class="training-setup-title">Exam Mode Setup</h2>
+        </div>
+        <!-- Exam Mode Notice -->
+        <div class="setup-section exam-notice">
+          <div class="exam-notice-content">
+            <span class="exam-notice-icon">📝</span>
+            <div class="exam-notice-text">
+              <strong>No guidance available</strong>
+              <p>
+                Exam Mode tests your skills without hints. All moves will be tracked for post-game
+                analysis.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Bot Selection -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Choose Your Opponent</h3>
+          <div class="bot-selection-grid" id="exam-bot-selection-grid">
+            <!-- Bot cards will be populated by JavaScript -->
+          </div>
+        </div>
+        <!-- Difficulty Preset -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Difficulty Level</h3>
+          <div class="difficulty-selector">
+            <button class="difficulty-button" data-preset="beginner">
+              <span class="difficulty-label">Beginner</span>
+              <span class="difficulty-elo">~800 Elo</span>
+            </button>
+            <button class="difficulty-button selected" data-preset="intermediate">
+              <span class="difficulty-label">Intermediate</span>
+              <span class="difficulty-elo">~1400 Elo</span>
+            </button>
+            <button class="difficulty-button" data-preset="advanced">
+              <span class="difficulty-label">Advanced</span>
+              <span class="difficulty-elo">~2000 Elo</span>
+            </button>
+            <button class="difficulty-button" data-preset="master">
+              <span class="difficulty-label">Master</span>
+              <span class="difficulty-elo">~2400 Elo</span>
+            </button>
+          </div>
+        </div>
+        <!-- Color Selection -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Choose Your Color</h3>
+          <div class="color-selector">
+            <button class="color-button selected" data-color="white">
+              <div class="color-piece white-king"></div>
+              <span class="color-label">White</span>
+              <span class="color-hint">Play first</span>
+            </button>
+            <button class="color-button" data-color="random">
+              <div class="color-piece random-icon">?</div>
+              <span class="color-label">Random</span>
+              <span class="color-hint">Let fate decide</span>
+            </button>
+            <button class="color-button" data-color="black">
+              <div class="color-piece black-king"></div>
+              <span class="color-label">Black</span>
+              <span class="color-hint">Play second</span>
+            </button>
+          </div>
+        </div>
+        <!-- Options -->
+        <div class="setup-section">
+          <h3 class="setup-section-title">Options</h3>
+          <div class="setup-options">
+            <label class="setup-option">
+              <input type="checkbox" id="exam-time-delays-enabled" checked />
+              <span class="option-label">Human-like bot timing</span>
+            </label>
+          </div>
+        </div>
+        <!-- Start Game Button -->
+        <div class="setup-actions">
+          <button class="start-game-button exam-start" id="start-exam-button">Start Exam</button>
         </div>
       </div>
     </div>

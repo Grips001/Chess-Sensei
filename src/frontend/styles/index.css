@@ -2020,3 +2020,53 @@ body {
     min-width: auto;
   }
 }
+
+/* ============================================
+   Exam Mode Styles
+   Phase 4: Exam Mode notice and button styles
+   ============================================ */
+
+/* Exam notice section */
+.exam-notice {
+  background: rgb(255 220 150 / 30%);
+  border: 1px solid rgb(220 180 50 / 40%);
+}
+
+.exam-notice-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.exam-notice-icon {
+  font-size: 32px;
+  filter: drop-shadow(0 2px 4px rgb(0 0 0 / 15%));
+}
+
+.exam-notice-text {
+  flex: 1;
+}
+
+.exam-notice-text strong {
+  display: block;
+  font-size: 16px;
+  color: #8b6914;
+  margin-bottom: 4px;
+}
+
+.exam-notice-text p {
+  margin: 0;
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.5;
+}
+
+/* Exam start button - distinct color from training */
+.start-game-button.exam-start {
+  background: linear-gradient(135deg, rgb(220 150 50 / 95%), rgb(200 130 30 / 100%));
+  box-shadow: 0 6px 20px rgb(220 150 50 / 35%);
+}
+
+.start-game-button.exam-start:hover {
+  box-shadow: 0 8px 28px rgb(220 150 50 / 50%);
+}

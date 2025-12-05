@@ -108,6 +108,8 @@ interface BestMovesResponse {
 
 The following methods are available via Buntralino IPC:
 
+### Core Engine Methods (Phase 1)
+
 | Method             | Description                   | Request              | Response               |
 | ------------------ | ----------------------------- | -------------------- | ---------------------- |
 | `requestBestMoves` | Get top N moves for position  | `PositionRequest`    | `BestMovesResponse`    |
@@ -117,6 +119,34 @@ The following methods are available via Buntralino IPC:
 | `startNewGame`     | Reset engine state            | none                 | `SuccessResponse`      |
 | `setSkillLevel`    | Set engine difficulty (0-20)  | `{ level: number }`  | `SuccessResponse`      |
 | `getEngineStatus`  | Check engine state            | none                 | `EngineStatusResponse` |
+
+### AI Opponent Methods (Phase 3)
+
+| Method                 | Description                          | Request               | Response                    |
+| ---------------------- | ------------------------------------ | --------------------- | --------------------------- |
+| `configureBot`         | Configure bot personality/difficulty | `ConfigureBotRequest` | `BotConfigResponse`         |
+| `getBotMove`           | Get AI opponent's move               | `BotMoveRequest`      | `BotMoveResponse`           |
+| `getBotProfiles`       | List all bot personalities           | none                  | `BotProfilesResponse`       |
+| `getCurrentBotConfig`  | Get current bot configuration        | none                  | `BotConfigResponse`         |
+| `getDifficultyPresets` | Get difficulty preset options        | none                  | `DifficultyPresetsResponse` |
+
+### Analysis & Storage Methods (Phase 4)
+
+| Method              | Description                      | Request                   | Response                 |
+| ------------------- | -------------------------------- | ------------------------- | ------------------------ |
+| `analyzeGame`       | Run post-game analysis pipeline  | `AnalyzeGameRequest`      | `GameAnalysisResponse`   |
+| `getAnalysisConfig` | Get analysis depth configuration | none                      | `AnalysisConfigResponse` |
+| `calculateMetrics`  | Calculate 9 composite scores     | `CalculateMetricsRequest` | `GameMetricsResponse`    |
+| `initializeStorage` | Initialize storage directories   | none                      | `SuccessResponse`        |
+| `saveGame`          | Save game data to disk           | `SaveGameRequest`         | `SaveGameResponse`       |
+| `saveAnalysis`      | Save analysis results to disk    | `SaveAnalysisRequest`     | `SaveAnalysisResponse`   |
+| `getGamesList`      | Get list of all saved games      | none                      | `GamesListResponse`      |
+| `loadGame`          | Load a saved game by ID          | `LoadGameRequest`         | `LoadGameResponse`       |
+| `loadAnalysis`      | Load analysis for a game         | `LoadAnalysisRequest`     | `LoadAnalysisResponse`   |
+| `getStoragePath`    | Get storage base path            | none                      | `StoragePathResponse`    |
+
+All method types are defined in `src/shared/ipc-types.ts` and
+`src/backend/index.ts`.
 
 ## Move Classification
 
@@ -187,11 +217,21 @@ src/
 │   └── test-engine-operations.ts # Operation tests
 ├── shared/
 │   ├── engine-types.ts          # Engine interfaces
-│   ├── ipc-types.ts             # IPC interfaces
+│   ├── ipc-types.ts             # IPC interfaces (all methods)
+│   ├── bot-types.ts             # AI opponent types (Phase 3)
+│   ├── game-state.ts            # Game state management
 │   ├── chess-logic.ts           # Chess.js wrapper
 │   └── test-chess-logic.ts      # Chess logic tests
-└── backend/
-    └── index.ts                 # IPC registration
+├── backend/
+│   ├── index.ts                 # IPC registration (all methods)
+│   ├── ai-opponent.ts           # AI opponent logic (Phase 3)
+│   ├── analysis-pipeline.ts     # Post-game analysis (Phase 4)
+│   ├── metrics-calculator.ts    # Composite scores (Phase 4)
+│   └── data-storage.ts          # File persistence (Phase 4)
+└── frontend/
+    ├── training-mode.ts         # Training Mode UI (Phase 3)
+    ├── move-guidance.ts         # Best-move guidance (Phase 3)
+    └── exam-mode.ts             # Exam Mode UI (Phase 4)
 ```
 
 ## Troubleshooting
@@ -208,7 +248,8 @@ The engine initializes automatically on backend startup. Check:
 **Compiled executable mode:**
 
 1. `stockfish/` directory exists next to the executable
-2. Contains `stockfish-17.1-lite-single-*.js` and `stockfish-17.1-lite-single-*.wasm`
+2. Contains `stockfish-17.1-lite-single-*.js` and
+   `stockfish-17.1-lite-single-*.wasm`
 3. Console shows "[Stockfish] Running in compiled mode"
 
 ### Slow Analysis

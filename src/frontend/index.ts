@@ -23,6 +23,7 @@ import {
 import { ChessGame, type Piece, type PieceSymbol, type Square } from '../shared/chess-logic';
 import { SoundManager } from './sound-manager';
 import { createTrainingMode, type TrainingConfig } from './training-mode';
+import { createExamMode, type ExamConfig } from './exam-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 
 console.log('Chess-Sensei Frontend initialized');
@@ -36,8 +37,15 @@ const soundManager = new SoundManager();
 // Initialize training mode
 const { manager: trainingManager, ui: trainingUI } = createTrainingMode();
 
+// Initialize exam mode (Phase 4)
+const { manager: examManager, ui: examUI } = createExamMode();
+
 // Initialize move guidance
 const guidanceManager = createMoveGuidance();
+
+// Current active game mode
+type GameMode = 'none' | 'training' | 'exam';
+let currentGameMode: GameMode = 'none';
 
 // Track drag and selection state
 let draggedPiece: { element: HTMLElement; square: string } | null = null;
@@ -190,6 +198,7 @@ function updateGameAlert(): void {
 /**
  * Show game result modal
  * Per Task 2.3.5: Game result display
+ * Per Task 4.1.6: Generate PGN on game completion (Exam Mode)
  */
 function showGameResult(): void {
   const overlay = document.getElementById('game-result-overlay');
@@ -204,6 +213,10 @@ function showGameResult(): void {
   const isStalemate = game.isStalemate();
   const isDraw = game.isDraw();
 
+  // Determine result and termination for Exam Mode record
+  let gameResult = '';
+  let termination: 'checkmate' | 'stalemate' | 'resignation' | 'draw' | 'timeout' = 'draw';
+
   if (isCheckmate) {
     // Checkmate
     const winner = game.getTurn() === 'w' ? 'Black' : 'White';
@@ -212,21 +225,55 @@ function showGameResult(): void {
     subtitle.textContent = 'Checkmate';
     reason.textContent = `${loser} king has no legal moves`;
     overlay.classList.remove('hidden');
+
+    // Set result for Exam Mode
+    gameResult = game.getTurn() === 'w' ? '0-1' : '1-0';
+    termination = 'checkmate';
   } else if (isStalemate) {
     // Stalemate
     title.textContent = 'Draw';
     subtitle.textContent = 'Stalemate';
     reason.textContent = 'No legal moves available';
     overlay.classList.remove('hidden');
+
+    gameResult = '1/2-1/2';
+    termination = 'stalemate';
   } else if (isDraw) {
     // Other draw conditions
     title.textContent = 'Draw';
     subtitle.textContent = 'Game Drawn';
     reason.textContent = 'By repetition, 50-move rule, or insufficient material';
     overlay.classList.remove('hidden');
+
+    gameResult = '1/2-1/2';
+    termination = 'draw';
   } else {
     // No game over - hide modal
     overlay.classList.add('hidden');
+    return;
+  }
+
+  // Generate Exam Mode game record if in Exam Mode
+  if (currentGameMode === 'exam' && examManager.isActive()) {
+    const pgn = game.getPgn();
+    const gameRecord = examManager.generateGameRecord(
+      gameResult,
+      termination,
+      pgn,
+      'Unknown Opening' // Opening detection will be added in Phase 4.2
+    );
+
+    console.log('Exam Mode game completed:', {
+      gameId: gameRecord.gameId,
+      result: gameRecord.metadata.result,
+      termination: gameRecord.metadata.termination,
+      duration: gameRecord.metadata.duration,
+      totalMoves: gameRecord.metadata.totalMoves,
+    });
+    console.log('PGN:', pgn);
+
+    // Emit game end callback
+    examManager.onGameEnd?.(gameRecord);
   }
 }
 
@@ -351,6 +398,7 @@ function handlePromotionChoice(piece: string): void {
 
 /**
  * Execute a move (with optional promotion piece)
+ * Per Task 4.1.4: Full game recording for Exam Mode
  */
 function executeMove(from: string, to: string, promotion?: string): void {
   try {
@@ -358,6 +406,12 @@ function executeMove(from: string, to: string, promotion?: string): void {
     const move = game.makeMove(moveStr);
     if (move) {
       console.log('Move made:', move.san);
+
+      // Record move in Exam Mode
+      if (currentGameMode === 'exam' && examManager.isActive()) {
+        const playerColor = examManager.getPlayerColor();
+        examManager.recordMove(move.san, moveStr, game.getFen(), playerColor);
+      }
 
       // Clear redo stack on new move (can't redo after making a new move)
       redoStack = [];
@@ -825,7 +879,7 @@ function clearHighlights(): void {
 function highlightLegalMoves(fromSquare: string): void {
   clearHighlights();
 
-  const legalMoves = game.getLegalMoves({ square: fromSquare as any });
+  const legalMoves = game.getLegalMoves({ square: fromSquare as Square });
 
   legalMoves.forEach((move) => {
     const targetSquare = document.querySelector(`[data-square="${move.to}"]`);
@@ -842,6 +896,7 @@ function highlightLegalMoves(fromSquare: string): void {
 /**
  * Handle post-move updates and check if bot should play
  * Per Task 3.2.5: Training Mode state management
+ * Per Task 4.1: Exam Mode state management (no guidance)
  */
 async function handlePostMoveUpdates(): Promise<void> {
   clearSelection();
@@ -864,8 +919,8 @@ async function handlePostMoveUpdates(): Promise<void> {
     return;
   }
 
-  // Check if bot should make a move in Training Mode
-  if (trainingManager.isActive()) {
+  // Handle Training Mode
+  if (currentGameMode === 'training' && trainingManager.isActive()) {
     const shouldBotMove = trainingManager.updatePosition(game.getFen());
     if (shouldBotMove) {
       // Hide guidance during bot's turn
@@ -877,6 +932,78 @@ async function handlePostMoveUpdates(): Promise<void> {
       // It's player's turn, update guidance
       await updateGuidance();
     }
+  }
+
+  // Handle Exam Mode (NO guidance - per game-modes.md)
+  if (currentGameMode === 'exam' && examManager.isActive()) {
+    const shouldBotMove = examManager.updatePosition(game.getFen());
+    if (shouldBotMove) {
+      await requestExamBotMove();
+    }
+    // Guidance is NEVER shown in Exam Mode
+    showGuidancePanel(false);
+  }
+}
+
+/**
+ * Request and execute a bot move in Exam Mode
+ * Per Task 4.1: Exam Mode bot integration
+ */
+async function requestExamBotMove(): Promise<void> {
+  if (!examManager.isActive() || examManager.isPlayerTurn()) {
+    return;
+  }
+
+  // Show thinking indicator
+  showBotThinking(true);
+
+  try {
+    const botMove = await examManager.requestBotMove(game.getFen());
+    if (botMove) {
+      // Execute the bot's move
+      const move = game.makeMove(botMove);
+      if (move) {
+        console.log('Exam Bot move:', move.san);
+
+        // Record move for Exam Mode tracking
+        const botColor = examManager.isPlayerWhite() ? 'black' : 'white';
+        examManager.recordMove(move.san, botMove, game.getFen(), botColor);
+
+        // Play appropriate sound
+        if (move.isCheckmate) {
+          soundManager.play('checkmate');
+        } else if (move.isCheck) {
+          soundManager.play('check');
+        } else if (move.isCastling) {
+          soundManager.play('castle');
+        } else if (move.captured) {
+          soundManager.play('capture');
+        } else {
+          soundManager.play('move');
+        }
+
+        // Update UI
+        renderChessboard();
+        updateTurnIndicator();
+        updateMoveHistory();
+        updateCapturedPieces();
+        updateGameAlert();
+
+        // Show game result if game is over
+        if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+          setTimeout(() => {
+            showGameResult();
+          }, 1000);
+        }
+
+        // Update exam mode state
+        examManager.updatePosition(game.getFen());
+      }
+    }
+  } catch (error) {
+    console.error('Error getting exam bot move:', error);
+  } finally {
+    showBotThinking(false);
   }
 }
 
@@ -1213,10 +1340,21 @@ async function updateGuidance(): Promise<void> {
  * Per Task 2.2.4: Piece animation on move
  * Per Task 2.2.5: Move sound effects
  * Per Task 3.2.5: Training Mode integration
+ * Per Task 4.1: Exam Mode integration (move recording, no guidance)
  */
 function attemptMove(from: string, to: string): void {
   // In Training Mode, only allow moves on player's turn
-  if (trainingManager.isActive() && !trainingManager.isPlayerTurn()) {
+  if (
+    currentGameMode === 'training' &&
+    trainingManager.isActive() &&
+    !trainingManager.isPlayerTurn()
+  ) {
+    console.log('Not your turn - waiting for bot');
+    return;
+  }
+
+  // In Exam Mode, only allow moves on player's turn
+  if (currentGameMode === 'exam' && examManager.isActive() && !examManager.isPlayerTurn()) {
     console.log('Not your turn - waiting for bot');
     return;
   }
@@ -1480,6 +1618,14 @@ async function startTrainingGame(
   config: TrainingConfig,
   playerColor: 'white' | 'black'
 ): Promise<void> {
+  // Set current game mode
+  currentGameMode = 'training';
+
+  // Make sure Exam Mode is stopped
+  if (examManager.isActive()) {
+    examManager.stop();
+  }
+
   // Reset the game
   game.reset();
   redoStack = [];
@@ -1517,6 +1663,55 @@ async function startTrainingGame(
   }
 }
 
+/**
+ * Start an Exam Mode game
+ * Per Task 4.1.2: Exam Mode setup flow
+ * Per Task 4.1.3: Exam Mode state management
+ * Per game-modes.md: Guidance is completely disabled
+ */
+async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'): Promise<void> {
+  // Set current game mode
+  currentGameMode = 'exam';
+
+  // Make sure Training Mode is stopped
+  if (trainingManager.isActive()) {
+    trainingManager.stop();
+  }
+
+  // Reset the game
+  game.reset();
+  redoStack = [];
+
+  // Flip board if playing as black
+  if (playerColor === 'black' && !boardFlipped) {
+    boardFlipped = true;
+  } else if (playerColor === 'white' && boardFlipped) {
+    boardFlipped = false;
+  }
+
+  // Render the fresh board
+  renderChessboard();
+  updateTurnIndicator();
+  updateMoveHistory();
+  updateCapturedPieces();
+  updateGameAlert();
+  updateUndoRedoButtons();
+
+  // IMPORTANT: Hide guidance panel - Exam Mode has NO guidance
+  showGuidancePanel(false);
+  guidanceManager.deactivate();
+
+  console.log(`Exam Mode started: Playing as ${playerColor}, gameId: ${examManager.getGameId()}`);
+
+  // If playing as black, bot makes the first move
+  if (playerColor === 'black') {
+    // Small delay before bot's first move
+    setTimeout(async () => {
+      await requestExamBotMove();
+    }, 500);
+  }
+}
+
 // Initialize application
 (async () => {
   // Render the chessboard immediately
@@ -1529,20 +1724,37 @@ async function startTrainingGame(
   // Initialize Training Mode UI
   trainingUI.initialize();
 
+  // Initialize Exam Mode UI (Phase 4)
+  examUI.initialize();
+
   // Set up Training Mode callbacks
   trainingUI.onGameStart = (config, playerColor) => {
     startTrainingGame(config, playerColor);
+  };
+
+  // Set up Exam Mode callbacks (Phase 4)
+  examUI.onGameStart = (config, playerColor) => {
+    startExamGame(config, playerColor);
+  };
+
+  // Helper to show mode selection
+  const showModeSelection = () => {
+    // Stop any active game mode
+    if (trainingManager.isActive()) {
+      trainingManager.stop();
+    }
+    if (examManager.isActive()) {
+      examManager.stop();
+    }
+    currentGameMode = 'none';
+    trainingUI.show();
   };
 
   // Wire up "New Game" buttons
   const newGameButton = document.getElementById('new-game-button');
   if (newGameButton) {
     newGameButton.addEventListener('click', () => {
-      // In Training Mode, show mode selection instead of just resetting
-      if (trainingManager.isActive()) {
-        trainingManager.stop();
-      }
-      trainingUI.show();
+      showModeSelection();
     });
   }
 
@@ -1554,10 +1766,7 @@ async function startTrainingGame(
         handleNewGameControl();
       } else {
         // No game in progress, show mode selection
-        if (trainingManager.isActive()) {
-          trainingManager.stop();
-        }
-        trainingUI.show();
+        showModeSelection();
       }
     });
   }
@@ -1609,5 +1818,5 @@ async function startTrainingGame(
   // Make test function available globally for debugging (Phase 1 tests)
   (window as unknown as { testIPC: () => Promise<void> }).testIPC = testIPCCommunication;
 
-  console.log('Phase 3: Training Mode UI initialized');
+  console.log('Phase 4: Exam Mode UI initialized (guidance disabled)');
 })();
