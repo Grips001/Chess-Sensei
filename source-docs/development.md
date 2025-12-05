@@ -187,7 +187,7 @@ Version tags correspond to completed development phases:
 | v0.2.0  | Phase 2: UI & Chessboard        | Complete |
 | v0.3.0  | Phase 3: AI Opponent & Training | Complete |
 | v0.4.0  | Phase 4: Exam Mode & Metrics    | Complete |
-| v0.5.1  | Phase 5: Post-Game Analysis UI  | Complete |
+| v0.5.2  | Phase 5: Post-Game Analysis UI  | Complete |
 | v1.0.0  | Full Release (Phase 9 complete) | Planned  |
 
 ### Creating a Release
@@ -200,7 +200,7 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    # Edit package.json version field
-   "version": "0.5.1"
+   "version": "0.5.2"
    ```
 
 2. **Update CHANGELOG.md** with release notes
@@ -209,15 +209,15 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    git add package.json CHANGELOG.md
-   git commit -m "chore: prepare release v0.5.1"
+   git commit -m "chore: prepare release v0.5.2"
    ```
 
 4. **Create and push tag**:
 
    ```bash
-   git tag -a v0.5.1 -m "Phase 5: Post-Game Analysis UI"
+   git tag -a v0.5.2 -m "Phase 5: Bug fixes"
    git push origin main
-   git push origin v0.5.1
+   git push origin v0.5.2
    ```
 
 5. **GitHub Actions automatically**:

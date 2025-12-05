@@ -13,6 +13,25 @@ and this project adheres to
 - Player progress dashboard (Phase 6)
 - Sandbox Mode for position exploration (Phase 7)
 
+## [0.5.2] - 2025-12-05
+
+### Fixed
+
+- **Game mode switching bug**: Fixed issue where switching from Training Mode to
+  Exam Mode (or vice versa) after completing a game would show the previous
+  game's result overlay instead of starting a fresh game
+- **Stale timeout cleanup**: Added proper cancellation of pending game result
+  timeouts when starting a new game to prevent race conditions
+- **Consolidated new game flow**: Unified all "New Game" paths to use a single
+  `showModeSelection()` function for consistent hard reset behavior
+
+### Changed
+
+- Removed redundant `startNewGame()` and `handleNewGameControl()` functions in
+  favor of centralized `showModeSelection()` reset logic
+- All "New Game" actions now perform a complete state reset including game
+  state, board orientation, overlays, and pending timeouts
+
 ## [0.5.1] - 2025-12-05
 
 ### Added
@@ -277,7 +296,8 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.2...HEAD
+[0.5.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.2...v0.4.0

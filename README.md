@@ -167,7 +167,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.5.1 (Phase 5: Post-Game Analysis UI + Advanced Logging)
+**Current Version:** v0.5.2 (Phase 5: Post-Game Analysis UI + Bug Fixes)
 
 ### Installation
 

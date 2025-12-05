@@ -43,7 +43,7 @@ updates first.
 
 **Last Updated:** 2025-12-05
 
-**Current Version:** v0.5.1
+**Current Version:** v0.5.2
 
 **Current Phase:** Phase 6 - Player Progress Dashboard 🚧 NEXT
 

@@ -125,7 +125,7 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 5 Complete ✓ **Version:** v0.5.1 **Next:** Phase 6 - Player
+**Phase:** Phase 5 Complete ✓ **Version:** v0.5.2 **Next:** Phase 6 - Player
 Progress Dashboard
 
 ### Completed Phases
@@ -230,6 +230,6 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 ## Success
 
 Chess-Sensei is ready for active development. Phase 5 (Post-Game Analysis UI) is
-complete with version v0.5.1.
+complete with version v0.5.2.
 
 Next up: Phase 6 - Player Progress Dashboard!

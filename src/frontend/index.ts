@@ -62,6 +62,9 @@ let boardFlipped: boolean = false;
 // Track redo stack (for redo functionality)
 let redoStack: string[] = [];
 
+// Track pending game result timeout (to cancel on game reset)
+let gameResultTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
 /**
  * Update the turn indicator display
  * Per Task 2.3.1: Show current turn indicator
@@ -696,59 +699,8 @@ function executeMove(from: string, to: string, promotion?: string): void {
   }
 }
 
-/**
- * Start a new game
- * Per Task 2.3.5 & 2.4.1: Option to start new game
- */
-function startNewGame(): void {
-  // Reset game to starting position
-  game.reset();
-
-  // Clear redo stack
-  redoStack = [];
-
-  // Hide game result modal
-  const overlay = document.getElementById('game-result-overlay');
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
-
-  // Hide confirmation dialog
-  const confirmOverlay = document.getElementById('confirm-dialog-overlay');
-  if (confirmOverlay) {
-    confirmOverlay.classList.add('hidden');
-  }
-
-  // Re-render everything
-  renderChessboard();
-  updateTurnIndicator();
-  updateMoveHistory();
-  updateCapturedPieces();
-  updateGameAlert();
-  updateUndoRedoButtons();
-
-  console.log('New game started');
-}
-
-/**
- * Handle "New Game" button from Game Controls
- * Per Task 2.4.1: New game button with confirmation
- */
-function handleNewGameControl(): void {
-  const history = game.getHistory();
-
-  // If game in progress, confirm before resetting
-  if (history.length > 0) {
-    showConfirmDialog(
-      'Start New Game?',
-      'Current game progress will be lost. Continue?',
-      startNewGame
-    );
-  } else {
-    // No game in progress, just start
-    startNewGame();
-  }
-}
+// Note: startNewGame() and handleNewGameControl() removed in favor of showModeSelection()
+// which provides a complete "hard reset" when starting a new game (see line ~1965)
 
 /**
  * Handle "Resign" button
@@ -887,7 +839,7 @@ function handleRedo(): void {
 
       // Show game result modal if game is over
       if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-        setTimeout(() => {
+        gameResultTimeoutId = setTimeout(() => {
           showGameResult();
         }, 1000);
       }
@@ -1138,7 +1090,7 @@ async function handlePostMoveUpdates(): Promise<void> {
     showGuidancePanel(false);
     guidanceManager.clearGuidance();
     updateGuidanceHighlights();
-    setTimeout(() => {
+    gameResultTimeoutId = setTimeout(() => {
       showGameResult();
     }, 1000);
     return;
@@ -1216,7 +1168,7 @@ async function requestExamBotMove(): Promise<void> {
 
         // Show game result if game is over
         if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-          setTimeout(() => {
+          gameResultTimeoutId = setTimeout(() => {
             showGameResult();
           }, 1000);
         }
@@ -1274,7 +1226,7 @@ async function requestBotMove(): Promise<void> {
 
         // Show game result if game is over
         if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-          setTimeout(() => {
+          gameResultTimeoutId = setTimeout(() => {
             showGameResult();
           }, 1000);
         }
@@ -1962,8 +1914,14 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     startExamGame(config, playerColor);
   };
 
-  // Helper to show mode selection
+  // Helper to show mode selection - resets entire game to fresh state
   const showModeSelection = () => {
+    // Cancel any pending game result timeout (prevents stale results from showing)
+    if (gameResultTimeoutId !== null) {
+      clearTimeout(gameResultTimeoutId);
+      gameResultTimeoutId = null;
+    }
+
     // Stop any active game mode
     if (trainingManager.isActive()) {
       trainingManager.stop();
@@ -1972,6 +1930,37 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
       examManager.stop();
     }
     currentGameMode = 'none';
+
+    // Reset game to starting position (clean slate)
+    game.reset();
+    redoStack = [];
+
+    // Reset board orientation to default (white at bottom)
+    boardFlipped = false;
+
+    // Hide all overlays
+    const resultOverlay = document.getElementById('game-result-overlay');
+    if (resultOverlay) {
+      resultOverlay.classList.add('hidden');
+    }
+    const confirmOverlay = document.getElementById('confirm-dialog-overlay');
+    if (confirmOverlay) {
+      confirmOverlay.classList.add('hidden');
+    }
+
+    // Hide guidance panel
+    showGuidancePanel(false);
+    guidanceManager.deactivate();
+
+    // Re-render everything fresh
+    renderChessboard();
+    updateTurnIndicator();
+    updateMoveHistory();
+    updateCapturedPieces();
+    updateGameAlert();
+    updateUndoRedoButtons();
+
+    // Show mode selection
     trainingUI.show();
   };
 
@@ -2010,9 +1999,13 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     newGameControl.addEventListener('click', () => {
       // Show confirmation if game is in progress
       if (game.getHistory().length > 0) {
-        handleNewGameControl();
+        showConfirmDialog(
+          'Start New Game?',
+          'Current game progress will be lost. Continue?',
+          showModeSelection
+        );
       } else {
-        // No game in progress, show mode selection
+        // No game in progress, show mode selection directly
         showModeSelection();
       }
     });
