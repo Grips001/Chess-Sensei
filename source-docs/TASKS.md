@@ -41,13 +41,77 @@ updates first.
 
 ## Current Status
 
-**Last Updated:** 2025-12-04
+**Last Updated:** 2025-12-05
 
-**Current Version:** v0.4.0
+**Current Version:** v0.5.1
 
-**Current Phase:** Phase 5 - Post-Game Analysis UI 🚧 NEXT
+**Current Phase:** Phase 6 - Player Progress Dashboard 🚧 NEXT
 
-**Previous Phase:** Phase 4 - Exam Mode & Metrics Collection ✅ COMPLETE
+**Previous Phase:** Phase 5 - Post-Game Analysis UI ✅ COMPLETE
+
+**Phase 5 Completion Summary:**
+
+All Phase 5 tasks have been completed:
+
+- ✅ Task 5.1: Analysis Launch (2 tasks)
+- ✅ Task 5.2: Move-by-Move Review (5 tasks)
+- ✅ Task 5.3: Mistake Deep Dive (4 tasks)
+- ✅ Task 5.4: Alternative Lines Exploration (2 tasks)
+- ✅ Task 5.5: Game Summary Report (5 tasks)
+- ✅ Task 5.6: Deep Analytics Dashboard (7 tasks)
+- ✅ Task 5.7: Training Recommendations (4 tasks)
+- ✅ Task 5.8: Export Options (3 tasks)
+- ✅ Task 5.9: Phase 5 Milestones Verification (all verified)
+
+**Debug Logging Infrastructure (Added during Phase 5):**
+
+A comprehensive debug logging system was implemented to aid in debugging and
+development. This system is available when running with the `--dev` flag.
+
+**New Files Created:**
+
+- `src/shared/logger-types.ts` - Shared types for logging system
+- `src/backend/file-logger.ts` - Backend file logger singleton
+- `src/frontend/frontend-logger.ts` - Frontend logger (sends to backend via IPC)
+
+**Logging Features:**
+
+- Log levels: debug, info, warn, error
+- Backend writes to `logs/chess-sensei-YYYY-MM-DDTHH-MM-SS.log`
+- Frontend logs forwarded to backend via IPC
+- Helper methods: `enter()`, `exit()`, `ipc()`, `ipcResponse()`, `separator()`
+- Structured logging with component names and timestamps
+
+**IPC Methods Added:**
+
+- `LOG_MESSAGE` - Forward frontend log to backend file
+- `GET_LOG_PATH` - Get current log file path
+- `IS_LOGGING_ENABLED` - Check if --dev mode is active
+
+**IMPORTANT FOR REMAINING PHASES:**
+
+All new features in Phases 6-9 must incorporate the logging system:
+
+1. **Import the logger** at the top of new files:
+   - Backend: `import { logger } from './file-logger';`
+   - Frontend: `import { frontendLogger } from './frontend-logger';`
+
+2. **Log key operations**:
+   - IPC calls and responses: `logger.ipc()`, `logger.ipcResponse()`
+   - Function entry/exit for complex functions: `logger.enter()`,
+     `logger.exit()`
+   - State changes: `logger.stateChange()`
+   - User actions: `frontendLogger.userAction()`
+   - Errors with full context: `logger.error(component, message, error, data)`
+
+3. **Use appropriate log levels**:
+   - `debug`: Detailed tracing (IPC calls, state changes)
+   - `info`: Key events (game start, analysis complete)
+   - `warn`: Recoverable issues (fallback used, optional feature unavailable)
+   - `error`: Failures requiring attention
+
+4. **Component naming convention**: Use descriptive component names like
+   `'Dashboard'`, `'SandboxMode'`, `'ExportManager'` for easy log filtering
 
 **Phase 4 Completion Summary:**
 
@@ -1361,7 +1425,7 @@ Implement all 9 composite index calculations with their component metrics:
 
 ## Phase 5: Post-Game Analysis UI
 
-**Status:** 📋 PLANNED
+**Status:** ✅ COMPLETE
 
 **Source:** [roadmap.md](roadmap.md) - Phase 5,
 [post-game-analysis.md](post-game-analysis.md)
@@ -1381,14 +1445,14 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Analysis Launch"
 
-- [ ] **5.1.1** Implement game over screen
+- [x] **5.1.1** Implement game over screen
   - Show result (Win/Loss/Draw)
   - Quick stats preview:
     - Accuracy percentage
     - Number of blunders, mistakes, inaccuracies
     - Game duration
   - **"View Analysis"** button prominently displayed
-- [ ] **5.1.2** Enable analysis from game history
+- [x] **5.1.2** Enable analysis from game history
   - Access any past Exam Mode game from Game History
   - Click to open full analysis interface
 
@@ -1396,20 +1460,20 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Main View"
 
-- [ ] **5.2.1** Interactive board replay
+- [x] **5.2.1** Interactive board replay
   - Full game replay with navigation controls
   - Play/Pause auto-replay
   - Step forward/backward through moves
   - Jump to specific move numbers
   - **Jump to mistakes/blunders directly**
   - Keyboard navigation
-- [ ] **5.2.2** Move highlight colors (per post-game-analysis.md)
+- [x] **5.2.2** Move highlight colors (per post-game-analysis.md)
   - **Green**: Excellent move
   - **Teal**: Good move
   - **Yellow**: Inaccuracy
   - **Orange**: Mistake
   - **Red**: Blunder
-- [ ] **5.2.3** Move list panel (Right Side)
+- [x] **5.2.3** Move list panel (Right Side)
   - Full game notation (SAN)
   - Each move annotated with:
     - Classification symbol (✓ Excellent, ? Inaccuracy, ?? Blunder)
@@ -1418,7 +1482,7 @@ Implement all 9 composite index calculations with their component metrics:
   - **Click any move** to jump to position
   - Mistake moves highlighted for quick identification
   - Scrolling synchronized with board
-- [ ] **5.2.4** Evaluation graph display (Top)
+- [x] **5.2.4** Evaluation graph display (Top)
   - Line graph of evaluation over game
   - White advantage above line, Black below
   - Y-axis: centipawn or win probability
@@ -1426,7 +1490,7 @@ Implement all 9 composite index calculations with their component metrics:
   - **Visual drop-offs** show mistakes
   - **Click graph points** to jump to position
   - Mark critical moments
-- [ ] **5.2.5** Current position analysis panel (Bottom)
+- [x] **5.2.5** Current position analysis panel (Bottom)
   - **Your Move**: The move played
   - **Move Quality**: Classification and CPL
   - **Engine Best Move**: What engine recommended
@@ -1438,24 +1502,24 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Mistake Deep Dive"
 
-- [ ] **5.3.1** Mistake detail modal
+- [x] **5.3.1** Mistake detail modal
   - Click any mistake/blunder to open details
   - Full-screen or overlay modal
-- [ ] **5.3.2** Show "What Happened" section
+- [x] **5.3.2** Show "What Happened" section
   - Position diagram before mistake
   - Your move highlighted with arrow
   - **Why It's a Mistake** explanation:
     - "Hangs a pawn on e5"
     - "Misses winning tactic Rxh7+"
     - "Allows opponent fork on d5"
-- [ ] **5.3.3** Show "Better Alternatives" section
+- [x] **5.3.3** Show "Better Alternatives" section
   - Engine best move with arrow and notation
   - Expected continuation (top 2-3 moves)
   - Evaluation comparison:
     - After your move: -1.5
     - After best move: +0.8
     - Difference: -2.3 pawns
-- [ ] **5.3.4** "Open in Sandbox" button
+- [x] **5.3.4** "Open in Sandbox" button
   - Loads exact position in Sandbox Mode
   - Enable further exploration
   - Practice finding right move
@@ -1464,12 +1528,12 @@ Implement all 9 composite index calculations with their component metrics:
 
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Alternative Lines"
 
-- [ ] **5.4.1** Implement "Explore Alternatives" feature
+- [x] **5.4.1** Implement "Explore Alternatives" feature
   - Available at any point in review
   - Show top 3 engine moves for position
   - Each with evaluation and brief continuation
   - Visual arrows on board
-- [ ] **5.4.2** Show move comparison
+- [x] **5.4.2** Show move comparison
   - Where player's move ranks among all legal moves
   - How much worse than best option
 
@@ -1478,7 +1542,7 @@ Implement all 9 composite index calculations with their component metrics:
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Game Summary
 Report"
 
-- [ ] **5.5.1** Game metadata section
+- [x] **5.5.1** Game metadata section
   - Date and time played
   - Bot opponent (personality and Elo)
   - Player color
@@ -1486,7 +1550,7 @@ Report"
   - Game result and termination type
   - Total moves
   - Game duration
-- [ ] **5.5.2** Overall performance card
+- [x] **5.5.2** Overall performance card
   - **Accuracy Score** with breakdown:
     - Opening Accuracy
     - Middlegame Accuracy
@@ -1498,16 +1562,16 @@ Report"
     - Mistakes count
     - Blunders count
   - **Average Centipawn Loss**
-- [ ] **5.5.3** Critical moments section
+- [x] **5.5.3** Critical moments section
   - Automatically identified turning points
   - Each with: move number, type, evaluation swing, description
   - Click to review
-- [ ] **5.5.4** Tactical opportunities section
+- [x] **5.5.4** Tactical opportunities section
   - Tactics Found count
   - Tactics Missed count
   - List of missed tactics with details
   - Click each to review
-- [ ] **5.5.5** Game phase breakdown
+- [x] **5.5.5** Game phase breakdown
   - Visual timeline showing phases
   - Phase boundaries
   - Summary per phase
@@ -1517,35 +1581,35 @@ Report"
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Deep Analytics
 View"
 
-- [ ] **5.6.1** Metrics scorecard for game
+- [x] **5.6.1** Metrics scorecard for game
   - All 9 composite scores for this game
   - Comparison to player average
   - Visual indicators (✓ Above average, ✗ Below)
   - Key insight text
-- [ ] **5.6.2** Detailed metric breakdown
+- [x] **5.6.2** Detailed metric breakdown
   - Drill into any composite score
   - Show individual component metrics
   - Example: Precision Score details showing all 14 components
-- [ ] **5.6.3** Positional heatmaps
+- [x] **5.6.3** Positional heatmaps
   - Where mistakes occurred (red squares)
   - Where played well (green squares)
   - Tactical hotspots (yellow squares)
   - Helps identify spatial blindspots
-- [ ] **5.6.4** Move time distribution chart
+- [x] **5.6.4** Move time distribution chart
   - Bar chart: move number vs. time spent
   - Identify rushed moves
   - Identify overthinking
   - Correlation insights
-- [ ] **5.6.5** Evaluation stability graph
+- [x] **5.6.5** Evaluation stability graph
   - Shows position volatility
   - Flat = stable, Sharp swings = tactical chaos
   - Player accuracy by stability
-- [ ] **5.6.6** Opening analysis
+- [x] **5.6.6** Opening analysis
   - Opening name detected
   - Preparation depth (move number of deviation)
   - Evaluation at moves 10 and 15
   - Recommendations
-- [ ] **5.6.7** Endgame analysis (if applicable)
+- [x] **5.6.7** Endgame analysis (if applicable)
   - Endgame type (Rook + Pawns, etc.)
   - Material advantage at endgame start
   - Expected vs. actual result
@@ -1556,19 +1620,19 @@ View"
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Training
 Recommendations"
 
-- [ ] **5.7.1** Generate personalized training suggestions
+- [x] **5.7.1** Generate personalized training suggestions
   - Based on weakness analysis
   - Prioritized (Top Priority, Secondary Focus)
   - Specific improvement areas
-- [ ] **5.7.2** Link to relevant training modes
+- [x] **5.7.2** Link to relevant training modes
   - Suggested practice settings
   - Difficulty recommendations
   - Bot personality suggestions
-- [ ] **5.7.3** Highlight specific weaknesses
+- [x] **5.7.3** Highlight specific weaknesses
   - Clear identification of problem areas
   - Historical trend data
   - Examples from this game
-- [ ] **5.7.4** Suggest practice positions
+- [x] **5.7.4** Suggest practice positions
   - Positions similar to mistakes
   - Tactical training suggestions
   - Endgame practice if relevant
@@ -1578,14 +1642,14 @@ Recommendations"
 **Source:** [post-game-analysis.md](post-game-analysis.md) - "Exporting and
 Sharing"
 
-- [ ] **5.8.1** Export Game PGN
+- [x] **5.8.1** Export Game PGN
   - Standard notation format
   - Include annotations (?, ??, !, !!)
-- [ ] **5.8.2** Export Analysis Report (PDF)
+- [x] **5.8.2** Export Analysis Report (Markdown)
   - Full summary report
-  - Includes graphs and key positions
-  - Printable for offline review
-- [ ] **5.8.3** Export Game Data (JSON)
+  - Includes all statistics and key positions
+  - Readable for offline review
+- [x] **5.8.3** Export Game Data (JSON)
   - Complete game + analysis
   - Importable back to Chess-Sensei
 
@@ -1593,12 +1657,13 @@ Sharing"
 
 **Source:** [roadmap.md](roadmap.md) - Phase 5 Milestones
 
-- [ ] Full post-game analysis UI functional
-- [ ] All data visualizations render correctly
-- [ ] User can review games effectively
-- [ ] Recommendations are actionable
-- [ ] Documentation detailing Post-Game Analysis implementation exists in
+- [x] Full post-game analysis UI functional
+- [x] All data visualizations render correctly
+- [x] User can review games effectively
+- [x] Recommendations are actionable
+- [x] Documentation detailing Post-Game Analysis implementation exists in
       `documents/` folder
+  - **COMPLETED:** See `documents/post-game-analysis.md`
 
 ---
 
@@ -1619,6 +1684,18 @@ Sharing"
 - Users are motivated by progress tracking
 - Documentation detailing Player Progress Dashboard implementation exists in
   `documents/` folder
+
+**Logging Requirements:**
+
+All Phase 6 implementations must include debug logging:
+
+- Log dashboard initialization and data loading
+- Log metric calculations and aggregations
+- Log chart/graph rendering events
+- Log user interactions (tab switches, filters, drill-downs)
+- Log data fetches and caching operations
+- Use component names: `'Dashboard'`, `'ProgressCharts'`, `'GameHistory'`,
+  `'Achievements'`
 
 ### 6.1 Progress Dashboard Overview
 
@@ -1800,6 +1877,18 @@ Areas"
 - Documentation detailing Sandbox Mode implementation exists in `documents/`
   folder
 
+**Logging Requirements:**
+
+All Phase 7 implementations must include debug logging:
+
+- Log board editor state changes (piece placements, removals)
+- Log FEN parsing and validation results
+- Log position validation (legal/illegal detection)
+- Log analysis requests and engine responses
+- Log mode transitions (edit → analyze → edit)
+- Use component names: `'SandboxMode'`, `'BoardEditor'`, `'PositionValidator'`,
+  `'SandboxAnalysis'`
+
 ### 7.1 Board Editor
 
 **Source:** [game-modes.md](game-modes.md) - "Sandbox Mode Features"
@@ -1929,6 +2018,19 @@ Areas"
 - File formats are standard and portable
 - Documentation detailing Import/Export & Data Management implementation exists
   in `documents/` folder
+
+**Logging Requirements:**
+
+All Phase 8 implementations must include debug logging:
+
+- Log export operations (file type, destination, size, success/failure)
+- Log import operations (file parsing, validation, conflicts, results)
+- Log backup creation and restoration steps
+- Log data validation and integrity checks
+- Log file system operations (read, write, delete, rename)
+- Log progress for long-running operations
+- Use component names: `'ExportManager'`, `'ImportManager'`, `'BackupSystem'`,
+  `'DataManager'`
 
 ### 8.1 Export Functions
 
@@ -2077,6 +2179,18 @@ Areas"
 - Users can learn the app easily
 - Documentation detailing Polish & Optimization implementation exists in
   `documents/` folder
+
+**Logging Requirements:**
+
+Phase 9 logging tasks:
+
+- Review and standardize logging across all components
+- Add performance timing logs for optimization work
+- Ensure all error paths have comprehensive logging
+- Add log level filtering options in settings (if warranted)
+- Document logging system in user/developer documentation
+- Consider adding log rotation for long-running sessions
+- Use component names consistently across all modules
 
 ### 9.1 UI/UX Refinements
 

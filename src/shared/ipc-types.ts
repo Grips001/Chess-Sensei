@@ -242,6 +242,14 @@ export const IPC_METHODS = {
   LOAD_ANALYSIS: 'loadAnalysis',
   /** Get the storage base path */
   GET_STORAGE_PATH: 'getStoragePath',
+
+  // Debug Logging Methods (--dev mode only)
+  /** Log a message from frontend to backend file logger */
+  LOG_MESSAGE: 'logMessage',
+  /** Get log file path */
+  GET_LOG_PATH: 'getLogPath',
+  /** Check if debug logging is enabled */
+  IS_LOGGING_ENABLED: 'isLoggingEnabled',
 } as const;
 
 /**

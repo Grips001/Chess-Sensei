@@ -118,15 +118,37 @@
         </div>
       </div>
     </div>
-    <!-- Game Result Modal -->
+    <!-- Game Result Modal (Enhanced for Phase 5) -->
     <div id="game-result-overlay" class="game-result-overlay hidden">
       <div class="game-result-modal">
         <h2 class="game-result-title" id="result-title">Game Over</h2>
         <p class="game-result-subtitle" id="result-subtitle"></p>
         <p class="game-result-reason" id="result-reason"></p>
+        <!-- Phase 5: Quick Stats Display -->
+        <div id="game-over-stats" class="hidden">
+          <!-- Stats will be populated by JavaScript -->
+        </div>
         <div class="game-result-buttons">
+          <button class="view-analysis-btn hidden" id="view-analysis-button">View Analysis</button>
           <button class="game-result-button" id="new-game-button">New Game</button>
         </div>
+      </div>
+    </div>
+    <!-- Phase 5: Post-Game Analysis Overlay -->
+    <div id="analysis-overlay" class="hidden">
+      <div class="analysis-header">
+        <h1>
+          <span class="analysis-header-icon">📊</span>
+          Game Analysis
+        </h1>
+        <button id="analysis-close-btn">×</button>
+      </div>
+      <div id="analysis-loading">
+        <div class="analysis-loading-spinner"></div>
+        <span>Analyzing game...</span>
+      </div>
+      <div id="analysis-content" class="hidden">
+        <!-- Analysis UI will be rendered here by JavaScript -->
       </div>
     </div>
     <!-- Mode Selection Screen -->

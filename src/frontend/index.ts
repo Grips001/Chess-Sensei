@@ -20,13 +20,17 @@ import {
   type EngineStatusResponse,
   type ErrorResponse,
 } from '../shared/ipc-types';
+import type { ExamGameRecord } from './exam-mode';
 import { ChessGame, type Piece, type PieceSymbol, type Square } from '../shared/chess-logic';
 import { SoundManager } from './sound-manager';
 import { createTrainingMode, type TrainingConfig } from './training-mode';
 import { createExamMode, type ExamConfig } from './exam-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
+import { createAnalysisUI } from './analysis-ui';
+import { frontendLogger } from './frontend-logger';
 
 console.log('Chess-Sensei Frontend initialized');
+frontendLogger.info('App', 'Chess-Sensei Frontend initializing');
 
 // Initialize chess game state
 const game = new ChessGame();
@@ -42,6 +46,9 @@ const { manager: examManager, ui: examUI } = createExamMode();
 
 // Initialize move guidance
 const guidanceManager = createMoveGuidance();
+
+// Initialize analysis UI (Phase 5)
+const analysisUI = createAnalysisUI();
 
 // Current active game mode
 type GameMode = 'none' | 'training' | 'exam';
@@ -196,22 +203,186 @@ function updateGameAlert(): void {
 }
 
 /**
+ * Convert frontend ExamGameRecord to backend ExamGameData format
+ * The backend expects a different structure for analysis
+ */
+function convertToBackendFormat(record: ExamGameRecord): {
+  gameId: string;
+  timestamp: number;
+  playerColor: 'white' | 'black';
+  botPersonality: string;
+  botElo: number;
+  result: '1-0' | '0-1' | '1/2-1/2';
+  termination: string;
+  duration: number;
+  moves: Array<{
+    moveNumber: number;
+    color: 'white' | 'black';
+    san: string;
+    uci: string;
+    fen: string;
+    timestamp: number;
+    timeSpent: number;
+  }>;
+  pgn: string;
+  startingFen?: string;
+} {
+  return {
+    gameId: record.gameId,
+    timestamp: new Date(record.timestamp).getTime(),
+    playerColor: record.metadata.playerColor,
+    botPersonality: record.metadata.botPersonality,
+    botElo: record.metadata.botElo,
+    result: record.metadata.result as '1-0' | '0-1' | '1/2-1/2',
+    termination: record.metadata.termination,
+    duration: record.metadata.duration,
+    moves: record.moves.map((m) => ({
+      moveNumber: m.moveNumber,
+      color: m.color,
+      san: m.san,
+      uci: m.uci,
+      fen: m.fen,
+      timestamp: m.timestamp,
+      timeSpent: m.timeSpent,
+    })),
+    pgn: record.pgn,
+  };
+}
+
+/**
+ * Save and analyze an Exam Mode game
+ * Per Task 5.1: Analysis launch flow
+ */
+async function saveAndAnalyzeGame(gameRecord: ExamGameRecord): Promise<boolean> {
+  frontendLogger.separator('SaveAnalyze', 'Starting Game Save and Analysis');
+  frontendLogger.info('SaveAnalyze', 'Starting save and analysis', {
+    gameId: gameRecord.gameId,
+    playerColor: gameRecord.metadata.playerColor,
+    result: gameRecord.metadata.result,
+    totalMoves: gameRecord.moves.length,
+  });
+
+  try {
+    console.log('Starting game save and analysis for:', gameRecord.gameId);
+
+    // Convert to backend format
+    const gameData = convertToBackendFormat(gameRecord);
+    frontendLogger.debug('SaveAnalyze', 'Converted to backend format', {
+      gameId: gameData.gameId,
+      moveCount: gameData.moves.length,
+    });
+
+    // Step 1: Analyze the game
+    console.log('Analyzing game...');
+    frontendLogger.info('SaveAnalyze', 'Step 1: Calling ANALYZE_GAME IPC');
+    const analysisResponse = await buntralino.run(IPC_METHODS.ANALYZE_GAME, {
+      gameData,
+      deepAnalysis: false, // Quick analysis for now
+    });
+
+    if (isErrorResponse(analysisResponse)) {
+      frontendLogger.error('SaveAnalyze', 'Analysis failed', undefined, {
+        error: analysisResponse.error,
+        code: analysisResponse.code,
+      });
+      console.error('Analysis failed:', analysisResponse.error);
+      return false;
+    }
+
+    const analysis = (analysisResponse as { analysis: unknown; success: true }).analysis;
+    frontendLogger.info('SaveAnalyze', 'Analysis complete', {
+      gameId: gameRecord.gameId,
+    });
+    console.log('Analysis complete');
+
+    // Step 2: Save the game data
+    console.log('Saving game data...');
+    frontendLogger.info('SaveAnalyze', 'Step 2: Calling SAVE_GAME IPC');
+    const saveGameResponse = await buntralino.run(IPC_METHODS.SAVE_GAME, {
+      gameData,
+    });
+
+    if (isErrorResponse(saveGameResponse)) {
+      frontendLogger.error('SaveAnalyze', 'Save game failed', undefined, {
+        error: saveGameResponse.error,
+        code: saveGameResponse.code,
+      });
+      console.error('Save game failed:', saveGameResponse.error);
+      return false;
+    }
+    const gamePath = (saveGameResponse as { path: string }).path;
+    frontendLogger.info('SaveAnalyze', 'Game saved', { path: gamePath });
+    console.log('Game saved to:', gamePath);
+
+    // Step 3: Save the analysis
+    console.log('Saving analysis...');
+    frontendLogger.info('SaveAnalyze', 'Step 3: Calling SAVE_ANALYSIS IPC');
+    const saveAnalysisResponse = await buntralino.run(IPC_METHODS.SAVE_ANALYSIS, {
+      analysis,
+    });
+
+    if (isErrorResponse(saveAnalysisResponse)) {
+      frontendLogger.error('SaveAnalyze', 'Save analysis failed', undefined, {
+        error: saveAnalysisResponse.error,
+        code: saveAnalysisResponse.code,
+      });
+      console.error('Save analysis failed:', saveAnalysisResponse.error);
+      return false;
+    }
+    const analysisPath = (saveAnalysisResponse as { path: string }).path;
+    frontendLogger.info('SaveAnalyze', 'Analysis saved', { path: analysisPath });
+    console.log('Analysis saved to:', analysisPath);
+
+    frontendLogger.info('SaveAnalyze', 'Game save and analysis complete', {
+      gameId: gameRecord.gameId,
+      gamePath,
+      analysisPath,
+    });
+    console.log('Game save and analysis complete');
+    return true;
+  } catch (error) {
+    frontendLogger.error('SaveAnalyze', 'Error in saveAndAnalyzeGame', error as Error);
+    console.error('Error in saveAndAnalyzeGame:', error);
+    return false;
+  }
+}
+
+/**
  * Show game result modal
  * Per Task 2.3.5: Game result display
  * Per Task 4.1.6: Generate PGN on game completion (Exam Mode)
+ * Per Task 5.1.1: Enhanced game over screen with quick stats
  */
 function showGameResult(): void {
+  frontendLogger.separator('GameResult', 'Game Result Processing');
+  frontendLogger.enter('GameResult', 'showGameResult');
+
   const overlay = document.getElementById('game-result-overlay');
   const title = document.getElementById('result-title');
   const subtitle = document.getElementById('result-subtitle');
   const reason = document.getElementById('result-reason');
+  const viewAnalysisBtn = document.getElementById('view-analysis-button');
+  const statsContainer = document.getElementById('game-over-stats');
 
-  if (!overlay || !title || !subtitle || !reason) return;
+  if (!overlay || !title || !subtitle || !reason) {
+    frontendLogger.warn('GameResult', 'Missing required DOM elements');
+    return;
+  }
+
+  // Hide View Analysis button and stats initially (will be shown after save completes)
+  frontendLogger.debug('GameResult', 'Hiding View Analysis button and stats initially');
+  if (viewAnalysisBtn) {
+    viewAnalysisBtn.classList.add('hidden');
+  }
+  if (statsContainer) {
+    statsContainer.classList.add('hidden');
+  }
 
   // Check game state
   const isCheckmate = game.isCheckmate();
   const isStalemate = game.isStalemate();
   const isDraw = game.isDraw();
+  frontendLogger.debug('GameResult', 'Game state', { isCheckmate, isStalemate, isDraw });
 
   // Determine result and termination for Exam Mode record
   let gameResult = '';
@@ -255,6 +426,7 @@ function showGameResult(): void {
 
   // Generate Exam Mode game record if in Exam Mode
   if (currentGameMode === 'exam' && examManager.isActive()) {
+    frontendLogger.info('GameResult', 'Processing Exam Mode game completion');
     const pgn = game.getPgn();
     const gameRecord = examManager.generateGameRecord(
       gameResult,
@@ -263,6 +435,13 @@ function showGameResult(): void {
       'Unknown Opening' // Opening detection will be added in Phase 4.2
     );
 
+    frontendLogger.info('GameResult', 'Exam Mode game record generated', {
+      gameId: gameRecord.gameId,
+      result: gameRecord.metadata.result,
+      termination: gameRecord.metadata.termination,
+      duration: gameRecord.metadata.duration,
+      totalMoves: gameRecord.metadata.totalMoves,
+    });
     console.log('Exam Mode game completed:', {
       gameId: gameRecord.gameId,
       result: gameRecord.metadata.result,
@@ -274,6 +453,52 @@ function showGameResult(): void {
 
     // Emit game end callback
     examManager.onGameEnd?.(gameRecord);
+
+    // Phase 5: Save game and run analysis, then show stats
+    const playerColor = examManager.getPlayerColor();
+    frontendLogger.info('GameResult', 'Starting async save and analysis', { playerColor });
+
+    // Save and analyze the game (async operation)
+    saveAndAnalyzeGame(gameRecord).then((success) => {
+      frontendLogger.info('GameResult', 'Save and analysis completed', { success });
+      if (success) {
+        console.log('Game saved and analyzed successfully');
+        frontendLogger.info('GameResult', 'Showing View Analysis button');
+        // Show View Analysis button
+        if (viewAnalysisBtn) {
+          viewAnalysisBtn.classList.remove('hidden');
+        }
+        // Load and display quick stats from the saved analysis
+        frontendLogger.info('GameResult', 'Calling showGameOverWithStats', {
+          gameId: gameRecord.gameId,
+          gameResult,
+          termination,
+          playerColor,
+        });
+        analysisUI.showGameOverWithStats(gameRecord.gameId, gameResult, termination, playerColor);
+      } else {
+        frontendLogger.error(
+          'GameResult',
+          'Failed to save/analyze game - analysis will not be available'
+        );
+        console.error('Failed to save/analyze game - analysis will not be available');
+        // Hide View Analysis button since we couldn't save
+        if (viewAnalysisBtn) {
+          viewAnalysisBtn.classList.add('hidden');
+        }
+        if (statsContainer) {
+          statsContainer.classList.add('hidden');
+        }
+      }
+    });
+  } else {
+    // Hide analysis button for non-Exam Mode games
+    if (viewAnalysisBtn) {
+      viewAnalysisBtn.classList.add('hidden');
+    }
+    if (statsContainer) {
+      statsContainer.classList.add('hidden');
+    }
   }
 }
 
@@ -1758,6 +1983,28 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     });
   }
 
+  // Phase 5: Wire up "View Analysis" button
+  const viewAnalysisButton = document.getElementById('view-analysis-button');
+  if (viewAnalysisButton) {
+    viewAnalysisButton.addEventListener('click', () => {
+      const gameId = examManager.getGameId();
+      if (gameId) {
+        // Hide game result overlay and open analysis
+        const resultOverlay = document.getElementById('game-result-overlay');
+        if (resultOverlay) {
+          resultOverlay.classList.add('hidden');
+        }
+        analysisUI.openAnalysis(gameId);
+      }
+    });
+  }
+
+  // Phase 5: Set up analysis UI callbacks
+  analysisUI.onClose = () => {
+    // Re-show mode selection when analysis is closed
+    showModeSelection();
+  };
+
   const newGameControl = document.getElementById('new-game-control');
   if (newGameControl) {
     newGameControl.addEventListener('click', () => {
@@ -1814,9 +2061,20 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   // Wait for Buntralino connection
   await buntralino.ready;
   console.log('Buntralino connection established');
+  frontendLogger.info('App', 'Buntralino connection established');
+
+  // Initialize the frontend logger (checks if dev mode is enabled)
+  await frontendLogger.initialize();
+  if (frontendLogger.isEnabled()) {
+    frontendLogger.separator('App', 'Chess-Sensei Frontend Session Started');
+    frontendLogger.info('App', 'Debug logging enabled', {
+      logPath: frontendLogger.getLogPath(),
+    });
+  }
 
   // Make test function available globally for debugging (Phase 1 tests)
   (window as unknown as { testIPC: () => Promise<void> }).testIPC = testIPCCommunication;
 
-  console.log('Phase 4: Exam Mode UI initialized (guidance disabled)');
+  frontendLogger.info('App', 'Phase 5: Post-Game Analysis UI initialized');
+  console.log('Phase 5: Post-Game Analysis UI initialized');
 })();

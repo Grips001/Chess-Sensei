@@ -99,7 +99,7 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 4 Complete ✓ → Phase 5 Next
+**Current Phase:** Phase 5 Complete ✓ → Phase 6 Next
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
@@ -138,7 +138,18 @@ User guides and operational documentation will be available in the
   - Local JSON data storage with atomic writes
   - Platform-specific storage paths (Windows, macOS, Linux)
   - Complete metrics documentation (documents/exam-mode-metrics.md)
-- 🚧 Phase 5: Post-Game Analysis UI (Next)
+- ✅ Phase 5: Post-Game Analysis UI complete
+  - Full analysis interface with three-tab layout (Review/Summary/Analytics)
+  - Interactive board replay with navigation and keyboard shortcuts
+  - Color-coded move classification (Excellent/Good/Inaccuracy/Mistake/Blunder)
+  - Evaluation graph with clickable points
+  - Mistake deep dive with alternatives modal
+  - Game summary with accuracy, move quality, and critical moments
+  - Deep analytics dashboard with time management insights
+  - Training recommendations based on game analysis
+  - Export options (PGN, JSON, Markdown report)
+  - Complete documentation (documents/post-game-analysis.md)
+- 🚧 Phase 6: Player Progress Dashboard (Next)
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
@@ -156,7 +167,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.4.0 (Phase 4: Exam Mode & Metrics Collection)
+**Current Version:** v0.5.1 (Phase 5: Post-Game Analysis UI + Advanced Logging)
 
 ### Installation
 

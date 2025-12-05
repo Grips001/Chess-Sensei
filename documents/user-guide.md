@@ -310,9 +310,20 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 4 (v0.4.0)
+### Current Release: Phase 5 (v0.5.1)
 
-Exam Mode and Metrics Collection are now available:
+**Post-Game Analysis UI** is now available:
+
+- **Three-Tab Analysis Interface** - Review, Summary, and Analytics tabs
+- **Interactive Board Replay** - Navigate through your game with keyboard
+  shortcuts
+- **Evaluation Graph** - Visual representation of the game flow
+- **Mistake Deep-Dive** - See alternative moves for any mistake
+- **Export Options** - Save as PGN, JSON, or Markdown report
+
+See [Post-Game Analysis Guide](post-game-analysis.md) for details.
+
+**Exam Mode and Metrics Collection** continue to be available:
 
 - **Exam Mode** - Play without guidance to test your skills
 - **Game Recording** - Full move history with timestamps
@@ -322,7 +333,7 @@ Exam Mode and Metrics Collection are now available:
 
 See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details on metrics.
 
-Training Mode continues to be available with:
+**Training Mode** continues to be available with:
 
 - **AI Opponent** - 5 bot personalities (Sensei, Student, Club Player,
   Tactician, Blunder-Prone)
@@ -334,18 +345,17 @@ See [Training Mode Guide](training-mode-guide.md) for details.
 
 ### Upcoming Features
 
-#### Phase 5: Post-Game Analysis UI
-
-- Move-by-move analysis with engine insights
-- Mistake identification and visualization
-- Evaluation graph display
-- Game summary report
-
 #### Phase 6: Player Progress Dashboard
 
 - Track improvement over time
 - Detailed statistics and trends
 - Radar charts for composite scores
+
+#### Phase 7: Sandbox Mode
+
+- Free position exploration
+- Custom position setup
+- Unlimited analysis depth
 
 Stay tuned for updates!
 

@@ -380,8 +380,15 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 4 (v0.4.0)** is complete and includes:
+**Phase 5 (v0.5.1)** is complete and includes:
 
+- **Post-Game Analysis UI** (Phase 5)
+  - Three-tab interface (Review/Summary/Analytics)
+  - Interactive board replay with navigation
+  - Evaluation graph with clickable points
+  - Mistake deep-dive with alternative moves
+  - Export options (PGN, JSON, Markdown)
+- **Advanced Debug Logging** for development
 - Exam Mode - play without guidance to test skills
 - Post-game analysis pipeline with move classification
 - 9 composite score calculations (Precision, Tactics, Stability, etc.)
@@ -397,9 +404,9 @@ See the full roadmap in [source-docs/roadmap.md](../source-docs/roadmap.md).
 
 **Upcoming phases:**
 
-- **Phase 5:** Post-Game Analysis UI
 - **Phase 6:** Player Progress Dashboard
 - **Phase 7:** Sandbox Mode
+- **Phase 8:** Polish & Optimization
 
 ### Can I request a feature?
 

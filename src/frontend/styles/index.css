@@ -2070,3 +2070,1798 @@ body {
 .start-game-button.exam-start:hover {
   box-shadow: 0 8px 28px rgb(220 150 50 / 50%);
 }
+
+/* ============================================
+   Phase 5: Post-Game Analysis UI Styles
+   @see source-docs/post-game-analysis.md
+   ============================================ */
+
+/* Analysis Overlay - Full screen container */
+#analysis-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+  z-index: 1000;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#analysis-overlay.hidden {
+  display: none;
+}
+
+/* Analysis Header */
+.analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
+  flex-shrink: 0;
+}
+
+.analysis-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.analysis-header-icon {
+  font-size: 28px;
+}
+
+#analysis-close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #666666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+#analysis-close-btn:hover {
+  background: rgb(0 0 0 / 10%);
+  color: #333333;
+}
+
+/* Analysis Loading State */
+#analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 16px;
+  color: #666666;
+}
+
+#analysis-loading.hidden {
+  display: none;
+}
+
+.analysis-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #dddddd;
+  border-top-color: #4682dc;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Analysis Content */
+#analysis-content {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+}
+
+#analysis-content.hidden {
+  display: none;
+}
+
+/* Analysis Layout - Two columns */
+.analysis-layout {
+  display: flex;
+  gap: 24px;
+  height: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Left side: Board section */
+.analysis-board-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.analysis-board-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Analysis Board */
+.analysis-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: min(70vh, 100%);
+  aspect-ratio: 1;
+  background: linear-gradient(145deg, #d8dce0 0%, #c8ccd0 100%);
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow:
+    10px 10px 20px rgb(0 0 0 / 12%),
+    -8px -8px 16px rgb(255 255 255 / 80%),
+    inset 1px 1px 2px rgb(255 255 255 / 30%);
+}
+
+.analysis-square {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.analysis-square.light {
+  background-color: #e8ecef;
+}
+
+.analysis-square.dark {
+  background-color: #7c8ea0;
+}
+
+.analysis-piece {
+  width: 85%;
+  height: 85%;
+  pointer-events: none;
+}
+
+/* Move highlight colors per post-game-analysis.md */
+.analysis-square.highlight-from,
+.analysis-square.highlight-to {
+  position: relative;
+}
+
+.analysis-square.highlight-from::after,
+.analysis-square.highlight-to::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Excellent move - Green */
+.analysis-square.highlight-excellent::after {
+  border: 3px solid rgb(34 197 94 / 70%);
+  box-shadow: inset 0 0 10px rgb(34 197 94 / 30%);
+  background: rgb(34 197 94 / 15%);
+}
+
+/* Good move - Teal */
+.analysis-square.highlight-good::after {
+  border: 3px solid rgb(20 184 166 / 70%);
+  box-shadow: inset 0 0 10px rgb(20 184 166 / 30%);
+  background: rgb(20 184 166 / 15%);
+}
+
+/* Inaccuracy - Yellow */
+.analysis-square.highlight-inaccuracy::after {
+  border: 3px solid rgb(234 179 8 / 70%);
+  box-shadow: inset 0 0 10px rgb(234 179 8 / 30%);
+  background: rgb(234 179 8 / 15%);
+}
+
+/* Mistake - Orange */
+.analysis-square.highlight-mistake::after {
+  border: 3px solid rgb(249 115 22 / 70%);
+  box-shadow: inset 0 0 10px rgb(249 115 22 / 30%);
+  background: rgb(249 115 22 / 15%);
+}
+
+/* Blunder - Red */
+.analysis-square.highlight-blunder::after {
+  border: 3px solid rgb(239 68 68 / 70%);
+  box-shadow: inset 0 0 10px rgb(239 68 68 / 30%);
+  background: rgb(239 68 68 / 15%);
+}
+
+/* Navigation Controls */
+.analysis-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.nav-button {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 80%);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 10%),
+    inset 0 1px 0 rgb(255 255 255 / 50%);
+}
+
+.nav-button:hover {
+  background: rgb(255 255 255 / 95%);
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgb(0 0 0 / 15%),
+    inset 0 1px 0 rgb(255 255 255 / 50%);
+}
+
+.nav-button:active {
+  transform: translateY(0);
+}
+
+.nav-button.play-pause {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #4682dc, #3672cc);
+  color: white;
+}
+
+.nav-button.play-pause:hover {
+  background: linear-gradient(135deg, #5692ec, #4682dc);
+}
+
+.jump-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.jump-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 80%);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666666;
+  transition: all 0.2s ease;
+}
+
+.jump-button.blunder {
+  color: #ef4444;
+  border: 1px solid rgb(239 68 68 / 30%);
+}
+
+.jump-button:hover {
+  background: rgb(255 255 255 / 95%);
+  transform: translateY(-1px);
+}
+
+/* Right side: Analysis Panels */
+.analysis-panels {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.analysis-panel {
+  background: rgb(255 255 255 / 85%);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow:
+    0 4px 20px rgb(0 0 0 / 10%),
+    0 0 0 1px rgb(255 255 255 / 50%);
+}
+
+.analysis-panel h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #444444;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Evaluation Graph Panel */
+.eval-graph-panel {
+  height: 140px;
+}
+
+.eval-graph-container {
+  position: relative;
+  height: 80px;
+}
+
+.eval-graph {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.eval-center-line {
+  stroke: #aaaaaa;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.eval-line {
+  stroke: #4682dc;
+  stroke-width: 2;
+  fill: none;
+}
+
+.eval-point {
+  fill: #4682dc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.eval-point:hover {
+  fill: #3672cc;
+  transform: scale(1.5);
+  transform-origin: center;
+}
+
+.eval-current-marker {
+  stroke: #ef4444;
+  stroke-width: 2;
+  transition:
+    x1 0.15s ease,
+    x2 0.15s ease;
+}
+
+.eval-graph-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: absolute;
+  right: -30px;
+  top: 0;
+  bottom: 0;
+  font-size: 10px;
+  color: #888888;
+}
+
+/* Move List Panel */
+.move-list-panel {
+  flex: 1;
+  min-height: 200px;
+  max-height: 300px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.analysis-move-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.analysis-move-list .move-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.analysis-move-list .move-pair:hover {
+  background: rgb(0 0 0 / 5%);
+}
+
+.analysis-move-list .move-number {
+  min-width: 28px;
+  font-weight: 600;
+  color: #888888;
+  font-size: 13px;
+}
+
+.move-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  transition: all 0.15s ease;
+}
+
+.move-entry:hover {
+  background: rgb(0 0 0 / 10%);
+}
+
+.move-entry.selected {
+  background: rgb(70 130 220 / 20%);
+  box-shadow: inset 0 0 0 2px rgb(70 130 220 / 40%);
+}
+
+.move-san {
+  font-weight: 600;
+}
+
+.move-symbol {
+  font-size: 12px;
+  margin-left: 2px;
+}
+
+.move-eval-change {
+  font-size: 11px;
+  color: #888888;
+  margin-left: 4px;
+}
+
+/* Move classification colors */
+.move-excellent {
+  color: #22c55e;
+}
+
+.move-excellent .move-symbol {
+  color: #16a34a;
+}
+
+.move-good {
+  color: #14b8a6;
+}
+
+.move-good .move-symbol {
+  color: #0d9488;
+}
+
+.move-inaccuracy {
+  color: #eab308;
+}
+
+.move-inaccuracy .move-symbol {
+  color: #ca8a04;
+}
+
+.move-mistake {
+  color: #f97316;
+}
+
+.move-mistake .move-symbol {
+  color: #ea580c;
+}
+
+.move-blunder {
+  color: #ef4444;
+}
+
+.move-blunder .move-symbol {
+  color: #dc2626;
+}
+
+.move-opponent {
+  color: #666666;
+}
+
+/* Position Analysis Panel */
+.position-panel {
+  min-height: 180px;
+}
+
+.position-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #666666;
+}
+
+.info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.info-value.move-san {
+  font-family: 'Courier New', monospace;
+}
+
+.info-value.best-move {
+  font-family: 'Courier New', monospace;
+  color: #4682dc;
+}
+
+.info-value .cpl {
+  font-size: 11px;
+  color: #888888;
+  font-weight: normal;
+  margin-left: 6px;
+}
+
+/* Classification colors in position panel */
+.classification-excellent {
+  color: #22c55e;
+}
+
+.classification-good {
+  color: #14b8a6;
+}
+
+.classification-inaccuracy {
+  color: #eab308;
+}
+
+.classification-mistake {
+  color: #f97316;
+}
+
+.classification-blunder {
+  color: #ef4444;
+}
+
+/* Eval change styling */
+.eval-change.positive {
+  color: #22c55e;
+}
+
+.eval-change.negative {
+  color: #ef4444;
+}
+
+.eval-change.neutral {
+  color: #888888;
+}
+
+/* View Alternatives Button */
+.view-alternatives-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #4682dc, #3672cc);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-alternatives-btn:hover {
+  background: linear-gradient(135deg, #5692ec, #4682dc);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(70 130 220 / 30%);
+}
+
+/* Alternatives Modal */
+.alternatives-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 60%);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+.alternatives-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #888888;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.modal-close-btn:hover {
+  background: rgb(0 0 0 / 10%);
+  color: #333333;
+}
+
+.alternatives-modal h2 {
+  margin: 0 0 20px;
+  font-size: 20px;
+  color: #333333;
+}
+
+.mistake-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.what-happened,
+.better-alternatives {
+  background: rgb(0 0 0 / 3%);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.what-happened h3,
+.better-alternatives h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.played-move,
+.best-move,
+.why-mistake {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.played-move .label,
+.best-move .label,
+.why-mistake .label {
+  color: #666666;
+  font-size: 13px;
+}
+
+.played-move .move,
+.best-move .move {
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.played-move .move.classification-blunder {
+  color: #ef4444;
+}
+
+.played-move .move.classification-mistake {
+  color: #f97316;
+}
+
+.best-move .move.best {
+  color: #22c55e;
+}
+
+.why-mistake .value.negative {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.alternative-moves {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alt-move {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgb(255 255 255 / 70%);
+  border-radius: 6px;
+}
+
+.alt-move .rank {
+  color: #888888;
+  font-size: 13px;
+}
+
+.alt-move .move {
+  flex: 1;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.alt-move .eval {
+  color: #666666;
+  font-size: 13px;
+}
+
+.eval-comparison {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgb(0 0 0 / 10%);
+}
+
+.comparison-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sandbox-btn {
+  background: linear-gradient(135deg, #50b464, #40a454);
+  color: white;
+}
+
+.sandbox-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(80 180 100 / 30%);
+}
+
+/* Game Over Stats (Enhanced for Phase 5) */
+#game-over-stats {
+  margin: 20px 0;
+}
+
+#game-over-stats.hidden {
+  display: none;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: rgb(0 0 0 / 5%);
+  border-radius: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-item.accuracy {
+  grid-column: span 2;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.stat-item.accuracy .stat-value {
+  font-size: 32px;
+}
+
+.stat-value.excellent {
+  color: #22c55e;
+}
+
+.stat-value.good {
+  color: #14b8a6;
+}
+
+.stat-value.average {
+  color: #eab308;
+}
+
+.stat-value.below-average {
+  color: #f97316;
+}
+
+.stat-value.poor {
+  color: #ef4444;
+}
+
+.stat-value.blunder-count {
+  color: #ef4444;
+}
+
+.stat-value.mistake-count {
+  color: #f97316;
+}
+
+.stat-value.inaccuracy-count {
+  color: #eab308;
+}
+
+/* View Analysis Button in Game Over Modal */
+.view-analysis-btn {
+  margin-top: 12px;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4682dc, #3672cc);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-analysis-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgb(70 130 220 / 35%);
+}
+
+.view-analysis-btn.hidden {
+  display: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive styles for Analysis UI */
+@media (width <= 1200px) {
+  .analysis-layout {
+    flex-direction: column;
+  }
+
+  .analysis-panels {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .analysis-panel {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .move-list-panel {
+    max-height: 200px;
+  }
+}
+
+@media (width <= 768px) {
+  .analysis-board {
+    width: min(90vw, 400px);
+  }
+
+  .analysis-panels {
+    flex-direction: column;
+  }
+
+  .analysis-panel {
+    min-width: 100%;
+  }
+
+  .nav-button {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .nav-button.play-pause {
+    width: 48px;
+    height: 48px;
+  }
+
+  .quick-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-item.accuracy {
+    grid-column: 1;
+  }
+}
+
+/* ============================================
+   Phase 5: Tab Navigation Styles
+   ============================================ */
+
+.analysis-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px 16px;
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
+  margin-bottom: 16px;
+}
+
+.analysis-tab {
+  padding: 12px 24px;
+  border: none;
+  background: rgb(255 255 255 / 60%);
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  transition: all 0.2s ease;
+}
+
+.analysis-tab:hover {
+  background: rgb(255 255 255 / 80%);
+  color: #333333;
+}
+
+.analysis-tab.active {
+  background: rgb(255 255 255 / 95%);
+  color: #4682dc;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+}
+
+.analysis-tab-content {
+  display: none;
+}
+
+.analysis-tab-content.active {
+  display: block;
+}
+
+/* ============================================
+   Phase 5: Game Summary Report Styles (Task 5.5)
+   ============================================ */
+
+.summary-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.summary-card {
+  background: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow:
+    0 4px 20px rgb(0 0 0 / 8%),
+    0 0 0 1px rgb(255 255 255 / 50%);
+}
+
+.summary-card h3 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Overview Card */
+.overview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.overview-result {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.overview-result.win {
+  background: rgb(34 197 94 / 10%);
+  border: 1px solid rgb(34 197 94 / 30%);
+}
+
+.overview-result.loss {
+  background: rgb(239 68 68 / 10%);
+  border: 1px solid rgb(239 68 68 / 30%);
+}
+
+.overview-result.draw {
+  background: rgb(100 100 100 / 10%);
+  border: 1px solid rgb(100 100 100 / 30%);
+}
+
+.result-text {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.overview-result.win .result-text {
+  color: #22c55e;
+}
+
+.overview-result.loss .result-text {
+  color: #ef4444;
+}
+
+.overview-result.draw .result-text {
+  color: #666666;
+}
+
+.result-detail {
+  display: block;
+  font-size: 13px;
+  color: #888888;
+  margin-top: 4px;
+}
+
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.overview-stat {
+  text-align: center;
+}
+
+.overview-stat .stat-label {
+  display: block;
+  font-size: 11px;
+  color: #888888;
+  text-transform: uppercase;
+}
+
+.overview-stat .stat-value {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-top: 4px;
+}
+
+/* Accuracy Card */
+.accuracy-content {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.accuracy-main {
+  flex-shrink: 0;
+}
+
+.accuracy-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid;
+}
+
+.accuracy-circle.excellent {
+  border-color: #22c55e;
+  background: rgb(34 197 94 / 10%);
+}
+
+.accuracy-circle.good {
+  border-color: #14b8a6;
+  background: rgb(20 184 166 / 10%);
+}
+
+.accuracy-circle.average {
+  border-color: #eab308;
+  background: rgb(234 179 8 / 10%);
+}
+
+.accuracy-circle.below-average {
+  border-color: #f97316;
+  background: rgb(249 115 22 / 10%);
+}
+
+.accuracy-circle.poor {
+  border-color: #ef4444;
+  background: rgb(239 68 68 / 10%);
+}
+
+.accuracy-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.accuracy-circle.excellent .accuracy-value {
+  color: #22c55e;
+}
+
+.accuracy-circle.good .accuracy-value {
+  color: #14b8a6;
+}
+
+.accuracy-circle.average .accuracy-value {
+  color: #eab308;
+}
+
+.accuracy-circle.below-average .accuracy-value {
+  color: #f97316;
+}
+
+.accuracy-circle.poor .accuracy-value {
+  color: #ef4444;
+}
+
+.accuracy-label {
+  font-size: 11px;
+  color: #888888;
+  text-transform: uppercase;
+}
+
+.accuracy-phases {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.phase-accuracy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.phase-name {
+  width: 80px;
+  font-size: 13px;
+  color: #666666;
+}
+
+.phase-bar {
+  flex: 1;
+  height: 8px;
+  background: rgb(0 0 0 / 10%);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.phase-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.phase-fill.excellent {
+  background: #22c55e;
+}
+
+.phase-fill.good {
+  background: #14b8a6;
+}
+
+.phase-fill.average {
+  background: #eab308;
+}
+
+.phase-fill.below-average {
+  background: #f97316;
+}
+
+.phase-fill.poor {
+  background: #ef4444;
+}
+
+.phase-value {
+  width: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* Move Quality Card */
+.quality-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quality-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 3%);
+}
+
+.quality-icon {
+  width: 24px;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  text-align: center;
+}
+
+.quality-row.excellent .quality-icon {
+  color: #22c55e;
+}
+
+.quality-row.good .quality-icon {
+  color: #14b8a6;
+}
+
+.quality-row.inaccuracy .quality-icon {
+  color: #eab308;
+}
+
+.quality-row.mistake .quality-icon {
+  color: #f97316;
+}
+
+.quality-row.blunder .quality-icon {
+  color: #ef4444;
+}
+
+.quality-row.cpl .quality-icon {
+  color: #666666;
+}
+
+.quality-label {
+  flex: 1;
+  font-size: 14px;
+  color: #444444;
+}
+
+.quality-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333333;
+}
+
+/* Critical Moments Card */
+.moments-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.moment-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.moment-item:hover {
+  transform: translateX(4px);
+}
+
+.moment-item.blunder {
+  background: rgb(239 68 68 / 10%);
+  border-left: 3px solid #ef4444;
+}
+
+.moment-item.missed_win {
+  background: rgb(249 115 22 / 10%);
+  border-left: 3px solid #f97316;
+}
+
+.moment-item.turning_point {
+  background: rgb(234 179 8 / 10%);
+  border-left: 3px solid #eab308;
+}
+
+.moment-item.brilliant {
+  background: rgb(34 197 94 / 10%);
+  border-left: 3px solid #22c55e;
+}
+
+.moment-move {
+  font-weight: 600;
+  color: #444444;
+}
+
+.moment-type {
+  font-size: 12px;
+  color: #888888;
+  text-transform: uppercase;
+}
+
+.moment-desc {
+  width: 100%;
+  font-size: 13px;
+  color: #666666;
+}
+
+.no-moments,
+.no-tactics {
+  text-align: center;
+  padding: 20px;
+  color: #888888;
+  font-style: italic;
+}
+
+/* Tactical Opportunities Card */
+.tactics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tactic-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 3%);
+}
+
+.tactic-icon {
+  font-size: 16px;
+}
+
+.tactic-item.found .tactic-icon {
+  color: #22c55e;
+}
+
+.tactic-item.missed .tactic-icon {
+  color: #ef4444;
+}
+
+.tactic-type {
+  flex: 1;
+  font-weight: 600;
+  color: #444444;
+}
+
+.tactic-move {
+  font-size: 13px;
+  color: #888888;
+}
+
+.tactic-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.tactic-status.found {
+  background: rgb(34 197 94 / 20%);
+  color: #16a34a;
+}
+
+.tactic-status.missed {
+  background: rgb(239 68 68 / 20%);
+  color: #dc2626;
+}
+
+/* Summary Actions */
+.summary-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 90%);
+  color: #444444;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+}
+
+.export-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}
+
+/* ============================================
+   Phase 5: Deep Analytics Dashboard Styles (Task 5.6)
+   ============================================ */
+
+.analytics-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.analytics-card {
+  background: rgb(255 255 255 / 90%);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow:
+    0 4px 20px rgb(0 0 0 / 8%),
+    0 0 0 1px rgb(255 255 255 / 50%);
+}
+
+.analytics-card h3 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analytics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analytics-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
+}
+
+.analytics-stat:last-child {
+  border-bottom: none;
+}
+
+.analytics-stat .stat-note {
+  font-size: 11px;
+  color: #aaaaaa;
+  margin-left: 4px;
+}
+
+/* Bar Chart */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-label {
+  width: 80px;
+  font-size: 13px;
+  color: #666666;
+}
+
+.bar-container {
+  flex: 1;
+  height: 24px;
+  background: rgb(0 0 0 / 10%);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+  transition: width 0.5s ease;
+}
+
+.bar.excellent {
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.bar.good {
+  background: linear-gradient(90deg, #14b8a6, #0d9488);
+}
+
+.bar.average {
+  background: linear-gradient(90deg, #eab308, #ca8a04);
+}
+
+.bar.below-average {
+  background: linear-gradient(90deg, #f97316, #ea580c);
+}
+
+.bar.poor {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+/* Move Distribution Chart */
+.distribution-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.distribution-bars {
+  display: flex;
+  height: 32px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dist-bar {
+  transition: flex 0.5s ease;
+  min-width: 4px;
+}
+
+.dist-bar.excellent {
+  background: #22c55e;
+}
+
+.dist-bar.good {
+  background: #14b8a6;
+}
+
+.dist-bar.inaccuracy {
+  background: #eab308;
+}
+
+.dist-bar.mistake {
+  background: #f97316;
+}
+
+.dist-bar.blunder {
+  background: #ef4444;
+}
+
+.distribution-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.legend-item {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-item::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legend-item.excellent::before {
+  background: #22c55e;
+}
+
+.legend-item.good::before {
+  background: #14b8a6;
+}
+
+.legend-item.inaccuracy::before {
+  background: #eab308;
+}
+
+.legend-item.mistake::before {
+  background: #f97316;
+}
+
+.legend-item.blunder::before {
+  background: #ef4444;
+}
+
+/* Training Recommendations */
+.recommendations-card {
+  grid-column: 1 / -1;
+}
+
+.recommendations-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recommendation-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgb(70 130 220 / 5%);
+  border-left: 3px solid #4682dc;
+  border-radius: 0 8px 8px 0;
+}
+
+.rec-number {
+  width: 24px;
+  height: 24px;
+  background: #4682dc;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.rec-text {
+  flex: 1;
+  font-size: 14px;
+  color: #444444;
+  line-height: 1.5;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #888888;
+  font-style: italic;
+}
+
+/* Responsive adjustments for Summary/Analytics */
+@media (width <= 768px) {
+  .summary-layout,
+  .analytics-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-actions {
+    flex-direction: column;
+  }
+
+  .export-btn {
+    width: 100%;
+  }
+
+  .accuracy-content {
+    flex-direction: column;
+  }
+
+  .accuracy-circle {
+    margin: 0 auto;
+  }
+
+  .overview-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==============================================
+   Task 5.8: Export Notifications
+   ============================================== */
+
+.export-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 15%);
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 10000;
+}
+
+.export-notification.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.export-notification.success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+}
+
+.export-notification.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.notification-icon {
+  width: 24px;
+  height: 24px;
+  background: rgb(255 255 255 / 20%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.notification-message {
+  flex: 1;
+}

@@ -10,9 +10,56 @@ and this project adheres to
 
 ### Planned
 
-- Post-game analysis UI (Phase 5)
 - Player progress dashboard (Phase 6)
 - Sandbox Mode for position exploration (Phase 7)
+
+## [0.5.1] - 2025-12-05
+
+### Added
+
+- **Post-Game Analysis UI** (Phase 5)
+  - Three-tab analysis interface (Review/Summary/Analytics)
+  - Interactive board replay with move navigation
+  - Keyboard shortcuts (Arrow keys, Home, End)
+  - Color-coded move classification display
+  - Evaluation graph with clickable points
+  - Mistake deep-dive modal with alternative moves
+  - Game summary with accuracy and move quality breakdown
+  - Critical moments highlighting
+  - Deep analytics dashboard with time management insights
+  - Training recommendations based on game analysis
+  - Export options (PGN, JSON, Markdown report)
+
+- **Advanced Debug Logging System**
+  - File-based logging enabled via `--dev` flag
+  - Frontend-to-backend log forwarding via IPC
+  - Four log levels: debug, info, warn, error
+  - Timestamped log files in `logs/` directory
+  - Structured logging with component names
+  - Automatic console output in dev mode
+
+- **Documentation**
+  - Post-game analysis guide (`documents/post-game-analysis.md`)
+  - Debug logging documentation in TASKS.md
+
+### Technical
+
+- New files: `src/frontend/analysis-ui.ts`, `src/frontend/frontend-logger.ts`
+- New files: `src/backend/file-logger.ts`, `src/shared/logger-types.ts`
+- New IPC methods: `logMessage`, `getLogPath`, `isLoggingEnabled`
+- Updated `ipc-types.ts` with logging method definitions
+
+## [0.5.0] - 2025-12-05
+
+### Added
+
+- **Post-Game Analysis Pipeline** (Phase 4 continuation)
+  - Batch analysis infrastructure for game review
+  - Integration preparation for Analysis UI
+
+### Technical
+
+- Intermediate release for Phase 5 development base
 
 ## [0.4.0] - 2025-12-04
 
@@ -230,7 +277,9 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.0...v0.5.1
+[0.5.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.2...v0.4.0
 [0.3.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.3.0...v0.3.1

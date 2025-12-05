@@ -55,9 +55,25 @@ import {
   createBotProfileFromElo,
   applyDifficultyPreset,
 } from '../shared/bot-types';
+import { logger } from './file-logger';
+import type { LogRequest } from '../shared/logger-types';
+
+// Initialize logger early (before other initialization)
+const executablePath = process.execPath;
+logger.initialize(devMode, executablePath).then(() => {
+  if (devMode) {
+    logger.info('Backend', 'Logger initialized', {
+      devMode,
+      executablePath,
+      argv: process.argv,
+      cwd: process.cwd(),
+    });
+  }
+});
 
 if (devMode) {
   console.log('Chess-Sensei Backend initialized (DEV MODE)');
+  logger.info('Backend', 'Chess-Sensei Backend initialized (DEV MODE)');
 } else {
   console.log('Chess-Sensei Backend initialized');
 }
@@ -867,13 +883,21 @@ const functionMap = {
    * Per Task 4.4.7: Implement game save flow
    */
   saveGame: async (payload: SaveGameRequest): Promise<SaveGameResponse | ErrorResponse> => {
+    logger.info('IPC:saveGame', 'Saving game data', {
+      gameId: payload.gameData?.gameId,
+      playerColor: payload.gameData?.playerColor,
+      result: payload.gameData?.result,
+      moveCount: payload.gameData?.moves?.length,
+    });
     try {
       if (!dataStorage) {
         dataStorage = createDataStorage();
       }
       const path = await dataStorage.saveGame(payload.gameData);
+      logger.info('IPC:saveGame', 'Game saved successfully', { path });
       return { path, success: true };
     } catch (error) {
+      logger.error('IPC:saveGame', 'Failed to save game', error);
       console.error('Save game error:', error);
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -890,13 +914,20 @@ const functionMap = {
   saveAnalysis: async (
     payload: SaveAnalysisRequest
   ): Promise<SaveAnalysisResponse | ErrorResponse> => {
+    logger.info('IPC:saveAnalysis', 'Saving analysis data', {
+      gameId: payload.analysis?.gameId,
+      totalMoves: payload.analysis?.summary?.totalMoves,
+      accuracy: payload.analysis?.summary?.overallAccuracy,
+    });
     try {
       if (!dataStorage) {
         dataStorage = createDataStorage();
       }
       const path = await dataStorage.saveAnalysis(payload.analysis);
+      logger.info('IPC:saveAnalysis', 'Analysis saved successfully', { path });
       return { path, success: true };
     } catch (error) {
+      logger.error('IPC:saveAnalysis', 'Failed to save analysis', error);
       console.error('Save analysis error:', error);
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -929,20 +960,28 @@ const functionMap = {
    * Load a saved game
    */
   loadGame: async (payload: LoadGameRequest): Promise<LoadGameResponse | ErrorResponse> => {
+    logger.info('IPC:loadGame', 'Loading game', { gameId: payload.gameId });
     try {
       if (!dataStorage) {
         dataStorage = createDataStorage();
       }
       const game = await dataStorage.loadGame(payload.gameId);
       if (!game) {
+        logger.warn('IPC:loadGame', 'Game not found', { gameId: payload.gameId });
         return {
           error: `Game not found: ${payload.gameId}`,
           code: 'GAME_NOT_FOUND',
           success: false,
         };
       }
+      logger.info('IPC:loadGame', 'Game loaded successfully', {
+        gameId: payload.gameId,
+        playerColor: game.metadata?.playerColor,
+        result: game.metadata?.result,
+      });
       return { game, success: true };
     } catch (error) {
+      logger.error('IPC:loadGame', 'Failed to load game', error, { gameId: payload.gameId });
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
         code: 'LOAD_GAME_ERROR',
@@ -957,20 +996,29 @@ const functionMap = {
   loadAnalysis: async (
     payload: LoadAnalysisRequest
   ): Promise<LoadAnalysisResponse | ErrorResponse> => {
+    logger.info('IPC:loadAnalysis', 'Loading analysis', { gameId: payload.gameId });
     try {
       if (!dataStorage) {
         dataStorage = createDataStorage();
       }
       const analysis = await dataStorage.loadAnalysis(payload.gameId);
       if (!analysis) {
+        logger.warn('IPC:loadAnalysis', 'Analysis not found', { gameId: payload.gameId });
         return {
           error: `Analysis not found for game: ${payload.gameId}`,
           code: 'ANALYSIS_NOT_FOUND',
           success: false,
         };
       }
+      logger.info('IPC:loadAnalysis', 'Analysis loaded successfully', {
+        gameId: payload.gameId,
+        accuracy: analysis.summary?.overallAccuracy,
+      });
       return { analysis, success: true };
     } catch (error) {
+      logger.error('IPC:loadAnalysis', 'Failed to load analysis', error, {
+        gameId: payload.gameId,
+      });
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
         code: 'LOAD_ANALYSIS_ERROR',
@@ -987,6 +1035,36 @@ const functionMap = {
       dataStorage = createDataStorage();
     }
     return { path: dataStorage.getStorageBasePath(), success: true };
+  },
+
+  // ========================================
+  // Debug Logging Methods (--dev mode only)
+  // ========================================
+
+  /**
+   * Log a message from frontend
+   */
+  logMessage: async (payload: LogRequest): Promise<{ success: true }> => {
+    logger.logFromFrontend(payload);
+    return { success: true };
+  },
+
+  /**
+   * Get log file path
+   */
+  getLogPath: async (): Promise<{ path: string; enabled: boolean; success: true }> => {
+    return {
+      path: logger.getLogFilePath(),
+      enabled: logger.isEnabled(),
+      success: true,
+    };
+  },
+
+  /**
+   * Check if debug logging is enabled
+   */
+  isLoggingEnabled: async (): Promise<{ enabled: boolean; success: true }> => {
+    return { enabled: logger.isEnabled(), success: true };
   },
 };
 
