@@ -1,3 +1,21 @@
+/* ========================================
+   CSS Custom Properties (Design Tokens)
+   ======================================== */
+:root {
+  /* Porcelain white - softer on eyes than pure white */
+  --color-porcelain: #faf9f7;
+  --color-porcelain-rgb: 250 249 247;
+
+  /* Text colors */
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
+  --color-text-muted: #888888;
+
+  /* Background gradient colors */
+  --color-bg-light: #f0efed;
+  --color-bg-medium: #e8e7e5;
+}
+
 /* Global styles */
 html,
 body {
@@ -8,8 +26,8 @@ body {
 }
 
 body {
-  background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
-  color: #333333;
+  background: linear-gradient(135deg, var(--color-bg-medium) 0%, var(--color-bg-light) 100%);
+  color: var(--color-text-primary);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   overflow: hidden;
@@ -426,7 +444,7 @@ body {
 
 /* Guidance panel container */
 .guidance-panel {
-  background: rgb(255 255 255 / 85%);
+  background: rgb(var(--color-porcelain-rgb) / 85%);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 16px;
@@ -484,7 +502,7 @@ body {
 }
 
 .guidance-move-entry:hover {
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   transform: translateX(4px);
 }
 
@@ -801,7 +819,7 @@ body {
 
 /* Game result modal */
 .game-result-modal {
-  background: linear-gradient(135deg, rgb(255 255 255 / 95%), rgb(245 245 245 / 95%));
+  background: linear-gradient(135deg, rgb(var(--color-porcelain-rgb) / 95%), rgb(240 239 237 / 95%));
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 8px 32px rgb(0 0 0 / 30%);
@@ -884,7 +902,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   color: #333333;
 
   /* Soft neomorphic depth for press feedback */
@@ -898,7 +916,7 @@ body {
   box-shadow:
     4px 4px 12px rgb(0 0 0 / 18%),
     -2px -2px 8px rgb(255 255 255 / 90%);
-  background: rgb(255 255 255 / 95%);
+  background: rgb(var(--color-porcelain-rgb) / 95%);
 }
 
 .control-button:active:not(:disabled) {
@@ -958,7 +976,7 @@ body {
 }
 
 .confirm-dialog {
-  background: linear-gradient(135deg, rgb(255 255 255 / 95%), rgb(245 245 245 / 95%));
+  background: linear-gradient(135deg, rgb(var(--color-porcelain-rgb) / 95%), rgb(240 239 237 / 95%));
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 6px 24px rgb(0 0 0 / 25%);
@@ -1071,7 +1089,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
@@ -1243,7 +1261,7 @@ body {
 }
 
 .move-pair:hover {
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
 }
 
 /* Move number */
@@ -1466,7 +1484,7 @@ body {
 .mode-card {
   width: 280px;
   padding: 32px 24px;
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   box-shadow:
@@ -1609,7 +1627,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   color: #555555;
   box-shadow:
     3px 3px 8px rgb(0 0 0 / 10%),
@@ -1667,7 +1685,7 @@ body {
 }
 
 .bot-card:hover {
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
 }
@@ -1715,7 +1733,7 @@ body {
 }
 
 .difficulty-button:hover {
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   transform: translateY(-2px);
 }
 
@@ -1758,7 +1776,7 @@ body {
 }
 
 .color-button:hover {
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgb(0 0 0 / 12%);
 }
@@ -1832,7 +1850,7 @@ body {
 }
 
 .setup-option:hover {
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
 }
 
 .setup-option input[type='checkbox'] {
@@ -2097,7 +2115,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgb(0 0 0 / 10%);
   flex-shrink: 0;
@@ -2299,7 +2317,7 @@ body {
   height: 48px;
   border: none;
   border-radius: 12px;
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   backdrop-filter: blur(8px);
   cursor: pointer;
   font-size: 18px;
@@ -2313,7 +2331,7 @@ body {
 }
 
 .nav-button:hover {
-  background: rgb(255 255 255 / 95%);
+  background: rgb(var(--color-porcelain-rgb) / 95%);
   transform: translateY(-2px);
   box-shadow:
     0 4px 12px rgb(0 0 0 / 15%),
@@ -2344,7 +2362,7 @@ body {
   padding: 8px 16px;
   border: none;
   border-radius: 8px;
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -2358,7 +2376,7 @@ body {
 }
 
 .jump-button:hover {
-  background: rgb(255 255 255 / 95%);
+  background: rgb(var(--color-porcelain-rgb) / 95%);
   transform: translateY(-1px);
 }
 
@@ -2372,7 +2390,7 @@ body {
 }
 
 .analysis-panel {
-  background: rgb(255 255 255 / 85%);
+  background: rgb(var(--color-porcelain-rgb) / 85%);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 16px;
@@ -2686,7 +2704,7 @@ body {
 }
 
 .alternatives-modal {
-  background: white;
+  background: var(--color-porcelain);
   border-radius: 16px;
   padding: 24px;
   max-width: 500px;
@@ -3058,12 +3076,12 @@ body {
 }
 
 .analysis-tab:hover {
-  background: rgb(255 255 255 / 80%);
+  background: rgb(var(--color-porcelain-rgb) / 80%);
   color: #333333;
 }
 
 .analysis-tab.active {
-  background: rgb(255 255 255 / 95%);
+  background: rgb(var(--color-porcelain-rgb) / 95%);
   color: #4682dc;
   box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
@@ -3090,7 +3108,7 @@ body {
 }
 
 .summary-card {
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 20px;
@@ -3526,7 +3544,7 @@ body {
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   color: #444444;
   font-weight: 600;
   cursor: pointer;
@@ -3535,7 +3553,7 @@ body {
 }
 
 .export-btn:hover {
-  background: white;
+  background: var(--color-porcelain);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
 }
@@ -3554,7 +3572,7 @@ body {
 }
 
 .analytics-card {
-  background: rgb(255 255 255 / 90%);
+  background: rgb(var(--color-porcelain-rgb) / 90%);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   padding: 20px;
