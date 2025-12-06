@@ -13,6 +13,24 @@ and this project adheres to
 - Sandbox Mode for position exploration (Phase 7)
 - Polish & Optimization (Phase 8)
 
+## [0.6.1] - 2025-12-06
+
+### Fixed
+
+- **Progress Dashboard not appearing** - Dashboard overlay had same z-index as
+  mode selection screen, causing it to render behind. Increased z-index from
+  2000 to 3000.
+- **Radar chart labels cut off** - Skill Profile chart labels were being
+  clipped. Implemented dynamic SVG viewBox calculation that automatically
+  adjusts to fit all labels regardless of content length.
+
+### Changed
+
+- Radar chart now uses origin-centered coordinates with dynamic bounds
+  calculation
+- Removed hardcoded CSS constraints on radar chart container for better
+  flexibility
+
 ## [0.6.0] - 2025-12-06
 
 ### Added
@@ -319,7 +337,8 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.0...v0.5.1

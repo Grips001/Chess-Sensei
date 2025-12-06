@@ -175,7 +175,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.6.0 (Phase 6: Player Progress Dashboard)
+**Current Version:** v0.6.1 (Phase 6: Player Progress Dashboard)
 
 ### Installation
 

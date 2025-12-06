@@ -125,7 +125,7 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 6 Complete ✓ **Version:** v0.6.0 **Next:** Phase 7 - Sandbox
+**Phase:** Phase 6 Complete ✓ **Version:** v0.6.1 **Next:** Phase 7 - Sandbox
 Mode
 
 ### Completed Phases
@@ -227,6 +227,6 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 ## Success
 
 Chess-Sensei is ready for active development. Phase 6 (Player Progress
-Dashboard) is complete with version v0.6.0.
+Dashboard) is complete with version v0.6.1.
 
 Next up: Phase 7 - Sandbox Mode!

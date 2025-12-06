@@ -310,7 +310,7 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 6 (v0.6.0)
+### Current Release: Phase 6 (v0.6.1)
 
 **Player Progress Dashboard** is now available:
 

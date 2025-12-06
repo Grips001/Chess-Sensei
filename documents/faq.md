@@ -380,7 +380,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 6 (v0.6.0)** is complete and includes:
+**Phase 6 (v0.6.1)** is complete and includes:
 
 - **Player Progress Dashboard** (Phase 6)
   - Composite score radar chart (9 dimensions)

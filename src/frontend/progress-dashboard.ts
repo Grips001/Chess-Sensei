@@ -506,8 +506,17 @@ export class ProgressDashboardManager {
    * Render the full dashboard
    */
   private renderDashboard(): void {
+    frontendLogger.debug('Dashboard', 'renderDashboard() called');
     const container = document.getElementById('dashboard-content');
-    if (!container) return;
+    if (!container) {
+      frontendLogger.error('Dashboard', 'dashboard-content element not found!');
+      return;
+    }
+    frontendLogger.debug('Dashboard', 'Rendering dashboard content', {
+      profile: !!this.state.profile,
+      gamesCount: this.state.games.length,
+      selectedTab: this.state.selectedTab,
+    });
 
     container.innerHTML = `
       <!-- Tab Navigation -->
@@ -606,6 +615,7 @@ export class ProgressDashboardManager {
 
   /**
    * Task 6.1.1: Render radar/spider chart for composite scores
+   * Uses dynamic viewBox calculation to ensure all labels fit regardless of content
    */
   private renderRadarChart(scores: CompositeScores): string {
     const scoreEntries = [
@@ -632,18 +642,68 @@ export class ProgressDashboardManager {
       },
     ];
 
-    const size = 200;
-    const center = size / 2;
-    const maxRadius = size * 0.4;
+    // Core chart dimensions (relative units)
+    const maxRadius = 60;
+    const labelGap = 15; // Gap between chart edge and label anchor
+    const labelPadding = 50; // Extra padding for label text width
+    const verticalPadding = 15; // Extra padding for value text below label
     const numAxes = scoreEntries.length;
     const angleStep = (2 * Math.PI) / numAxes;
+
+    // Calculate label positions to determine bounds
+    const labelPositions = scoreEntries.map((_, i) => {
+      const angle = -Math.PI / 2 + i * angleStep;
+      const labelRadius = maxRadius + labelGap;
+      return {
+        x: labelRadius * Math.cos(angle),
+        y: labelRadius * Math.sin(angle),
+        angle,
+      };
+    });
+
+    // Calculate dynamic bounds based on label positions
+    // Add extra width for text based on text-anchor direction
+    let minX = -maxRadius,
+      maxX = maxRadius,
+      minY = -maxRadius,
+      maxY = maxRadius;
+
+    labelPositions.forEach((pos) => {
+      const isRightSide = pos.angle > -Math.PI / 2 && pos.angle < Math.PI / 2;
+      const isLeftSide = pos.angle < -Math.PI / 2 || pos.angle > Math.PI / 2;
+
+      // Horizontal bounds - add text width padding on the appropriate side
+      if (isRightSide) {
+        maxX = Math.max(maxX, pos.x + labelPadding);
+      } else if (isLeftSide) {
+        minX = Math.min(minX, pos.x - labelPadding);
+      } else {
+        // Top/bottom - center aligned, add half padding both sides
+        minX = Math.min(minX, pos.x - labelPadding / 2);
+        maxX = Math.max(maxX, pos.x + labelPadding / 2);
+      }
+
+      // Vertical bounds - add padding for value text below label
+      minY = Math.min(minY, pos.y - verticalPadding);
+      maxY = Math.max(maxY, pos.y + verticalPadding);
+    });
+
+    // Calculate viewBox with margin
+    const margin = 5;
+    const viewBoxX = minX - margin;
+    const viewBoxY = minY - margin;
+    const viewBoxWidth = maxX - minX + margin * 2;
+    const viewBoxHeight = maxY - minY + margin * 2;
+
+    // Center point is at origin (0, 0) - labels positioned relative to center
+    const center = 0;
 
     // Generate axis lines
     const axisLines = scoreEntries
       .map((_, i) => {
         const angle = -Math.PI / 2 + i * angleStep;
-        const x = center + maxRadius * Math.cos(angle);
-        const y = center + maxRadius * Math.sin(angle);
+        const x = maxRadius * Math.cos(angle);
+        const y = maxRadius * Math.sin(angle);
         return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" class="radar-axis" />`;
       })
       .join('');
@@ -661,30 +721,30 @@ export class ProgressDashboardManager {
       .map((entry, i) => {
         const angle = -Math.PI / 2 + i * angleStep;
         const r = (entry.value / 100) * maxRadius;
-        const x = center + r * Math.cos(angle);
-        const y = center + r * Math.sin(angle);
+        const x = r * Math.cos(angle);
+        const y = r * Math.sin(angle);
         return `${x},${y}`;
       })
       .join(' ');
 
-    // Generate labels
+    // Generate labels with dynamic positioning
     const labels = scoreEntries
       .map((entry, i) => {
         const angle = -Math.PI / 2 + i * angleStep;
-        const labelRadius = maxRadius + 25;
-        const x = center + labelRadius * Math.cos(angle);
-        const y = center + labelRadius * Math.sin(angle);
-        const textAnchor =
-          Math.abs(angle) < 0.1 || Math.abs(angle - Math.PI) < 0.1
-            ? 'middle'
-            : angle > -Math.PI / 2 && angle < Math.PI / 2
-              ? 'start'
-              : 'end';
+        const labelRadius = maxRadius + labelGap;
+        const x = labelRadius * Math.cos(angle);
+        const y = labelRadius * Math.sin(angle);
+
+        // Determine text-anchor based on position around the circle
+        const isNearTop = Math.abs(angle + Math.PI / 2) < 0.3;
+        const isNearBottom = Math.abs(angle - Math.PI / 2) < 0.3;
+        const textAnchor = isNearTop || isNearBottom ? 'middle' : x > 0 ? 'start' : 'end';
+
         return `
         <text x="${x}" y="${y}" class="radar-label" text-anchor="${textAnchor}" dominant-baseline="middle">
           ${entry.name}
         </text>
-        <text x="${x}" y="${y + 12}" class="radar-value" text-anchor="${textAnchor}" dominant-baseline="middle">
+        <text x="${x}" y="${y + 11}" class="radar-value" text-anchor="${textAnchor}" dominant-baseline="middle">
           ${Math.round(entry.value)}
         </text>
       `;
@@ -696,14 +756,14 @@ export class ProgressDashboardManager {
       .map((entry, i) => {
         const angle = -Math.PI / 2 + i * angleStep;
         const r = (entry.value / 100) * maxRadius;
-        const x = center + r * Math.cos(angle);
-        const y = center + r * Math.sin(angle);
-        return `<circle cx="${x}" cy="${y}" r="4" class="radar-point" fill="${entry.color}" />`;
+        const x = r * Math.cos(angle);
+        const y = r * Math.sin(angle);
+        return `<circle cx="${x}" cy="${y}" r="3" class="radar-point" fill="${entry.color}" />`;
       })
       .join('');
 
     return `
-      <svg class="radar-chart" viewBox="0 0 ${size} ${size}" preserveAspectRatio="xMidYMid meet">
+      <svg class="radar-chart" viewBox="${viewBoxX} ${viewBoxY} ${viewBoxWidth} ${viewBoxHeight}" preserveAspectRatio="xMidYMid meet">
         <!-- Background rings -->
         ${rings}
 
@@ -1625,21 +1685,40 @@ export class ProgressDashboardManager {
    * Show/hide dashboard overlay
    */
   private showDashboardOverlay(show: boolean): void {
+    frontendLogger.debug('Dashboard', `showDashboardOverlay(${show})`);
     const overlay = document.getElementById('dashboard-overlay');
-    if (overlay) {
-      overlay.classList.toggle('hidden', !show);
+    if (!overlay) {
+      frontendLogger.error('Dashboard', 'dashboard-overlay element not found!');
+      return;
     }
+    overlay.classList.toggle('hidden', !show);
+    frontendLogger.debug('Dashboard', 'Overlay classes after toggle', {
+      classes: overlay.className,
+    });
   }
 
   /**
    * Show/hide loading state
    */
   private showLoadingState(show: boolean): void {
+    frontendLogger.debug('Dashboard', `showLoadingState(${show})`);
     const loading = document.getElementById('dashboard-loading');
     const content = document.getElementById('dashboard-content');
 
+    if (!loading) {
+      frontendLogger.error('Dashboard', 'dashboard-loading element not found!');
+    }
+    if (!content) {
+      frontendLogger.error('Dashboard', 'dashboard-content element not found!');
+    }
+
     if (loading) loading.classList.toggle('hidden', !show);
     if (content) content.classList.toggle('hidden', show);
+
+    frontendLogger.debug('Dashboard', 'Loading/Content classes after toggle', {
+      loadingClasses: loading?.className,
+      contentClasses: content?.className,
+    });
   }
 
   /**

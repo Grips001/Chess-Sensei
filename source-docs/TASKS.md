@@ -43,7 +43,7 @@ updates first.
 
 **Last Updated:** 2025-12-06
 
-**Current Version:** v0.6.0
+**Current Version:** v0.6.1
 
 **Current Phase:** Phase 7 - Sandbox Mode 📋 NEXT
 
