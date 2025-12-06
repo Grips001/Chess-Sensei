@@ -30,8 +30,7 @@ Single-threaded **Source:**
 **Why this variant:**
 
 1. **NNUE Support**: Essential for strongest analysis and accurate evaluations
-2. **Size (~7MB)**: Fits within <10MB application size target (per
-   architecture.md)
+2. **Compact Size (~7MB)**: Reasonable footprint for a desktop application
 3. **Single-threaded**: Sufficient for desktop chess training (one analysis at a
    time)
 4. **No CORS Required**: Simpler deployment for desktop app
@@ -40,7 +39,7 @@ Single-threaded **Source:**
 
 ### Alternatives Rejected
 
-- **NNUE Full (75MB)**: Too large for <10MB target
+- **NNUE Full (75MB)**: Unnecessarily large for training use case
 - **stockfish.wasm (Lichess)**: No NNUE - weaker analysis
 - **Multi-threaded variants**: Adds complexity, requires CORS headers
 - **ASM-JS fallback**: Much weaker, larger than WASM

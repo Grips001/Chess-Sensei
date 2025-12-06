@@ -2290,7 +2290,6 @@ Phase 9 logging tasks:
 - [ ] **9.2.5** WASM module optimization
   - Monitor module size
   - Tree-shaking for minimal bundle
-  - Target: <10MB application size
 
 ### 9.3 Accessibility Improvements
 
@@ -2465,7 +2464,6 @@ All features must be stable and tested:
 - [ ] Accessibility standards achieved
 - [ ] No critical bugs
 - [ ] <1% crash rate
-- [ ] Sub-10MB application size (per architecture.md)
 
 ---
 
@@ -2542,7 +2540,6 @@ If any deviation from this plan is required:
 | Post-game analysis | <30 seconds per game    |
 | UI responsiveness  | <100ms for interactions |
 | Memory usage       | <500MB typical          |
-| Application size   | <10MB                   |
 | Crash rate         | <1%                     |
 
 ### All 12 Source Documents

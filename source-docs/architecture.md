@@ -13,7 +13,6 @@ development workflows.
   - The lightweight, native desktop shell of **Neutralinojs**
 - This architecture enables:
   - Native desktop execution without bundling Chromium
-  - Sub-10MB application footprints
   - Faster startup times
   - Lower RAM and CPU usage compared to Electron-based apps
 

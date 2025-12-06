@@ -36,7 +36,7 @@ system**:
 ### Offline-First & Lightweight
 
 - **No external dependencies** --- fully self-contained
-- **Sub-10MB application size** --- no Chromium bloat
+- **No Chromium bloat** --- uses Neutralino.js native webview
 - **Cross-platform desktop** --- Windows, macOS, Linux
 - **Privacy-focused** --- all data stored locally by default
 
