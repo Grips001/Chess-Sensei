@@ -381,6 +381,111 @@
         </div>
       </div>
     </div>
+    <!-- Sandbox Mode Overlay -->
+    <div id="sandbox-overlay" class="sandbox-overlay hidden">
+      <div class="sandbox-container">
+        <div class="sandbox-header">
+          <button class="back-button" id="sandbox-back-button">← Back</button>
+          <h2 class="sandbox-title">Sandbox Mode</h2>
+          <div class="sandbox-subtitle">Position Editor & Analysis</div>
+        </div>
+        <div class="sandbox-content">
+          <!-- Left side: Board Editor -->
+          <div class="sandbox-board-section">
+            <div class="sandbox-board-wrapper">
+              <div class="board-files sandbox-files">
+                <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span
+                ><span>g</span><span>h</span>
+              </div>
+              <div class="board-ranks sandbox-ranks">
+                <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span
+                ><span>2</span><span>1</span>
+              </div>
+              <div id="sandbox-board" class="sandbox-board">
+                <!-- Board will be rendered by JavaScript -->
+              </div>
+            </div>
+            <!-- Piece Palette -->
+            <div class="sandbox-palette-section">
+              <h4>Piece Palette</h4>
+              <div id="sandbox-piece-palette" class="piece-palette">
+                <!-- Palette pieces will be rendered by JavaScript -->
+              </div>
+              <p class="palette-helper-text">
+                Select a piece, then click on board to place. Right-click to remove.
+              </p>
+            </div>
+          </div>
+          <!-- Right side: Controls -->
+          <div class="sandbox-controls-section">
+            <!-- Position Templates -->
+            <div class="sandbox-panel">
+              <h4>Quick Setup</h4>
+              <div class="template-buttons">
+                <button class="template-button" data-template="starting">Starting Position</button>
+                <button class="template-button" data-template="empty">Empty Board</button>
+                <button class="template-button" data-template="kqVsK">K+Q vs K</button>
+                <button class="template-button" data-template="krVsK">K+R vs K</button>
+                <button class="template-button" data-template="kpVsK">K+P vs K</button>
+                <button class="template-button" data-template="lucena">Lucena Position</button>
+              </div>
+            </div>
+            <!-- FEN Input/Output -->
+            <div class="sandbox-panel">
+              <h4>FEN Notation</h4>
+              <div class="fen-input-group">
+                <input
+                  type="text"
+                  id="sandbox-fen-input"
+                  class="fen-input"
+                  placeholder="Enter FEN..."
+                />
+                <button id="sandbox-fen-load" class="fen-button">Load</button>
+                <button id="sandbox-fen-copy" class="fen-button">Copy</button>
+              </div>
+            </div>
+            <!-- Board Controls -->
+            <div class="sandbox-panel">
+              <h4>Board Controls</h4>
+              <div class="board-controls">
+                <button id="sandbox-clear-board" class="control-btn danger">Clear Board</button>
+                <button id="sandbox-color-toggle" class="color-toggle white">
+                  ⚪ White to move
+                </button>
+              </div>
+            </div>
+            <!-- Validation Status -->
+            <div class="sandbox-panel">
+              <h4>Position Status</h4>
+              <div id="sandbox-validation" class="validation-status valid">
+                <span class="validation-icon">✓</span>
+                <span class="validation-text">Position is valid</span>
+              </div>
+              <div id="sandbox-validation-errors" class="validation-errors hidden">
+                <!-- Errors will be shown here -->
+              </div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="sandbox-actions">
+              <button id="sandbox-analyze-button" class="analyze-button">Analyze Position</button>
+            </div>
+            <!-- Analysis Results -->
+            <div id="sandbox-analysis-results" class="analysis-results hidden">
+              <h4>Analysis Results</h4>
+              <div class="eval-display">
+                <div class="eval-score" id="sandbox-eval-score">0.00</div>
+                <div class="eval-bar-container">
+                  <div class="eval-bar" id="sandbox-eval-bar"></div>
+                </div>
+              </div>
+              <div class="best-moves-list" id="sandbox-best-moves">
+                <!-- Best moves will be shown here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Frontend entry point -->
     <script type="module" src="/src/frontend/index.ts"></script>
   </body>

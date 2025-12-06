@@ -380,8 +380,17 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 6 (v0.6.1)** is complete and includes:
+**Phase 7 (v0.7.0)** is complete and includes:
 
+- **Sandbox Mode** (Phase 7)
+  - Board editor with drag-and-drop piece placement
+  - Piece palette for placing/removing pieces
+  - Position validation (king placement, pawn ranks, piece counts)
+  - FEN import/export with copy-to-clipboard
+  - Quick position templates (Starting, Empty, K+Q vs K, etc.)
+  - Color-to-move toggle
+  - Engine analysis with best move highlighting
+  - Optional top-3 moves display
 - **Player Progress Dashboard** (Phase 6)
   - Composite score radar chart (9 dimensions)
   - Game history with filtering and sorting
@@ -411,9 +420,8 @@ See the full roadmap in [source-docs/roadmap.md](../source-docs/roadmap.md).
 
 **Upcoming phases:**
 
-- **Phase 7:** Sandbox Mode
-- **Phase 8:** Polish & Optimization
-- **Phase 9:** Advanced Features
+- **Phase 8:** Import/Export & Data Management
+- **Phase 9:** Polish & Optimization
 
 ### Can I request a feature?
 

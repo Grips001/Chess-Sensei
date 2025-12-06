@@ -144,14 +144,14 @@ export const GAME_MODE_INFO: Record<
   },
   sandbox: {
     name: 'Sandbox Mode',
-    description: 'Free play and experimentation.',
+    description: 'Position editor and analysis tool.',
     features: [
-      'Play against yourself',
       'Set up custom positions',
-      'Test variations',
-      'No restrictions',
+      'Analyze with engine',
+      'Quick position templates',
+      'FEN import/export',
     ],
-    available: false, // Phase 5
+    available: true, // Phase 7
   },
 };
 

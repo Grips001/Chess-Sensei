@@ -99,7 +99,7 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 6 Complete ✓ → Phase 7 Next
+**Current Phase:** Phase 7 Complete ✓ → Phase 8 Next
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
@@ -157,7 +157,18 @@ User guides and operational documentation will be available in the
   - Training suggestions based on performance
   - Opponent-adjusted performance by Elo range
   - Complete documentation (documents/progress-dashboard.md)
-- 🚧 Phase 7: Sandbox Mode (Next)
+- ✅ Phase 7: Sandbox Mode complete
+  - Board editor with drag-and-drop piece placement
+  - Piece palette with all pieces (K, Q, R, B, N, P) in both colors
+  - Position validation (king placement, pawn ranks, piece counts)
+  - FEN import/export with copy-to-clipboard
+  - Quick position templates (Starting, Empty, K+Q vs K, K+R vs K, etc.)
+  - Color-to-move toggle
+  - Engine analysis with best move highlighting
+  - Optional top-3 moves display (Training Mode style)
+  - Evaluation bar and score display
+  - Complete documentation (documents/sandbox-mode.md)
+- 🚧 Phase 8: Import/Export & Data Management (Next)
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
@@ -175,7 +186,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.6.1 (Phase 6: Player Progress Dashboard)
+**Current Version:** v0.7.0 (Phase 7: Sandbox Mode)
 
 ### Installation
 

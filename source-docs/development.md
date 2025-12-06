@@ -190,6 +190,7 @@ Version tags correspond to completed development phases:
 | v0.5.2  | Phase 5: Post-Game Analysis UI     | Complete |
 | v0.6.0  | Phase 6: Player Progress Dashboard | Complete |
 | v0.6.1  | Phase 6: Dashboard hotfix          | Complete |
+| v0.7.0  | Phase 7: Sandbox Mode              | Complete |
 | v1.0.0  | Full Release (Phase 9 complete)    | Planned  |
 
 ### Creating a Release

@@ -125,8 +125,8 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 6 Complete ✓ **Version:** v0.6.1 **Next:** Phase 7 - Sandbox
-Mode
+**Phase:** Phase 7 Complete ✓ **Version:** v0.7.0 **Next:** Phase 8 -
+Import/Export & Data Management
 
 ### Completed Phases
 
@@ -140,22 +140,24 @@ Mode
   advanced debug logging
 - ✅ **Phase 6:** Progress dashboard, radar charts, game history, achievements,
   training suggestions
+- ✅ **Phase 7:** Sandbox Mode, board editor, FEN import/export, position
+  templates, engine analysis
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 7 involves:
+According to the roadmap, Phase 8 involves:
 
-1. **Sandbox Mode**
-   - Position setup and exploration
-   - Import/export FEN positions
-   - Engine analysis at any position
+1. **Import/Export**
+   - PGN file import and export
+   - Game library management
+   - Backup and restore functionality
 
-2. **Practice Tools**
-   - Study opening lines
-   - Practice specific positions
-   - Explore alternative variations
+2. **Data Management**
+   - Data cleanup tools
+   - Storage optimization
+   - Migration utilities
 
 ## Development Resources
 
@@ -226,7 +228,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 6 (Player Progress
-Dashboard) is complete with version v0.6.1.
+Chess-Sensei is ready for active development. Phase 7 (Sandbox Mode) is complete
+with version v0.7.0.
 
-Next up: Phase 7 - Sandbox Mode!
+Next up: Phase 8 - Import/Export & Data Management!

@@ -310,9 +310,22 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 6 (v0.6.1)
+### Current Release: Phase 7 (v0.7.0)
 
-**Player Progress Dashboard** is now available:
+**Sandbox Mode** is now available:
+
+- **Board Editor** - Drag-and-drop piece placement
+- **Piece Palette** - All pieces in both colors, plus eraser tool
+- **Position Validation** - Real-time validation of legal positions
+- **FEN Support** - Import and export positions via FEN notation
+- **Quick Templates** - Starting position, endgames (K+Q vs K, K+R vs K, etc.)
+- **Color Toggle** - Switch between white and black to move
+- **Engine Analysis** - Get Stockfish evaluation and best moves
+- **Top-3 Moves Option** - Training Mode style highlighting
+
+See [Sandbox Mode Guide](sandbox-mode.md) for details.
+
+**Player Progress Dashboard** continues to be available:
 
 - **Composite Score Radar Chart** - Visual 9-dimension skill profile
 - **Game History** - Browse all Exam Mode games with filtering
@@ -334,16 +347,6 @@ See [Progress Dashboard Guide](progress-dashboard.md) for details.
 
 See [Post-Game Analysis Guide](post-game-analysis.md) for details.
 
-**Exam Mode and Metrics Collection** continue to be available:
-
-- **Exam Mode** - Play without guidance to test your skills
-- **Game Recording** - Full move history with timestamps
-- **Post-Game Analysis** - Automatic move classification and evaluation
-- **9 Composite Scores** - Precision, Tactics, Stability, Conversion, and more
-- **Local Data Storage** - Your progress saved securely on your device
-
-See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details on metrics.
-
 **Training Mode** continues to be available with:
 
 - **AI Opponent** - 5 bot personalities (Sensei, Student, Club Player,
@@ -354,13 +357,17 @@ See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details on metrics.
 
 See [Training Mode Guide](training-mode-guide.md) for details.
 
+**Exam Mode** continues to be available with full metrics tracking.
+
+See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details.
+
 ### Upcoming Features
 
-#### Phase 7: Sandbox Mode
+#### Phase 8: Import/Export & Data Management
 
-- Free position exploration
-- Custom position setup
-- Unlimited analysis depth
+- PGN file import and export
+- Game library management
+- Backup and restore functionality
 
 Stay tuned for updates!
 

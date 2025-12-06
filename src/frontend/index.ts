@@ -25,6 +25,7 @@ import { ChessGame, type Piece, type PieceSymbol, type Square } from '../shared/
 import { SoundManager } from './sound-manager';
 import { createTrainingMode, type TrainingConfig } from './training-mode';
 import { createExamMode, type ExamConfig } from './exam-mode';
+import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from './sandbox-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
@@ -45,6 +46,9 @@ const { manager: trainingManager, ui: trainingUI } = createTrainingMode();
 // Initialize exam mode (Phase 4)
 const { manager: examManager, ui: examUI } = createExamMode();
 
+// Initialize sandbox mode (Phase 7)
+const { manager: sandboxManager, ui: sandboxUI } = createSandboxMode();
+
 // Initialize move guidance
 const guidanceManager = createMoveGuidance();
 
@@ -55,7 +59,7 @@ const analysisUI = createAnalysisUI();
 const progressDashboard = createProgressDashboard();
 
 // Current active game mode
-type GameMode = 'none' | 'training' | 'exam';
+type GameMode = 'none' | 'training' | 'exam' | 'sandbox';
 let currentGameMode: GameMode = 'none';
 
 // Track drag and selection state
@@ -1687,6 +1691,271 @@ function renderChessboard(): void {
   console.log(`Chessboard rendered: ${squareCount} squares with pieces at starting position`);
 }
 
+/**
+ * Render the Sandbox Mode board editor
+ * Phase 7: Board editor for custom positions
+ *
+ * Click behavior:
+ * - Left-click with palette piece selected: Place piece
+ * - Left-click with no palette piece: Show legal moves for piece (if any)
+ * - Right-click: Remove piece
+ * - Drag: Move piece on board or from palette
+ */
+function renderSandboxBoard(): void {
+  const boardElement = document.getElementById('sandbox-board');
+  if (!boardElement) {
+    console.error('sandbox-board element not found');
+    return;
+  }
+
+  boardElement.innerHTML = '';
+
+  const position = sandboxManager.getPosition();
+  const analysisResult = sandboxManager.getAnalysisResult();
+
+  // Create 8x8 grid of squares
+  for (let rank = 8; rank >= 1; rank--) {
+    for (let file = 0; file < 8; file++) {
+      const square = document.createElement('div');
+      square.className = 'square';
+
+      // Determine if square is light or dark
+      const isLight = (rank + file) % 2 === 0;
+      square.classList.add(isLight ? 'light' : 'dark');
+
+      // Set data attributes
+      const fileChar = String.fromCharCode(97 + file);
+      const squareName = `${fileChar}${rank}`;
+      square.dataset.square = squareName;
+
+      // Add analysis highlights if analysis is complete (always show top 3)
+      if (analysisResult) {
+        analysisResult.topMoves.forEach((move, idx) => {
+          if (move.from === squareName) {
+            square.classList.add(
+              idx === 0 ? 'best-move-from' : idx === 1 ? 'second-move-from' : 'third-move-from'
+            );
+          }
+          if (move.to === squareName) {
+            square.classList.add(
+              idx === 0 ? 'best-move-to' : idx === 1 ? 'second-move-to' : 'third-move-to'
+            );
+          }
+        });
+      }
+
+      // Get piece at this square
+      const piece = position.get(squareName);
+
+      if (piece) {
+        const pieceImg = document.createElement('img');
+        pieceImg.src = `/assets/pieces/${piece.color}${piece.type}.svg`;
+        pieceImg.className = 'piece';
+        pieceImg.alt = `${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}`;
+
+        // Always allow dragging pieces
+        pieceImg.draggable = true;
+        pieceImg.addEventListener('dragstart', (e) => {
+          e.dataTransfer?.setData('fromSquare', squareName);
+          e.dataTransfer?.setData('pieceType', piece.type);
+          e.dataTransfer?.setData('pieceColor', piece.color);
+          pieceImg.classList.add('dragging');
+        });
+        pieceImg.addEventListener('dragend', () => {
+          pieceImg.classList.remove('dragging');
+        });
+
+        square.appendChild(pieceImg);
+      }
+
+      // Left-click handler
+      square.addEventListener('click', () => {
+        const selectedPiece = sandboxManager.getSelectedPalettePiece();
+        if (selectedPiece) {
+          // Palette piece selected - place it on this square
+          sandboxManager.placePiece(squareName, selectedPiece);
+        } else if (piece) {
+          // No palette piece selected and there's a piece here - show legal moves
+          showSandboxLegalMoves(squareName, piece);
+        }
+        // If no palette piece and no piece on square, do nothing
+      });
+
+      // Right-click to remove piece
+      square.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        sandboxManager.removePiece(squareName);
+      });
+
+      // Drop handlers for drag and drop
+      square.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        square.classList.add('drop-target');
+      });
+
+      square.addEventListener('dragleave', () => {
+        square.classList.remove('drop-target');
+      });
+
+      square.addEventListener('drop', (e) => {
+        e.preventDefault();
+        square.classList.remove('drop-target');
+
+        const fromPalette = e.dataTransfer?.getData('fromPalette');
+        const fromSquare = e.dataTransfer?.getData('fromSquare');
+        const pieceType = e.dataTransfer?.getData('pieceType') as EditorPiece['type'];
+        const pieceColor = e.dataTransfer?.getData('pieceColor') as EditorPiece['color'];
+
+        if (fromPalette === 'true' && pieceType && pieceColor) {
+          // Dropped from palette - place new piece
+          sandboxManager.placePiece(squareName, { type: pieceType, color: pieceColor });
+        } else if (fromSquare && fromSquare !== squareName) {
+          // Dropped from another square - move piece
+          sandboxManager.movePiece(fromSquare, squareName);
+        }
+      });
+
+      boardElement.appendChild(square);
+    }
+  }
+}
+
+/**
+ * Show legal moves for a piece in Sandbox Mode
+ * Uses chess.js to calculate legal moves from the current FEN
+ */
+function showSandboxLegalMoves(square: string, _piece: EditorPiece): void {
+  // Clear any existing highlights first
+  const boardElement = document.getElementById('sandbox-board');
+  if (!boardElement) return;
+
+  // Remove previous legal move highlights
+  boardElement.querySelectorAll('.legal-move, .legal-capture, .sandbox-selected').forEach((el) => {
+    el.classList.remove('legal-move', 'legal-capture', 'sandbox-selected');
+  });
+
+  // Mark the selected square
+  const selectedSquare = boardElement.querySelector(`[data-square="${square}"]`);
+  if (selectedSquare) {
+    selectedSquare.classList.add('sandbox-selected');
+  }
+
+  // Get FEN and use chess.js to find legal moves
+  const fen = sandboxManager.getFen();
+  try {
+    // Create a temporary chess instance to check legal moves
+    const tempGame = new Chess(fen);
+    const moves = tempGame.moves({ square: square as Square, verbose: true });
+
+    // Highlight legal moves
+    moves.forEach((move) => {
+      const targetSquare = boardElement.querySelector(`[data-square="${move.to}"]`);
+      if (targetSquare) {
+        if (move.captured) {
+          targetSquare.classList.add('legal-capture');
+        } else {
+          targetSquare.classList.add('legal-move');
+        }
+      }
+    });
+  } catch {
+    // Invalid position or piece can't move - that's OK in sandbox mode
+    console.debug('Could not calculate legal moves for sandbox position');
+  }
+}
+
+/**
+ * Update sandbox validation display
+ */
+function updateSandboxValidation(): void {
+  const validation = sandboxManager.getValidation();
+  const statusDiv = document.getElementById('sandbox-validation');
+  const errorsDiv = document.getElementById('sandbox-validation-errors');
+  const analyzeBtn = document.getElementById('sandbox-analyze-button') as HTMLButtonElement;
+
+  if (statusDiv) {
+    statusDiv.classList.remove('valid', 'invalid', 'warning');
+
+    if (!validation.isValid) {
+      statusDiv.classList.add('invalid');
+      statusDiv.innerHTML = `
+        <span class="validation-icon">✗</span>
+        <span class="validation-text">Position is invalid</span>
+      `;
+    } else if (validation.warnings.length > 0) {
+      statusDiv.classList.add('warning');
+      statusDiv.innerHTML = `
+        <span class="validation-icon">⚠</span>
+        <span class="validation-text">Position has warnings</span>
+      `;
+    } else {
+      statusDiv.classList.add('valid');
+      statusDiv.innerHTML = `
+        <span class="validation-icon">✓</span>
+        <span class="validation-text">Position is valid</span>
+      `;
+    }
+  }
+
+  if (errorsDiv) {
+    const issues = [...validation.errors, ...validation.warnings];
+    if (issues.length > 0) {
+      errorsDiv.classList.remove('hidden');
+      errorsDiv.innerHTML = `<ul>${issues.map((e) => `<li>${e}</li>`).join('')}</ul>`;
+    } else {
+      errorsDiv.classList.add('hidden');
+    }
+  }
+
+  if (analyzeBtn) {
+    analyzeBtn.disabled = !validation.isValid;
+  }
+}
+
+/**
+ * Render sandbox analysis results
+ */
+function renderSandboxAnalysisResults(result: SandboxAnalysisResult): void {
+  const resultsDiv = document.getElementById('sandbox-analysis-results');
+  const scoreDiv = document.getElementById('sandbox-eval-score');
+  const barDiv = document.getElementById('sandbox-eval-bar');
+  const movesDiv = document.getElementById('sandbox-best-moves');
+
+  if (!resultsDiv) return;
+
+  resultsDiv.classList.remove('hidden');
+
+  // Update score display
+  if (scoreDiv) {
+    scoreDiv.textContent = result.formattedScore;
+  }
+
+  // Update eval bar (50% = equal, more = white advantage)
+  if (barDiv) {
+    // Convert centipawn score to percentage (sigmoid-like scaling)
+    const score = result.score;
+    const maxAdvantage = 400; // centipawns for ~95% bar
+    const normalized = Math.max(-maxAdvantage, Math.min(maxAdvantage, score));
+    const percentage = 50 + (normalized / maxAdvantage) * 45;
+    barDiv.style.width = `${percentage}%`;
+  }
+
+  // Render best moves list (always show all 3)
+  if (movesDiv) {
+    movesDiv.innerHTML = result.topMoves
+      .map(
+        (move, idx) => `
+      <div class="best-move-item rank-${idx + 1}">
+        <div class="move-rank">${idx + 1}</div>
+        <div class="best-move-notation">${move.move}</div>
+        <div class="move-score">${move.formattedScore}</div>
+      </div>
+    `
+      )
+      .join('');
+  }
+}
+
 // Results display element
 const resultsDiv: HTMLDivElement | null = null;
 
@@ -1908,6 +2177,9 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   // Initialize Exam Mode UI (Phase 4)
   examUI.initialize();
 
+  // Initialize Sandbox Mode UI (Phase 7)
+  sandboxUI.initialize();
+
   // Set up Training Mode callbacks
   trainingUI.onGameStart = (config, playerColor) => {
     startTrainingGame(config, playerColor);
@@ -1916,6 +2188,85 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   // Set up Exam Mode callbacks (Phase 4)
   examUI.onGameStart = (config, playerColor) => {
     startExamGame(config, playerColor);
+  };
+
+  // Set up Sandbox Mode callbacks (Phase 7)
+  sandboxUI.onModeStart = () => {
+    currentGameMode = 'sandbox';
+    frontendLogger.info('App', 'Sandbox Mode started');
+    renderSandboxBoard();
+  };
+
+  sandboxUI.onBack = () => {
+    currentGameMode = 'none';
+    frontendLogger.info('App', 'Sandbox Mode exited');
+  };
+
+  // Set up Sandbox Manager callbacks
+  sandboxManager.onPositionChange = () => {
+    renderSandboxBoard();
+    sandboxUI.updateFenDisplay();
+    updateSandboxValidation();
+  };
+
+  sandboxManager.onValidationChange = () => {
+    updateSandboxValidation();
+  };
+
+  sandboxManager.onAnalysisStart = () => {
+    const analyzeBtn = document.getElementById('sandbox-analyze-button');
+    const resultsDiv = document.getElementById('sandbox-analysis-results');
+    const scoreDiv = document.getElementById('sandbox-eval-score');
+    const movesDiv = document.getElementById('sandbox-best-moves');
+
+    if (analyzeBtn) {
+      analyzeBtn.textContent = 'Analyzing...';
+      (analyzeBtn as HTMLButtonElement).disabled = true;
+    }
+    if (resultsDiv) {
+      resultsDiv.classList.remove('hidden');
+    }
+    // Show loading state without destroying the structure
+    if (scoreDiv) {
+      scoreDiv.textContent = '...';
+    }
+    if (movesDiv) {
+      movesDiv.innerHTML = `
+        <div class="analyzing-indicator">
+          <div class="spinner"></div>
+          <span>Analyzing position...</span>
+        </div>
+      `;
+    }
+  };
+
+  sandboxManager.onAnalysisComplete = (result: SandboxAnalysisResult) => {
+    const analyzeBtn = document.getElementById('sandbox-analyze-button');
+    if (analyzeBtn) {
+      analyzeBtn.textContent = 'Re-analyze';
+      (analyzeBtn as HTMLButtonElement).disabled = false;
+    }
+
+    renderSandboxBoard(); // Re-render with highlights
+    renderSandboxAnalysisResults(result);
+  };
+
+  sandboxManager.onAnalysisError = (error: string) => {
+    const analyzeBtn = document.getElementById('sandbox-analyze-button');
+    const movesDiv = document.getElementById('sandbox-best-moves');
+
+    if (analyzeBtn) {
+      analyzeBtn.textContent = 'Analyze Position';
+      (analyzeBtn as HTMLButtonElement).disabled = false;
+    }
+    if (movesDiv) {
+      movesDiv.innerHTML = `
+        <div class="analysis-error">
+          <span class="error-icon">⚠️</span>
+          <span>${error}</span>
+        </div>
+      `;
+    }
   };
 
   // Helper to show mode selection - resets entire game to fresh state
@@ -1932,6 +2283,9 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     }
     if (examManager.isActive()) {
       examManager.stop();
+    }
+    if (sandboxManager.isActive()) {
+      sandboxManager.stop();
     }
     currentGameMode = 'none';
 

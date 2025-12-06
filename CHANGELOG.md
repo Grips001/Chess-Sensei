@@ -10,8 +10,32 @@ and this project adheres to
 
 ### Planned
 
-- Sandbox Mode for position exploration (Phase 7)
-- Polish & Optimization (Phase 8)
+- Import/Export & Data Management (Phase 8)
+- Polish & Optimization (Phase 9)
+
+## [0.7.0] - 2025-12-06
+
+### Added
+
+- **Sandbox Mode** (Phase 7)
+  - Board editor with drag-and-drop piece placement
+  - Piece palette with all pieces (K, Q, R, B, N, P) in both colors
+  - Position validation (king placement, pawn ranks, piece counts)
+  - FEN import/export with copy-to-clipboard
+  - Quick position templates (Starting, Empty, K+Q vs K, K+R vs K, K+P vs K,
+    Lucena)
+  - Color-to-move toggle
+  - Engine analysis with best move highlighting
+  - Optional top-3 moves display (Training Mode style)
+  - Evaluation bar and score display
+- User documentation: `documents/sandbox-mode.md`
+
+### Technical
+
+- New file: `src/frontend/sandbox-mode.ts`
+- SandboxModeManager and SandboxUIManager classes
+- Integration with existing IPC method `GET_GUIDANCE_MOVES` for analysis
+- Follows established manager/UI manager pattern from Training/Exam modes
 
 ## [0.6.1] - 2025-12-06
 
@@ -337,7 +361,8 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.1...v0.5.2
