@@ -65,7 +65,7 @@ However, you can:
 
 ### Does it have a timer/chess clock?
 
-Time controls are planned for **Phase 5**. Current games are untimed.
+Time controls are planned for a future update. Current games are untimed.
 
 ### Can I save my games?
 
@@ -380,8 +380,15 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 5 (v0.5.2)** is complete and includes:
+**Phase 6 (v0.6.0)** is complete and includes:
 
+- **Player Progress Dashboard** (Phase 6)
+  - Composite score radar chart (9 dimensions)
+  - Game history with filtering and sorting
+  - Analytics dashboard (accuracy trends, error distribution, CPL)
+  - Achievement system with unlockable badges
+  - Training suggestions based on performance
+  - Opponent-adjusted performance analysis
 - **Post-Game Analysis UI** (Phase 5)
   - Three-tab interface (Review/Summary/Analytics)
   - Interactive board replay with navigation
@@ -404,9 +411,9 @@ See the full roadmap in [source-docs/roadmap.md](../source-docs/roadmap.md).
 
 **Upcoming phases:**
 
-- **Phase 6:** Player Progress Dashboard
 - **Phase 7:** Sandbox Mode
 - **Phase 8:** Polish & Optimization
+- **Phase 9:** Advanced Features
 
 ### Can I request a feature?
 

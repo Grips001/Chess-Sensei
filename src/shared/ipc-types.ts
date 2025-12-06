@@ -243,6 +243,16 @@ export const IPC_METHODS = {
   /** Get the storage base path */
   GET_STORAGE_PATH: 'getStoragePath',
 
+  // Phase 6: Player Progress Methods
+  /** Load player profile with aggregated metrics */
+  LOAD_PLAYER_PROFILE: 'loadPlayerProfile',
+  /** Save updated player profile */
+  SAVE_PLAYER_PROFILE: 'savePlayerProfile',
+  /** Get achievement list with unlock status */
+  GET_ACHIEVEMENTS: 'getAchievements',
+  /** Unlock an achievement */
+  UNLOCK_ACHIEVEMENT: 'unlockAchievement',
+
   // Debug Logging Methods (--dev mode only)
   /** Log a message from frontend to backend file logger */
   LOG_MESSAGE: 'logMessage',

@@ -10,8 +10,31 @@ and this project adheres to
 
 ### Planned
 
-- Player progress dashboard (Phase 6)
 - Sandbox Mode for position exploration (Phase 7)
+- Polish & Optimization (Phase 8)
+
+## [0.6.0] - 2025-12-06
+
+### Added
+
+- **Player Progress Dashboard** (Phase 6)
+  - Composite score radar chart displaying 9 skill dimensions
+  - Game history table with filtering (All/Last 10/Last 30/This Month)
+  - Overview tab with quick stats, game record, and accuracy trends
+  - Analytics tab with phase accuracy, error distribution, CPL trends
+  - Period comparison (last 10 games vs. previous 10)
+  - Performance by opponent strength breakdown
+  - Achievement system with 9 unlockable badges
+  - Training suggestions based on performance metrics
+  - "View Progress" button on main mode selection screen
+- New IPC methods for player profile and achievements
+- Backend achievement storage with atomic file writes
+- User documentation: `documents/progress-dashboard.md`
+
+### Changed
+
+- Dashboard button styling to match mode selection theme
+- CSS organization for dashboard-specific overrides
 
 ## [0.5.2] - 2025-12-05
 
@@ -296,7 +319,8 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.2...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.2...v0.6.0
 [0.5.2]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.4.0...v0.5.0

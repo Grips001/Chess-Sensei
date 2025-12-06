@@ -151,12 +151,29 @@
         <!-- Analysis UI will be rendered here by JavaScript -->
       </div>
     </div>
+    <!-- Phase 6: Progress Dashboard Overlay -->
+    <div id="dashboard-overlay" class="hidden">
+      <div class="dashboard-container">
+        <div class="dashboard-header">
+          <h2>Player Progress</h2>
+          <button id="dashboard-close-btn">×</button>
+        </div>
+        <div id="dashboard-loading">
+          <div class="analysis-loading-spinner"></div>
+          <span>Loading progress data...</span>
+        </div>
+        <div id="dashboard-content" class="hidden">
+          <!-- Dashboard UI will be rendered here by JavaScript -->
+        </div>
+      </div>
+    </div>
     <!-- Mode Selection Screen -->
     <div id="mode-selection-overlay" class="mode-selection-overlay">
       <div class="mode-selection-container">
         <div class="mode-selection-header">
           <h1 class="mode-selection-title">Chess-Sensei</h1>
           <p class="mode-selection-subtitle">Your Personal Chess Training Partner</p>
+          <button class="progress-dashboard-btn" id="view-progress-btn">📊 View Progress</button>
         </div>
         <div class="mode-selection-cards">
           <!-- Training Mode Card -->

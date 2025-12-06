@@ -99,7 +99,7 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 5 Complete ✓ → Phase 6 Next
+**Current Phase:** Phase 6 Complete ✓ → Phase 7 Next
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
@@ -149,7 +149,15 @@ User guides and operational documentation will be available in the
   - Training recommendations based on game analysis
   - Export options (PGN, JSON, Markdown report)
   - Complete documentation (documents/post-game-analysis.md)
-- 🚧 Phase 6: Player Progress Dashboard (Next)
+- ✅ Phase 6: Player Progress Dashboard complete
+  - Composite score radar chart with 9 skill dimensions
+  - Game history with filtering and sorting
+  - Analytics with accuracy trends, error distribution, CPL analysis
+  - Achievement system with unlockable badges
+  - Training suggestions based on performance
+  - Opponent-adjusted performance by Elo range
+  - Complete documentation (documents/progress-dashboard.md)
+- 🚧 Phase 7: Sandbox Mode (Next)
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
@@ -167,7 +175,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.5.2 (Phase 5: Post-Game Analysis UI + Bug Fixes)
+**Current Version:** v0.6.0 (Phase 6: Player Progress Dashboard)
 
 ### Installation
 

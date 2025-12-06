@@ -1,6 +1,6 @@
 {
   "name": "chess-sensei",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "main": "index.js",
   "scripts": {
     "dev": "bunx --bun vite",

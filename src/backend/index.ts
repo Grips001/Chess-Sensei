@@ -33,6 +33,7 @@ import {
   MetricsCalculator,
   type GameMetrics,
   type CompositeScores,
+  type PlayerProfile,
 } from './metrics-calculator';
 import {
   createDataStorage,
@@ -40,6 +41,7 @@ import {
   type StoredGameData,
   type StoredAnalysisData,
   type GameIndexEntry,
+  type StoredAchievements,
 } from './data-storage';
 import type {
   BestMove,
@@ -344,6 +346,40 @@ interface LoadAnalysisResponse {
   analysis: StoredAnalysisData;
   /** Success flag */
   success: true;
+}
+
+// ========================================
+// Phase 6: Player Progress Types
+// ========================================
+
+/** Response payload for loading player profile */
+interface PlayerProfileResponse {
+  /** Player profile (null if not yet created) */
+  profile: PlayerProfile | null;
+  /** Success flag */
+  success: true;
+}
+
+/** Request payload for saving player profile */
+interface SavePlayerProfileRequest {
+  /** Profile data to save */
+  profile: PlayerProfile;
+}
+
+/** Response payload for getting achievements */
+interface AchievementsResponse {
+  /** Achievements data (null if not yet created) */
+  achievements: StoredAchievements | null;
+  /** Success flag */
+  success: true;
+}
+
+/** Request payload for unlocking an achievement */
+interface UnlockAchievementRequest {
+  /** Achievement ID to unlock */
+  id: string;
+  /** Current progress value */
+  progress?: number;
 }
 
 /**
@@ -1035,6 +1071,136 @@ const functionMap = {
       dataStorage = createDataStorage();
     }
     return { path: dataStorage.getStorageBasePath(), success: true };
+  },
+
+  // ========================================
+  // Phase 6: Player Progress Methods
+  // ========================================
+
+  /**
+   * Load player profile with aggregated metrics
+   */
+  loadPlayerProfile: async (): Promise<PlayerProfileResponse | ErrorResponse> => {
+    logger.info('IPC:loadPlayerProfile', 'Loading player profile');
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const profile = await dataStorage.loadPlayerProfile();
+      logger.info('IPC:loadPlayerProfile', 'Profile loaded', {
+        hasProfile: !!profile,
+        totalGames: profile?.totalGames,
+      });
+      return { profile, success: true };
+    } catch (error) {
+      logger.error('IPC:loadPlayerProfile', 'Failed to load profile', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'LOAD_PROFILE_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Save updated player profile
+   */
+  savePlayerProfile: async (
+    payload: SavePlayerProfileRequest
+  ): Promise<{ success: true } | ErrorResponse> => {
+    logger.info('IPC:savePlayerProfile', 'Saving player profile', {
+      totalGames: payload.profile?.totalGames,
+    });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      await dataStorage.savePlayerProfile(payload.profile);
+      logger.info('IPC:savePlayerProfile', 'Profile saved successfully');
+      return { success: true };
+    } catch (error) {
+      logger.error('IPC:savePlayerProfile', 'Failed to save profile', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'SAVE_PROFILE_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Get achievement list with unlock status
+   */
+  getAchievements: async (): Promise<AchievementsResponse | ErrorResponse> => {
+    logger.info('IPC:getAchievements', 'Loading achievements');
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      const achievements = await dataStorage.loadAchievements();
+      logger.info('IPC:getAchievements', 'Achievements loaded', {
+        count: achievements?.achievements?.length ?? 0,
+      });
+      return { achievements, success: true };
+    } catch (error) {
+      logger.error('IPC:getAchievements', 'Failed to load achievements', error);
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'LOAD_ACHIEVEMENTS_ERROR',
+        success: false,
+      };
+    }
+  },
+
+  /**
+   * Unlock an achievement
+   */
+  unlockAchievement: async (
+    payload: UnlockAchievementRequest
+  ): Promise<{ success: true } | ErrorResponse> => {
+    logger.info('IPC:unlockAchievement', 'Unlocking achievement', { id: payload.id });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+      }
+      let achievements = await dataStorage.loadAchievements();
+      if (!achievements) {
+        achievements = {
+          version: '1.0',
+          lastUpdated: new Date().toISOString(),
+          achievements: [],
+        };
+      }
+
+      // Check if achievement already exists
+      const existingIndex = achievements.achievements.findIndex((a) => a.id === payload.id);
+      if (existingIndex >= 0) {
+        // Update existing
+        achievements.achievements[existingIndex].unlockedAt = new Date().toISOString();
+        achievements.achievements[existingIndex].progress = payload.progress ?? 1;
+      } else {
+        // Add new
+        achievements.achievements.push({
+          id: payload.id,
+          unlockedAt: new Date().toISOString(),
+          progress: payload.progress ?? 1,
+        });
+      }
+
+      achievements.lastUpdated = new Date().toISOString();
+      await dataStorage.saveAchievements(achievements);
+      logger.info('IPC:unlockAchievement', 'Achievement unlocked', { id: payload.id });
+      return { success: true };
+    } catch (error) {
+      logger.error('IPC:unlockAchievement', 'Failed to unlock achievement', error, {
+        id: payload.id,
+      });
+      return {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'UNLOCK_ACHIEVEMENT_ERROR',
+        success: false,
+      };
+    }
   },
 
   // ========================================

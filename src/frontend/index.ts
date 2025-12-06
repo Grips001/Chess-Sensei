@@ -27,6 +27,7 @@ import { createTrainingMode, type TrainingConfig } from './training-mode';
 import { createExamMode, type ExamConfig } from './exam-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 import { createAnalysisUI } from './analysis-ui';
+import { createProgressDashboard } from './progress-dashboard';
 import { frontendLogger } from './frontend-logger';
 
 console.log('Chess-Sensei Frontend initialized');
@@ -49,6 +50,9 @@ const guidanceManager = createMoveGuidance();
 
 // Initialize analysis UI (Phase 5)
 const analysisUI = createAnalysisUI();
+
+// Initialize progress dashboard (Phase 6)
+const progressDashboard = createProgressDashboard();
 
 // Current active game mode
 type GameMode = 'none' | 'training' | 'exam';
@@ -2068,6 +2072,27 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   // Make test function available globally for debugging (Phase 1 tests)
   (window as unknown as { testIPC: () => Promise<void> }).testIPC = testIPCCommunication;
 
-  frontendLogger.info('App', 'Phase 5: Post-Game Analysis UI initialized');
-  console.log('Phase 5: Post-Game Analysis UI initialized');
+  // Phase 6: Setup Progress Dashboard button
+  const viewProgressBtn = document.getElementById('view-progress-btn');
+  if (viewProgressBtn) {
+    viewProgressBtn.addEventListener('click', () => {
+      frontendLogger.info('App', 'Opening Progress Dashboard');
+      progressDashboard.open();
+    });
+  }
+
+  // Setup dashboard callbacks
+  progressDashboard.onClose = () => {
+    frontendLogger.info('App', 'Progress Dashboard closed');
+  };
+
+  progressDashboard.onViewGame = (gameId: string) => {
+    frontendLogger.info('App', 'Opening game from dashboard', { gameId });
+    progressDashboard.close();
+    // Open analysis for the selected game
+    analysisUI.openAnalysis(gameId);
+  };
+
+  frontendLogger.info('App', 'Phase 6: Progress Dashboard UI initialized');
+  console.log('Phase 6: Progress Dashboard UI initialized');
 })();

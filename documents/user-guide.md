@@ -310,9 +310,20 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 5 (v0.5.2)
+### Current Release: Phase 6 (v0.6.0)
 
-**Post-Game Analysis UI** is now available:
+**Player Progress Dashboard** is now available:
+
+- **Composite Score Radar Chart** - Visual 9-dimension skill profile
+- **Game History** - Browse all Exam Mode games with filtering
+- **Analytics Dashboard** - Accuracy trends, error distribution, CPL analysis
+- **Achievement System** - Unlock badges for milestones and accomplishments
+- **Training Suggestions** - Personalized recommendations based on performance
+- **Opponent Analysis** - Performance breakdown by bot Elo range
+
+See [Progress Dashboard Guide](progress-dashboard.md) for details.
+
+**Post-Game Analysis UI** continues to be available:
 
 - **Three-Tab Analysis Interface** - Review, Summary, and Analytics tabs
 - **Interactive Board Replay** - Navigate through your game with keyboard
@@ -344,12 +355,6 @@ See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details on metrics.
 See [Training Mode Guide](training-mode-guide.md) for details.
 
 ### Upcoming Features
-
-#### Phase 6: Player Progress Dashboard
-
-- Track improvement over time
-- Detailed statistics and trends
-- Radar charts for composite scores
 
 #### Phase 7: Sandbox Mode
 

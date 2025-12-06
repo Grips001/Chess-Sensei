@@ -524,6 +524,43 @@ export class DataStorage {
   isInitialized(): boolean {
     return this.initialized;
   }
+
+  // ============================================
+  // Phase 6: Achievement Methods
+  // ============================================
+
+  /**
+   * Task 6.6: Load achievements
+   */
+  async loadAchievements(): Promise<StoredAchievements | null> {
+    await this.initialize();
+
+    const achievementsPath = join(this.basePath, 'metrics', 'achievements.json');
+    return this.readJson<StoredAchievements>(achievementsPath);
+  }
+
+  /**
+   * Task 6.6: Save achievements
+   */
+  async saveAchievements(achievements: StoredAchievements): Promise<void> {
+    await this.initialize();
+
+    const achievementsPath = join(this.basePath, 'metrics', 'achievements.json');
+    await this.atomicWrite(achievementsPath, JSON.stringify(achievements, null, 2));
+  }
+}
+
+/**
+ * Stored achievements format
+ */
+export interface StoredAchievements {
+  version: string;
+  lastUpdated: string;
+  achievements: Array<{
+    id: string;
+    unlockedAt?: string;
+    progress: number;
+  }>;
 }
 
 /**

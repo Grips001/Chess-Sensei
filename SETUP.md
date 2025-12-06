@@ -125,8 +125,8 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 5 Complete ✓ **Version:** v0.5.2 **Next:** Phase 6 - Player
-Progress Dashboard
+**Phase:** Phase 6 Complete ✓ **Version:** v0.6.0 **Next:** Phase 7 - Sandbox
+Mode
 
 ### Completed Phases
 
@@ -138,27 +138,24 @@ Progress Dashboard
   data storage
 - ✅ **Phase 5:** Post-game analysis UI, evaluation graph, export options,
   advanced debug logging
+- ✅ **Phase 6:** Progress dashboard, radar charts, game history, achievements,
+  training suggestions
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 6 involves:
+According to the roadmap, Phase 7 involves:
 
-1. **Progress Dashboard**
-   - Composite index radar chart
-   - Trend graphs for all scores
-   - Game history table
+1. **Sandbox Mode**
+   - Position setup and exploration
+   - Import/export FEN positions
+   - Engine analysis at any position
 
-2. **Detailed Analytics Views**
-   - Drill-down for each composite score
-   - Accuracy by game phase charts
-   - Error distribution visualizations
-
-3. **Historical Comparison**
-   - Compare time periods
-   - Show improvement/regression
-   - Highlight best/worst performances
+2. **Practice Tools**
+   - Study opening lines
+   - Practice specific positions
+   - Explore alternative variations
 
 ## Development Resources
 
@@ -229,7 +226,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 5 (Post-Game Analysis UI) is
-complete with version v0.5.2.
+Chess-Sensei is ready for active development. Phase 6 (Player Progress
+Dashboard) is complete with version v0.6.0.
 
-Next up: Phase 6 - Player Progress Dashboard!
+Next up: Phase 7 - Sandbox Mode!

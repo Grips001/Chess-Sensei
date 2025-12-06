@@ -27,6 +27,10 @@ Documentation here will include:
   guidance
 - **[Exam Mode & Metrics](exam-mode-metrics.md)** - Test skills and view
   performance scores
+- **[Post-Game Analysis](post-game-analysis.md)** - Review games with detailed
+  move-by-move analysis
+- **[Progress Dashboard](progress-dashboard.md)** - Track your improvement with
+  radar charts and achievements
 - **[FAQ](faq.md)** - Frequently asked questions and answers
 - **[Troubleshooting](troubleshooting.md)** - Common problems and solutions
 

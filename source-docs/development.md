@@ -180,15 +180,16 @@ Current versioning scheme:
 
 Version tags correspond to completed development phases:
 
-| Version | Phase                           | Status   |
-| ------- | ------------------------------- | -------- |
-| v0.0.0  | Phase 0: Foundation             | Complete |
-| v0.1.0  | Phase 1: Engine Integration     | Complete |
-| v0.2.0  | Phase 2: UI & Chessboard        | Complete |
-| v0.3.0  | Phase 3: AI Opponent & Training | Complete |
-| v0.4.0  | Phase 4: Exam Mode & Metrics    | Complete |
-| v0.5.2  | Phase 5: Post-Game Analysis UI  | Complete |
-| v1.0.0  | Full Release (Phase 9 complete) | Planned  |
+| Version | Phase                              | Status   |
+| ------- | ---------------------------------- | -------- |
+| v0.0.0  | Phase 0: Foundation                | Complete |
+| v0.1.0  | Phase 1: Engine Integration        | Complete |
+| v0.2.0  | Phase 2: UI & Chessboard           | Complete |
+| v0.3.0  | Phase 3: AI Opponent & Training    | Complete |
+| v0.4.0  | Phase 4: Exam Mode & Metrics       | Complete |
+| v0.5.2  | Phase 5: Post-Game Analysis UI     | Complete |
+| v0.6.0  | Phase 6: Player Progress Dashboard | Complete |
+| v1.0.0  | Full Release (Phase 9 complete)    | Planned  |
 
 ### Creating a Release
 
@@ -200,7 +201,7 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    # Edit package.json version field
-   "version": "0.5.2"
+   "version": "0.6.0"
    ```
 
 2. **Update CHANGELOG.md** with release notes
@@ -209,15 +210,15 @@ Releases are automated via GitHub Actions. To create a release:
 
    ```bash
    git add package.json CHANGELOG.md
-   git commit -m "chore: prepare release v0.5.2"
+   git commit -m "chore: prepare release v0.6.0"
    ```
 
 4. **Create and push tag**:
 
    ```bash
-   git tag -a v0.5.2 -m "Phase 5: Bug fixes"
+   git tag -a v0.6.0 -m "Phase 6: Player Progress Dashboard"
    git push origin main
-   git push origin v0.5.2
+   git push origin v0.6.0
    ```
 
 5. **GitHub Actions automatically**:
