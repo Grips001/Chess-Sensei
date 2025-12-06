@@ -29,6 +29,7 @@ import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from 
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
+import { createDataManagement } from './data-management';
 import { frontendLogger } from './frontend-logger';
 
 console.log('Chess-Sensei Frontend initialized');
@@ -57,6 +58,9 @@ const analysisUI = createAnalysisUI();
 
 // Initialize progress dashboard (Phase 6)
 const progressDashboard = createProgressDashboard();
+
+// Initialize data management (Phase 8)
+const dataManagement = createDataManagement();
 
 // Current active game mode
 type GameMode = 'none' | 'training' | 'exam' | 'sandbox';
@@ -2449,4 +2453,18 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
 
   frontendLogger.info('App', 'Phase 6: Progress Dashboard UI initialized');
   console.log('Phase 6: Progress Dashboard UI initialized');
+
+  // Phase 8: Setup Data Management button and overlay
+  dataManagement.initialize('data-mgmt-overlay');
+
+  const viewDataMgmtBtn = document.getElementById('view-data-mgmt-btn');
+  if (viewDataMgmtBtn) {
+    viewDataMgmtBtn.addEventListener('click', () => {
+      frontendLogger.info('App', 'Opening Data Management');
+      dataManagement.show();
+    });
+  }
+
+  frontendLogger.info('App', 'Phase 8: Data Management UI initialized');
+  console.log('Phase 8: Data Management UI initialized');
 })();

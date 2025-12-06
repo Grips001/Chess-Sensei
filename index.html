@@ -173,7 +173,10 @@
         <div class="mode-selection-header">
           <h1 class="mode-selection-title">Chess-Sensei</h1>
           <p class="mode-selection-subtitle">Your Personal Chess Training Partner</p>
-          <button class="progress-dashboard-btn" id="view-progress-btn">📊 View Progress</button>
+          <div class="header-buttons">
+            <button class="progress-dashboard-btn" id="view-progress-btn">📊 View Progress</button>
+            <button class="data-management-btn" id="view-data-mgmt-btn">💾 Data</button>
+          </div>
         </div>
         <div class="mode-selection-cards">
           <!-- Training Mode Card -->
@@ -378,6 +381,18 @@
         <!-- Start Game Button -->
         <div class="setup-actions">
           <button class="start-game-button exam-start" id="start-exam-button">Start Exam</button>
+        </div>
+      </div>
+    </div>
+    <!-- Phase 8: Data Management Overlay -->
+    <div id="data-mgmt-overlay" class="data-mgmt-overlay hidden">
+      <div class="data-mgmt-container">
+        <div class="data-mgmt-header">
+          <h2>Data Management</h2>
+          <button id="data-mgmt-close-btn">×</button>
+        </div>
+        <div id="data-mgmt-content">
+          <!-- Content will be rendered by JavaScript -->
         </div>
       </div>
     </div>

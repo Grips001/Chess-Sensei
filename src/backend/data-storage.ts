@@ -14,7 +14,7 @@
  */
 
 import { join, dirname } from 'path';
-import { mkdir, writeFile, readFile, rename, stat } from 'fs/promises';
+import { mkdir, writeFile, readFile, rename, stat, readdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
 import { homedir } from 'os';
 
@@ -126,6 +126,12 @@ const DATA_VERSION = '1.0';
 
 /** Application folder name */
 const APP_FOLDER = 'Chess-Sensei';
+
+/** Backup retention: keep last N daily backups */
+const DAILY_BACKUP_RETENTION = 7;
+
+/** Backup retention: keep last N weekly backups */
+const WEEKLY_BACKUP_RETENTION = 4;
 
 // ============================================
 // Data Storage Class
@@ -548,6 +554,337 @@ export class DataStorage {
     const achievementsPath = join(this.basePath, 'metrics', 'achievements.json');
     await this.atomicWrite(achievementsPath, JSON.stringify(achievements, null, 2));
   }
+
+  // ============================================
+  // Phase 8: Backup & Restore Methods
+  // ============================================
+
+  /**
+   * Task 8.4.1: Load backup settings
+   */
+  async loadBackupSettings(): Promise<BackupSettings> {
+    await this.initialize();
+
+    const settingsPath = join(this.basePath, 'settings', 'backup_settings.json');
+    const settings = await this.readJson<BackupSettings>(settingsPath);
+
+    // Return defaults if no settings exist
+    return (
+      settings || {
+        enabled: true,
+        frequency: 'daily',
+        compression: false,
+      }
+    );
+  }
+
+  /**
+   * Task 8.4.1: Save backup settings
+   */
+  async saveBackupSettings(settings: BackupSettings): Promise<void> {
+    await this.initialize();
+
+    const settingsPath = join(this.basePath, 'settings', 'backup_settings.json');
+    await this.atomicWrite(settingsPath, JSON.stringify(settings, null, 2));
+  }
+
+  /**
+   * Task 8.4.1: Check if backup is needed based on settings
+   */
+  async shouldCreateBackup(trigger: 'startup' | 'after-game'): Promise<boolean> {
+    const settings = await this.loadBackupSettings();
+
+    if (!settings.enabled) {
+      return false;
+    }
+
+    // For after-game trigger, only create backup if setting matches
+    if (trigger === 'after-game' && settings.frequency !== 'after-game') {
+      return false;
+    }
+
+    // For startup, check if enough time has passed
+    if (trigger === 'startup') {
+      if (!settings.lastBackupTimestamp) {
+        return true;
+      }
+
+      const lastBackup = new Date(settings.lastBackupTimestamp);
+      const now = new Date();
+      const hoursSinceLastBackup = (now.getTime() - lastBackup.getTime()) / (1000 * 60 * 60);
+
+      if (settings.frequency === 'daily' && hoursSinceLastBackup >= 24) {
+        return true;
+      }
+
+      if (settings.frequency === 'weekly' && hoursSinceLastBackup >= 168) {
+        return true;
+      }
+    }
+
+    return trigger === 'after-game' && settings.frequency === 'after-game';
+  }
+
+  /**
+   * Task 8.4.1: Create automatic backup
+   *
+   * Follows data-storage.md backup specifications:
+   * - Location: backups/ folder
+   * - Retention: last 7 daily, last 4 weekly
+   * - Format: full copy of all data
+   */
+  async createAutomaticBackup(type: 'daily' | 'weekly' | 'after-game'): Promise<BackupInfo | null> {
+    await this.initialize();
+
+    try {
+      const backupsPath = join(this.basePath, 'backups');
+      await this.ensureDirectory(backupsPath);
+
+      // Gather all data
+      const games = await this.getAllGamesData();
+      const analyses = await this.getAllAnalysesData();
+      const profile = await this.loadPlayerProfile();
+      const achievements = await this.loadAchievements();
+
+      // Create backup data
+      const backupData = {
+        version: DATA_VERSION,
+        backupTimestamp: new Date().toISOString(),
+        backupType: type,
+        source: 'Chess-Sensei',
+        gameCount: games.length,
+        games,
+        analyses,
+        profile,
+        achievements,
+      };
+
+      // Generate filename with timestamp and type
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const filename = `backup_${type}_${timestamp}.json`;
+      const backupPath = join(backupsPath, filename);
+
+      // Write backup
+      const jsonContent = JSON.stringify(backupData, null, 2);
+      await this.atomicWrite(backupPath, jsonContent);
+
+      // Update settings with last backup time
+      const settings = await this.loadBackupSettings();
+      settings.lastBackupTimestamp = new Date().toISOString();
+      await this.saveBackupSettings(settings);
+
+      // Clean up old backups according to retention policy
+      await this.cleanupOldBackups();
+
+      // Get file size
+      const stats = await stat(backupPath);
+
+      console.log(
+        `Automatic backup created: ${filename} (${games.length} games, ${stats.size} bytes)`
+      );
+
+      return {
+        filename,
+        timestamp: backupData.backupTimestamp,
+        type,
+        gameCount: games.length,
+        size: stats.size,
+      };
+    } catch (error) {
+      console.error('Failed to create automatic backup:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Task 8.4.1: Get all games data for backup
+   */
+  private async getAllGamesData(): Promise<StoredGameData[]> {
+    const gamesList = await this.getGamesList();
+    const games: StoredGameData[] = [];
+
+    for (const entry of gamesList) {
+      const game = await this.loadGame(entry.gameId);
+      if (game) {
+        games.push(game);
+      }
+    }
+
+    return games;
+  }
+
+  /**
+   * Task 8.4.1: Get all analyses data for backup
+   */
+  private async getAllAnalysesData(): Promise<StoredAnalysisData[]> {
+    const gamesList = await this.getGamesList();
+    const analyses: StoredAnalysisData[] = [];
+
+    for (const entry of gamesList) {
+      const analysis = await this.loadAnalysis(entry.gameId);
+      if (analysis) {
+        analyses.push(analysis);
+      }
+    }
+
+    return analyses;
+  }
+
+  /**
+   * Task 8.4.1: Cleanup old backups according to retention policy
+   *
+   * Per data-storage.md:
+   * - Retention: last 7 daily, last 4 weekly
+   */
+  private async cleanupOldBackups(): Promise<void> {
+    const backupsPath = join(this.basePath, 'backups');
+
+    try {
+      const files = await readdir(backupsPath);
+      const backupFiles = files.filter((f) => f.startsWith('backup_') && f.endsWith('.json'));
+
+      // Separate by type
+      const dailyBackups: { filename: string; timestamp: Date }[] = [];
+      const weeklyBackups: { filename: string; timestamp: Date }[] = [];
+      const otherBackups: { filename: string; timestamp: Date }[] = [];
+
+      for (const filename of backupFiles) {
+        // Parse filename: backup_<type>_<timestamp>.json
+        const match = filename.match(/^backup_(daily|weekly|after-game|manual)_(.+)\.json$/);
+        if (!match) continue;
+
+        const type = match[1];
+        const timestampStr = match[2].replace(/-/g, ':').replace('T', ' ');
+        const timestamp = new Date(timestampStr.slice(0, 10) + 'T' + timestampStr.slice(11) + 'Z');
+
+        if (type === 'daily' || type === 'after-game') {
+          dailyBackups.push({ filename, timestamp });
+        } else if (type === 'weekly') {
+          weeklyBackups.push({ filename, timestamp });
+        } else {
+          otherBackups.push({ filename, timestamp });
+        }
+      }
+
+      // Sort by timestamp (newest first)
+      dailyBackups.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      weeklyBackups.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+
+      // Delete old daily backups (keep last 7)
+      for (let i = DAILY_BACKUP_RETENTION; i < dailyBackups.length; i++) {
+        const filePath = join(backupsPath, dailyBackups[i].filename);
+        await unlink(filePath);
+        console.log(`Deleted old backup: ${dailyBackups[i].filename}`);
+      }
+
+      // Delete old weekly backups (keep last 4)
+      for (let i = WEEKLY_BACKUP_RETENTION; i < weeklyBackups.length; i++) {
+        const filePath = join(backupsPath, weeklyBackups[i].filename);
+        await unlink(filePath);
+        console.log(`Deleted old backup: ${weeklyBackups[i].filename}`);
+      }
+    } catch (error) {
+      console.error('Failed to cleanup old backups:', error);
+    }
+  }
+
+  /**
+   * Task 8.4.3: List available backups
+   */
+  async listBackups(): Promise<BackupInfo[]> {
+    await this.initialize();
+
+    const backupsPath = join(this.basePath, 'backups');
+    const backups: BackupInfo[] = [];
+
+    try {
+      if (!existsSync(backupsPath)) {
+        return [];
+      }
+
+      const files = await readdir(backupsPath);
+      const backupFiles = files.filter((f) => f.startsWith('backup_') && f.endsWith('.json'));
+
+      for (const filename of backupFiles) {
+        const filePath = join(backupsPath, filename);
+
+        try {
+          const stats = await stat(filePath);
+          const content = await this.readJson<{
+            backupTimestamp: string;
+            backupType: 'daily' | 'weekly' | 'manual' | 'after-game';
+            gameCount: number;
+          }>(filePath);
+
+          if (content) {
+            backups.push({
+              filename,
+              timestamp: content.backupTimestamp || stats.mtime.toISOString(),
+              type: content.backupType || 'manual',
+              gameCount: content.gameCount || 0,
+              size: stats.size,
+            });
+          }
+        } catch {
+          // Skip invalid backup files
+        }
+      }
+
+      // Sort by timestamp (newest first)
+      backups.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    } catch (error) {
+      console.error('Failed to list backups:', error);
+    }
+
+    return backups;
+  }
+
+  /**
+   * Task 8.4.4: Verify backup integrity
+   */
+  async verifyBackup(filename: string): Promise<{ valid: boolean; issues: string[] }> {
+    const issues: string[] = [];
+
+    try {
+      const backupPath = join(this.basePath, 'backups', filename);
+      const content = await readFile(backupPath, 'utf-8');
+      const data = JSON.parse(content);
+
+      // Check required fields
+      if (!data.version) issues.push('Missing version field');
+      if (!data.backupTimestamp) issues.push('Missing timestamp');
+      if (!data.source || data.source !== 'Chess-Sensei') issues.push('Invalid or missing source');
+      if (!Array.isArray(data.games)) issues.push('Missing or invalid games array');
+
+      // Validate each game
+      if (Array.isArray(data.games)) {
+        for (let i = 0; i < data.games.length; i++) {
+          if (!this.validateGameData(data.games[i])) {
+            issues.push(`Game at index ${i} failed validation`);
+          }
+        }
+      }
+
+      return {
+        valid: issues.length === 0,
+        issues,
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        issues: [
+          `Failed to read backup: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ],
+      };
+    }
+  }
+
+  /**
+   * Get backups folder path
+   */
+  getBackupsPath(): string {
+    return join(this.basePath, 'backups');
+  }
 }
 
 /**
@@ -561,6 +898,27 @@ export interface StoredAchievements {
     unlockedAt?: string;
     progress: number;
   }>;
+}
+
+/**
+ * Task 8.4.1: Backup settings configuration
+ */
+export interface BackupSettings {
+  enabled: boolean;
+  frequency: 'daily' | 'weekly' | 'after-game';
+  lastBackupTimestamp?: string;
+  compression: boolean;
+}
+
+/**
+ * Task 8.4.1: Backup metadata
+ */
+export interface BackupInfo {
+  filename: string;
+  timestamp: string;
+  type: 'daily' | 'weekly' | 'manual' | 'after-game';
+  gameCount: number;
+  size: number;
 }
 
 /**

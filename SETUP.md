@@ -125,8 +125,8 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 7 Complete ✓ **Version:** v0.7.0 **Next:** Phase 8 -
-Import/Export & Data Management
+**Phase:** Phase 8 Complete ✓ **Version:** v0.8.0 **Next:** Phase 9 - Polish &
+Optimization
 
 ### Completed Phases
 
@@ -142,22 +142,24 @@ Import/Export & Data Management
   training suggestions
 - ✅ **Phase 7:** Sandbox Mode, board editor, FEN import/export, position
   templates, engine analysis
+- ✅ **Phase 8:** Import/export system, data management UI, automatic backups,
+  PGN/JSON export
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 8 involves:
+According to the roadmap, Phase 9 involves:
 
-1. **Import/Export**
-   - PGN file import and export
-   - Game library management
-   - Backup and restore functionality
+1. **Performance Optimization**
+   - App startup time improvements
+   - Memory usage optimization
+   - Engine efficiency tuning
 
-2. **Data Management**
-   - Data cleanup tools
-   - Storage optimization
-   - Migration utilities
+2. **Polish & Refinement**
+   - UI/UX improvements
+   - Bug fixes and stability
+   - Documentation updates
 
 ## Development Resources
 
@@ -228,7 +230,7 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 7 (Sandbox Mode) is complete
-with version v0.7.0.
+Chess-Sensei is ready for active development. Phase 8 (Import/Export & Data
+Management) is complete with version v0.8.0.
 
-Next up: Phase 8 - Import/Export & Data Management!
+Next up: Phase 9 - Polish & Optimization!

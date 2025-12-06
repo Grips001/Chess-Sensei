@@ -391,13 +391,18 @@ Have an idea for improvement?
 Current known limitations (will be addressed in future updates):
 
 1. **No volume control:** Fixed at 50% (settings panel coming soon)
-2. **No time controls:** Untimed games only (chess clock coming in Phase 5)
+2. **No time controls:** Untimed games only (chess clock planned for future
+   release)
 
 **Resolved:**
 
 - **Phase 3:** Pawn promotion now supports all piece choices (Queen, Rook,
   Bishop, Knight)
 - **Phase 4:** Game data is now saved automatically for Exam Mode games
+- **Phase 5:** Post-game analysis UI with review, summary, and analytics tabs
+- **Phase 6:** Progress dashboard with radar charts and achievement system
+- **Phase 7:** Sandbox Mode with board editor and FEN support
+- **Phase 8:** Data management with export/import and automatic backups
 
 ## Still Having Problems?
 

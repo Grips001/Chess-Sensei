@@ -94,11 +94,16 @@ Full PGN import/export with file management is planned for **Phase 8**.
 - Critical moment detection (evaluation swings > 100cp)
 - 9 composite performance metrics
 
-The analysis UI for reviewing games is coming in **Phase 5**.
+The **analysis UI** is available as of **Phase 5** (v0.5.0) with:
+
+- Three-tab interface (Review/Summary/Analytics)
+- Interactive board replay with navigation
+- Evaluation graph with clickable points
+- Training recommendations
 
 ### Can I solve chess puzzles?
 
-Puzzle mode is planned for **Phase 5** of development.
+Puzzle mode is planned for a future release.
 
 ### Are there training exercises?
 
@@ -380,8 +385,15 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 7 (v0.7.0)** is complete and includes:
+**Phase 8 (v0.8.0)** is complete and includes:
 
+- **Import/Export & Data Management** (Phase 8)
+  - Export games as PGN or JSON (single or batch)
+  - Export player profile and full backups
+  - Import JSON/PGN files with duplicate detection
+  - Automatic backup system with configurable frequency
+  - Backup retention policy and verification
+  - Data management UI with export/import wizards
 - **Sandbox Mode** (Phase 7)
   - Board editor with drag-and-drop piece placement
   - Piece palette for placing/removing pieces

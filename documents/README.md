@@ -31,6 +31,9 @@ Documentation here will include:
   move-by-move analysis
 - **[Progress Dashboard](progress-dashboard.md)** - Track your improvement with
   radar charts and achievements
+- **[Sandbox Mode](sandbox-mode.md)** - Board editor and position analysis
+- **[Data Management](data-management.md)** - Export, import, and backup your
+  data
 - **[FAQ](faq.md)** - Frequently asked questions and answers
 - **[Troubleshooting](troubleshooting.md)** - Common problems and solutions
 

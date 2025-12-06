@@ -10,8 +10,40 @@ and this project adheres to
 
 ### Planned
 
-- Import/Export & Data Management (Phase 8)
 - Polish & Optimization (Phase 9)
+
+## [0.8.0] - 2025-12-06
+
+### Added
+
+- **Import/Export & Data Management** (Phase 8)
+  - Export single game as PGN or JSON format
+  - Export all games as batch JSON with optional analysis data
+  - Export player profile with statistics and composite scores
+  - Import games from JSON (single or batch)
+  - Import games from PGN format
+  - Merge player profiles from multiple devices
+  - Automatic backup system with configurable frequency
+    (daily/weekly/after-game)
+  - Manual backup creation and verification
+  - Backup retention policy (keep last 7 daily, 4 weekly)
+  - Data Management UI accessible from header button
+  - Export wizard with format selection
+  - Import wizard with file validation
+  - Backup management interface showing existing backups
+  - Backup integrity verification
+- New backend module: `src/backend/export-import.ts`
+- New frontend module: `src/frontend/data-management.ts`
+- IPC methods for all export/import/backup operations
+- User documentation: `documents/data-management.md`
+
+### Technical
+
+- ExportImportManager class for export/import operations
+- BackupSettings and BackupInfo types for backup configuration
+- DataStorage extended with backup system methods
+- Automatic backup cleanup based on retention policy
+- Content hash calculation for duplicate detection
 
 ## [0.7.0] - 2025-12-06
 
@@ -361,7 +393,8 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.5.2...v0.6.0

@@ -223,13 +223,15 @@ All data is stored in JSON format for:
 | `getGamesList`      | Get list of all saved games   |
 | `getStoragePath`    | Get storage base path         |
 
-## Future Enhancements
+## Implemented Features
 
-The following features are planned for Phase 5 (Post-Game Analysis UI):
+The following features are now available in Phase 5+ (Post-Game Analysis UI):
 
-- Interactive board replay with move navigation
-- Evaluation graph visualization
-- Move list with color-coded annotations
-- Mistake deep-dive with better alternatives
-- Game summary report
-- Export to PGN/PDF
+- ✅ Interactive board replay with move navigation
+- ✅ Evaluation graph visualization
+- ✅ Move list with color-coded annotations
+- ✅ Mistake deep-dive with better alternatives
+- ✅ Game summary report
+- ✅ Export to PGN/JSON
+
+See [Post-Game Analysis Guide](post-game-analysis.md) for details.

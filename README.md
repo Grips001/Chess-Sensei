@@ -99,7 +99,7 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 7 Complete ✓ → Phase 8 Next
+**Current Phase:** Phase 8 Complete ✓ → Phase 9 Next
 
 - ✅ Foundation and project setup complete
 - ✅ Buntralino initialized with proper structure
@@ -168,7 +168,17 @@ User guides and operational documentation will be available in the
   - Optional top-3 moves display (Training Mode style)
   - Evaluation bar and score display
   - Complete documentation (documents/sandbox-mode.md)
-- 🚧 Phase 8: Import/Export & Data Management (Next)
+- ✅ Phase 8: Import/Export & Data Management complete
+  - Export single game (PGN, JSON) or all games (batch JSON)
+  - Export player profile with statistics and composite scores
+  - Import games from JSON or PGN format
+  - Merge player profiles from multiple devices
+  - Automatic backup system with configurable frequency
+  - Manual backup creation and verification
+  - Backup retention policy (7 daily, 4 weekly)
+  - Data Management UI with export/import wizards
+  - Complete documentation (documents/data-management.md)
+- 🚧 Phase 9: Polish & Optimization (Next)
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
@@ -186,7 +196,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.7.0 (Phase 7: Sandbox Mode)
+**Current Version:** v0.8.0 (Phase 8: Import/Export & Data Management)
 
 ### Installation
 

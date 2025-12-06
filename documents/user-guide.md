@@ -310,9 +310,20 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 7 (v0.7.0)
+### Current Release: Phase 8 (v0.8.0)
 
-**Sandbox Mode** is now available:
+**Import/Export & Data Management** is now available:
+
+- **Export Data** - Export games (PGN/JSON), player profile, or full backups
+- **Import Data** - Import JSON/PGN files with duplicate detection
+- **Automatic Backups** - Configurable backup frequency
+  (daily/weekly/after-game)
+- **Backup Management** - View, verify, and restore from backups
+- **Data Management UI** - User-friendly export/import wizards
+
+See [Data Management Guide](data-management.md) for details.
+
+**Sandbox Mode** continues to be available:
 
 - **Board Editor** - Drag-and-drop piece placement
 - **Piece Palette** - All pieces in both colors, plus eraser tool

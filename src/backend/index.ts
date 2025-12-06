@@ -43,6 +43,13 @@ import {
   type GameIndexEntry,
   type StoredAchievements,
 } from './data-storage';
+import {
+  createExportImportManager,
+  ExportImportManager,
+  type ExportResult,
+  type ImportResult,
+  type ExportImportError,
+} from './export-import';
 import type {
   BestMove,
   PositionEvaluation,
@@ -94,6 +101,9 @@ let metricsCalculator: MetricsCalculator | null = null;
 
 // Global data storage instance
 let dataStorage: DataStorage | null = null;
+
+// Global export/import manager instance
+let exportImportManager: ExportImportManager | null = null;
 
 /**
  * Initialize the chess engine
@@ -380,6 +390,88 @@ interface UnlockAchievementRequest {
   id: string;
   /** Current progress value */
   progress?: number;
+}
+
+// ========================================
+// Phase 8: Export/Import Types
+// ========================================
+
+/** Request payload for exporting a single game */
+interface ExportGameRequest {
+  /** Game ID to export */
+  gameId: string;
+  /** Export format */
+  format: 'pgn' | 'json';
+  /** Optional destination path */
+  destinationPath?: string;
+}
+
+/** Request payload for exporting all games */
+interface ExportAllGamesRequest {
+  /** Optional destination path */
+  destinationPath?: string;
+  /** Include analysis data */
+  includeAnalysis?: boolean;
+}
+
+/** Request payload for exporting player profile */
+interface ExportProfileRequest {
+  /** Optional destination path */
+  destinationPath?: string;
+}
+
+/** Request payload for full backup */
+interface ExportBackupRequest {
+  /** Optional destination path */
+  destinationPath?: string;
+}
+
+/** Request payload for importing a single game */
+interface ImportGameRequest {
+  /** Path to the file to import */
+  filePath: string;
+  /** Format of the file */
+  format: 'json' | 'pgn';
+}
+
+/** Request payload for importing batch games */
+interface ImportBatchRequest {
+  /** Path to the batch JSON file */
+  filePath: string;
+}
+
+/** Request payload for merging profiles */
+interface MergeProfilesRequest {
+  /** Path to the profile file to merge */
+  filePath: string;
+}
+
+/** Response payload for export operations */
+interface ExportResponse {
+  /** Export result details */
+  result: ExportResult;
+  /** Success flag */
+  success: true;
+}
+
+/** Response payload for import operations */
+interface ImportResponse {
+  /** Import result details */
+  result: ImportResult;
+  /** Success flag */
+  success: true;
+}
+
+/** Response payload for single game import */
+interface ImportGameResponse {
+  /** Imported game data */
+  game: StoredGameData;
+  /** Analysis data if available */
+  analysis?: StoredAnalysisData;
+  /** Whether analysis is needed */
+  needsAnalysis?: boolean;
+  /** Success flag */
+  success: true;
 }
 
 /**
@@ -1201,6 +1293,721 @@ const functionMap = {
         success: false,
       };
     }
+  },
+
+  // ========================================
+  // Phase 8: Export/Import Methods
+  // ========================================
+
+  /**
+   * Export a single game as PGN or JSON
+   * Per Task 8.1.1: Export single game (PGN)
+   * Per Task 8.1.2: Export single game (JSON)
+   */
+  exportGame: async (payload: ExportGameRequest): Promise<ExportResponse | ErrorResponse> => {
+    logger.info('IPC:exportGame', 'Exporting game', {
+      gameId: payload.gameId,
+      format: payload.format,
+    });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Load game data
+      const game = await dataStorage.loadGame(payload.gameId);
+      if (!game) {
+        return {
+          success: false,
+          error: `Game not found: ${payload.gameId}`,
+          code: 'GAME_NOT_FOUND',
+        };
+      }
+
+      let result: ExportResult | ExportImportError;
+
+      if (payload.format === 'pgn') {
+        result = await exportImportManager.exportGameAsPGN(game, payload.destinationPath);
+      } else {
+        // Load analysis if available
+        const analysis = await dataStorage.loadAnalysis(payload.gameId);
+        result = await exportImportManager.exportGameAsJSON(
+          game,
+          analysis ?? undefined,
+          payload.destinationPath
+        );
+      }
+
+      if (!result.success) {
+        return result as ErrorResponse;
+      }
+
+      logger.info('IPC:exportGame', 'Game exported successfully', {
+        path: (result as ExportResult).path,
+      });
+      return { result: result as ExportResult, success: true };
+    } catch (error) {
+      logger.error('IPC:exportGame', 'Failed to export game', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'EXPORT_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Export all games as batch JSON
+   * Per Task 8.1.3: Export all games (batch JSON)
+   */
+  exportAllGames: async (
+    payload: ExportAllGamesRequest
+  ): Promise<ExportResponse | ErrorResponse> => {
+    logger.info('IPC:exportAllGames', 'Exporting all games', {
+      includeAnalysis: payload.includeAnalysis,
+    });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Load all games
+      const gamesList = await dataStorage.getGamesList();
+      const games: StoredGameData[] = [];
+      const analyses: StoredAnalysisData[] = [];
+
+      for (const entry of gamesList) {
+        const game = await dataStorage.loadGame(entry.gameId);
+        if (game) {
+          games.push(game);
+          if (payload.includeAnalysis) {
+            const analysis = await dataStorage.loadAnalysis(entry.gameId);
+            if (analysis) {
+              analyses.push(analysis);
+            }
+          }
+        }
+      }
+
+      const result = await exportImportManager.exportAllGames(
+        games,
+        payload.includeAnalysis ? analyses : undefined,
+        payload.destinationPath
+      );
+
+      if (!result.success) {
+        return result as ErrorResponse;
+      }
+
+      logger.info('IPC:exportAllGames', 'All games exported', {
+        count: games.length,
+        path: (result as ExportResult).path,
+      });
+      return { result: result as ExportResult, success: true };
+    } catch (error) {
+      logger.error('IPC:exportAllGames', 'Failed to export all games', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'EXPORT_ALL_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Export player profile as JSON
+   * Per Task 8.1.4: Export player profile (JSON)
+   */
+  exportProfile: async (payload: ExportProfileRequest): Promise<ExportResponse | ErrorResponse> => {
+    logger.info('IPC:exportProfile', 'Exporting player profile');
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Load player profile
+      const profile = await dataStorage.loadPlayerProfile();
+      if (!profile) {
+        return {
+          success: false,
+          error: 'No player profile found',
+          code: 'PROFILE_NOT_FOUND',
+        };
+      }
+
+      const result = await exportImportManager.exportPlayerProfile(
+        profile,
+        payload.destinationPath
+      );
+
+      if (!result.success) {
+        return result as ErrorResponse;
+      }
+
+      logger.info('IPC:exportProfile', 'Profile exported', { path: (result as ExportResult).path });
+      return { result: result as ExportResult, success: true };
+    } catch (error) {
+      logger.error('IPC:exportProfile', 'Failed to export profile', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'EXPORT_PROFILE_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Export full backup (all games, analyses, and profile)
+   * Per Task 8.1.5: Export full backup
+   */
+  exportBackup: async (payload: ExportBackupRequest): Promise<ExportResponse | ErrorResponse> => {
+    logger.info('IPC:exportBackup', 'Creating full backup');
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Load all games
+      const gamesList = await dataStorage.getGamesList();
+      const games: StoredGameData[] = [];
+      const analyses: StoredAnalysisData[] = [];
+
+      for (const entry of gamesList) {
+        const game = await dataStorage.loadGame(entry.gameId);
+        if (game) {
+          games.push(game);
+          const analysis = await dataStorage.loadAnalysis(entry.gameId);
+          if (analysis) {
+            analyses.push(analysis);
+          }
+        }
+      }
+
+      // Load profile
+      const profile = await dataStorage.loadPlayerProfile();
+
+      const result = await exportImportManager.exportFullBackup(
+        games,
+        analyses,
+        profile,
+        payload.destinationPath
+      );
+
+      if (!result.success) {
+        return result as ErrorResponse;
+      }
+
+      logger.info('IPC:exportBackup', 'Full backup created', {
+        games: games.length,
+        path: (result as ExportResult).path,
+      });
+      return { result: result as ExportResult, success: true };
+    } catch (error) {
+      logger.error('IPC:exportBackup', 'Failed to create backup', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'BACKUP_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Import a single game from JSON or PGN
+   * Per Task 8.2.1: Import single game (JSON)
+   * Per Task 8.2.3: Import from PGN
+   */
+  importGame: async (payload: ImportGameRequest): Promise<ImportGameResponse | ErrorResponse> => {
+    logger.info('IPC:importGame', 'Importing game', {
+      path: payload.filePath,
+      format: payload.format,
+    });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Get existing game IDs for duplicate detection
+      const gamesList = await dataStorage.getGamesList();
+      const existingIds = new Set(gamesList.map((g) => g.gameId));
+
+      if (payload.format === 'pgn') {
+        const result = await exportImportManager.importFromPGN(payload.filePath);
+        if (!result.success) {
+          return result as ErrorResponse;
+        }
+        const pgnResult = result as { game: StoredGameData; needsAnalysis: true };
+
+        // Save the imported game
+        await dataStorage.saveGame({
+          gameId: pgnResult.game.gameId,
+          timestamp: new Date(pgnResult.game.timestamp).getTime(),
+          playerColor: pgnResult.game.metadata.playerColor,
+          botPersonality: pgnResult.game.metadata.botPersonality,
+          botElo: pgnResult.game.metadata.botElo,
+          result: pgnResult.game.metadata.result,
+          termination: pgnResult.game.metadata.termination,
+          duration: pgnResult.game.metadata.duration,
+          moves: pgnResult.game.moves.flatMap((m, _i) => {
+            const moves = [];
+            if (m.white) {
+              moves.push({
+                moveNumber: m.moveNumber,
+                color: 'white' as const,
+                san: m.white.san,
+                uci: m.white.uci,
+                fen: m.white.fen,
+                timestamp: m.white.timestamp,
+                timeSpent: m.white.timeSpent,
+              });
+            }
+            if (m.black) {
+              moves.push({
+                moveNumber: m.moveNumber,
+                color: 'black' as const,
+                san: m.black.san,
+                uci: m.black.uci,
+                fen: m.black.fen,
+                timestamp: m.black.timestamp,
+                timeSpent: m.black.timeSpent,
+              });
+            }
+            return moves;
+          }),
+          pgn: pgnResult.game.pgn,
+        });
+
+        logger.info('IPC:importGame', 'PGN game imported', { gameId: pgnResult.game.gameId });
+        return {
+          game: pgnResult.game,
+          needsAnalysis: true,
+          success: true,
+        };
+      } else {
+        const result = await exportImportManager.importGameFromJSON(payload.filePath, existingIds);
+        if (!result.success) {
+          return result as ErrorResponse;
+        }
+        const jsonResult = result as { game: StoredGameData; analysis?: StoredAnalysisData };
+
+        // Save the imported game
+        await dataStorage.saveGame({
+          gameId: jsonResult.game.gameId,
+          timestamp: new Date(jsonResult.game.timestamp).getTime(),
+          playerColor: jsonResult.game.metadata.playerColor,
+          botPersonality: jsonResult.game.metadata.botPersonality,
+          botElo: jsonResult.game.metadata.botElo,
+          result: jsonResult.game.metadata.result,
+          termination: jsonResult.game.metadata.termination,
+          duration: jsonResult.game.metadata.duration,
+          moves: jsonResult.game.moves.flatMap((m) => {
+            const moves = [];
+            if (m.white) {
+              moves.push({
+                moveNumber: m.moveNumber,
+                color: 'white' as const,
+                san: m.white.san,
+                uci: m.white.uci,
+                fen: m.white.fen,
+                timestamp: m.white.timestamp,
+                timeSpent: m.white.timeSpent,
+              });
+            }
+            if (m.black) {
+              moves.push({
+                moveNumber: m.moveNumber,
+                color: 'black' as const,
+                san: m.black.san,
+                uci: m.black.uci,
+                fen: m.black.fen,
+                timestamp: m.black.timestamp,
+                timeSpent: m.black.timeSpent,
+              });
+            }
+            return moves;
+          }),
+          pgn: jsonResult.game.pgn,
+        });
+
+        // Save analysis if available
+        if (jsonResult.analysis) {
+          await dataStorage.saveAnalysis({
+            gameId: jsonResult.analysis.gameId,
+            analysisVersion: jsonResult.analysis.analysisVersion,
+            analysisTimestamp: jsonResult.analysis.analysisTimestamp,
+            engineVersion: jsonResult.analysis.engineVersion,
+            summary: {
+              ...jsonResult.analysis.summary,
+              totalMoves: jsonResult.game.moves.length,
+            },
+            moveAnalysis: jsonResult.analysis.moveAnalysis,
+            criticalMoments: jsonResult.analysis.criticalMoments,
+            tacticalOpportunities: jsonResult.analysis.tacticalOpportunities,
+            gamePhases: jsonResult.analysis.gamePhases,
+          });
+        }
+
+        logger.info('IPC:importGame', 'JSON game imported', { gameId: jsonResult.game.gameId });
+        return {
+          game: jsonResult.game,
+          analysis: jsonResult.analysis,
+          needsAnalysis: !jsonResult.analysis,
+          success: true,
+        };
+      }
+    } catch (error) {
+      logger.error('IPC:importGame', 'Failed to import game', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'IMPORT_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Import multiple games from batch JSON
+   * Per Task 8.2.2: Import game collection (batch JSON)
+   */
+  importBatchGames: async (
+    payload: ImportBatchRequest
+  ): Promise<ImportResponse | ErrorResponse> => {
+    logger.info('IPC:importBatchGames', 'Importing batch games', { path: payload.filePath });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Get existing game IDs for duplicate detection
+      const gamesList = await dataStorage.getGamesList();
+      const existingIds = new Set(gamesList.map((g) => g.gameId));
+
+      const result = await exportImportManager.importBatchGames(payload.filePath, existingIds);
+      if (!result.success) {
+        return result as ErrorResponse;
+      }
+
+      const batchResult = result as {
+        games: StoredGameData[];
+        analyses: StoredAnalysisData[];
+        result: ImportResult;
+      };
+
+      // Save imported games and analyses
+      for (const game of batchResult.games) {
+        await dataStorage.saveGame({
+          gameId: game.gameId,
+          timestamp: new Date(game.timestamp).getTime(),
+          playerColor: game.metadata.playerColor,
+          botPersonality: game.metadata.botPersonality,
+          botElo: game.metadata.botElo,
+          result: game.metadata.result,
+          termination: game.metadata.termination,
+          duration: game.metadata.duration,
+          moves: game.moves.flatMap((m) => {
+            const moves = [];
+            if (m.white) {
+              moves.push({
+                moveNumber: m.moveNumber,
+                color: 'white' as const,
+                san: m.white.san,
+                uci: m.white.uci,
+                fen: m.white.fen,
+                timestamp: m.white.timestamp,
+                timeSpent: m.white.timeSpent,
+              });
+            }
+            if (m.black) {
+              moves.push({
+                moveNumber: m.moveNumber,
+                color: 'black' as const,
+                san: m.black.san,
+                uci: m.black.uci,
+                fen: m.black.fen,
+                timestamp: m.black.timestamp,
+                timeSpent: m.black.timeSpent,
+              });
+            }
+            return moves;
+          }),
+          pgn: game.pgn,
+        });
+      }
+
+      for (const analysis of batchResult.analyses) {
+        await dataStorage.saveAnalysis({
+          gameId: analysis.gameId,
+          analysisVersion: analysis.analysisVersion,
+          analysisTimestamp: analysis.analysisTimestamp,
+          engineVersion: analysis.engineVersion,
+          summary: analysis.summary,
+          moveAnalysis: analysis.moveAnalysis,
+          criticalMoments: analysis.criticalMoments,
+          tacticalOpportunities: analysis.tacticalOpportunities,
+          gamePhases: analysis.gamePhases,
+        });
+      }
+
+      logger.info('IPC:importBatchGames', 'Batch import complete', {
+        imported: batchResult.result.imported,
+        skipped: batchResult.result.skipped,
+        errors: batchResult.result.errors,
+      });
+      return { result: batchResult.result, success: true };
+    } catch (error) {
+      logger.error('IPC:importBatchGames', 'Failed to import batch games', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'BATCH_IMPORT_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Merge player profiles from another device
+   * Per Task 8.2.4: Merge player profiles
+   */
+  mergeProfiles: async (
+    payload: MergeProfilesRequest
+  ): Promise<{ profile: PlayerProfile; success: true } | ErrorResponse> => {
+    logger.info('IPC:mergeProfiles', 'Merging profiles', { path: payload.filePath });
+    try {
+      if (!dataStorage) {
+        dataStorage = createDataStorage();
+        await dataStorage.initialize();
+      }
+      if (!exportImportManager) {
+        exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+      }
+
+      // Load current profile
+      const currentProfile = await dataStorage.loadPlayerProfile();
+      if (!currentProfile) {
+        return {
+          success: false,
+          error: 'No current player profile found',
+          code: 'PROFILE_NOT_FOUND',
+        };
+      }
+
+      // Load profile to merge from file
+      const { readFile } = await import('fs/promises');
+      const content = await readFile(payload.filePath, 'utf-8');
+      const data = JSON.parse(content);
+
+      if (!data.profile) {
+        return {
+          success: false,
+          error: 'Invalid profile file: missing profile data',
+          code: 'INVALID_PROFILE',
+        };
+      }
+
+      // Merge profiles
+      const mergedProfile = await exportImportManager.mergePlayerProfiles(
+        currentProfile,
+        data.profile
+      );
+
+      // Save merged profile
+      await dataStorage.savePlayerProfile(mergedProfile);
+
+      logger.info('IPC:mergeProfiles', 'Profiles merged', {
+        totalGames: mergedProfile.totalGames,
+      });
+      return { profile: mergedProfile, success: true };
+    } catch (error) {
+      logger.error('IPC:mergeProfiles', 'Failed to merge profiles', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        code: 'MERGE_ERROR',
+      };
+    }
+  },
+
+  /**
+   * Get exports directory path
+   */
+  getExportsPath: async (): Promise<{ path: string; success: true }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    if (!exportImportManager) {
+      exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+    }
+    return { path: exportImportManager.getExportsPath(), success: true };
+  },
+
+  // ========================================
+  // Phase 8.4: Backup & Restore Methods
+  // ========================================
+
+  /**
+   * Task 8.4.1: Get backup settings
+   */
+  getBackupSettings: async (): Promise<{
+    settings: {
+      enabled: boolean;
+      frequency: string;
+      lastBackupTimestamp?: string;
+      compression: boolean;
+    };
+    success: true;
+  }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    const settings = await dataStorage.loadBackupSettings();
+    return { settings, success: true };
+  },
+
+  /**
+   * Task 8.4.1: Save backup settings
+   */
+  saveBackupSettings: async (payload: {
+    enabled: boolean;
+    frequency: 'daily' | 'weekly' | 'after-game';
+    compression: boolean;
+  }): Promise<{ success: true }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    const currentSettings = await dataStorage.loadBackupSettings();
+    await dataStorage.saveBackupSettings({
+      ...currentSettings,
+      enabled: payload.enabled,
+      frequency: payload.frequency,
+      compression: payload.compression,
+    });
+    logger.info('Backup', 'Backup settings saved', payload);
+    return { success: true };
+  },
+
+  /**
+   * Task 8.4.1: Check if automatic backup should be created
+   */
+  checkBackupNeeded: async (payload: {
+    trigger: 'startup' | 'after-game';
+  }): Promise<{
+    needed: boolean;
+    success: true;
+  }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    const needed = await dataStorage.shouldCreateBackup(payload.trigger);
+    return { needed, success: true };
+  },
+
+  /**
+   * Task 8.4.1: Create automatic backup
+   */
+  createAutomaticBackup: async (payload: {
+    type: 'daily' | 'weekly' | 'after-game';
+  }): Promise<{
+    backup: {
+      filename: string;
+      timestamp: string;
+      type: string;
+      gameCount: number;
+      size: number;
+    } | null;
+    success: true;
+  }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    logger.info('Backup', 'Creating automatic backup', { type: payload.type });
+    const backup = await dataStorage.createAutomaticBackup(payload.type);
+    if (backup) {
+      logger.info('Backup', 'Automatic backup created', backup);
+    } else {
+      logger.warn('Backup', 'Failed to create automatic backup');
+    }
+    return { backup, success: true };
+  },
+
+  /**
+   * Task 8.4.3: List available backups
+   */
+  listBackups: async (): Promise<{
+    backups: Array<{
+      filename: string;
+      timestamp: string;
+      type: string;
+      gameCount: number;
+      size: number;
+    }>;
+    success: true;
+  }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    const backups = await dataStorage.listBackups();
+    return { backups, success: true };
+  },
+
+  /**
+   * Task 8.4.4: Verify backup integrity
+   */
+  verifyBackup: async (payload: {
+    filename: string;
+  }): Promise<{
+    valid: boolean;
+    issues: string[];
+    success: true;
+  }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    logger.info('Backup', 'Verifying backup', { filename: payload.filename });
+    const result = await dataStorage.verifyBackup(payload.filename);
+    logger.info('Backup', 'Backup verification result', { ...result, filename: payload.filename });
+    return { ...result, success: true };
+  },
+
+  /**
+   * Get backups folder path
+   */
+  getBackupsPath: async (): Promise<{ path: string; success: true }> => {
+    if (!dataStorage) {
+      dataStorage = createDataStorage();
+      await dataStorage.initialize();
+    }
+    return { path: dataStorage.getBackupsPath(), success: true };
   },
 
   // ========================================
