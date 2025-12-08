@@ -289,7 +289,8 @@ permission.
 - **Frontend:** Vite + TypeScript
 - **Chess Logic:** chess.js (move validation)
 - **Chess Engine:** Stockfish WASM
-- **Architecture:** Buntralino (Bun + Neutralino bridge)
+- **Architecture:** WebSocket IPC (Bun backend + Neutralino.js 6.4.0 frontend,
+  port 9339)
 
 See [Architecture Documentation](../source-docs/architecture.md) for details.
 

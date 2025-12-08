@@ -1,8 +1,10 @@
 /**
- * Test script for Chess Logic Module
+ * Manual Test Script for Chess Logic Module
  *
  * Tests the ChessGame class and chess logic functionality.
- * Run with: bun src/shared/test-chess-logic.ts
+ * This is NOT a Bun unit test - run manually when testing chess logic changes.
+ *
+ * Run with: bun src/shared/chess-logic-manual-test.ts
  */
 
 import { ChessGame, createGame, STARTPOS_FEN, WHITE, BLACK } from './chess-logic';

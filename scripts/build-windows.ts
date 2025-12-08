@@ -1,14 +1,14 @@
 /**
- * Custom Windows Build Script for Chess-Sensei
+ * Windows Build Script for Chess-Sensei
  *
- * This script works around the pe-library/resedit incompatibility with
- * Bun-compiled executables by using rcedit (from Electron) instead.
+ * Builds a production-ready Windows x64 application with:
+ * - Bun-compiled backend executable (with WebSocket IPC)
+ * - Neutralino 6.4.0 UI runtime
+ * - Stockfish 17.1 WASM engine
+ * - Custom icon and metadata via rcedit
  *
- * The issue: pe-library throws "After Resource section, sections except for
- * relocation are not supported" when trying to patch Bun executables because
- * Bun's PE section layout differs from what pe-library expects.
- *
- * Solution: Use rcedit which handles Bun executables correctly.
+ * Note: rcedit is used for executable metadata because it correctly handles
+ * Bun's PE section layout (pe-library does not support Bun executables).
  *
  * @see https://github.com/electron/rcedit
  */
@@ -56,8 +56,10 @@ function getIconPath(config: NeutralinoConfig): string {
 }
 
 /**
- * Convert subsystem to GUI (hide console window)
- * This is the same as makeWindowsBinGui in buntralino-cli
+ * Convert PE subsystem to GUI mode (hides console window)
+ *
+ * Modifies the PE header subsystem field to IMAGE_SUBSYSTEM_WINDOWS_GUI (2)
+ * so the application runs without showing a console window.
  *
  * Uses node:fs/promises for low-level file descriptor operations
  * to avoid TypeScript 5.6+ Buffer/ArrayBufferView type incompatibilities
@@ -151,11 +153,10 @@ async function patchWithRcedit(exePath: string, config: NeutralinoConfig): Promi
  *       neutralino.exe       (UI runtime)
  *       resources.neu        (app resources)
  *
- * Note: Dependencies must be in the same folder as the main exe because
- * Buntralino looks for neutralino.exe in process.cwd()
+ * Note: All dependencies are in the same folder for simplicity
  */
 async function buildWindows(): Promise<void> {
-  console.log('🔨 Custom Windows Build for Chess-Sensei\n');
+  console.log('🔨 Windows Build for Chess-Sensei\n');
 
   // Read config
   let config: NeutralinoConfig;
@@ -187,22 +188,16 @@ async function buildWindows(): Promise<void> {
   }
 
   // Step 1: Build frontend with Vite (compiles TS/CSS and copies public/ to app/)
-  // Set SKIP_BUNTRALINO=true to prevent Vite from running buntralino build (we do it ourselves)
   console.log('\n🏗️  Building frontend with Vite...');
-  await $`SKIP_BUNTRALINO=true bun run build`.cwd(projectRoot).quiet();
+  await $`bun run build`.cwd(projectRoot).quiet();
   console.log('  ✓ Vite build complete (frontend + assets)');
 
-  // Step 2: Update Neutralino binaries (needed in CI)
-  console.log('\n📥 Updating Neutralino binaries...');
-  await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
-  console.log('  ✓ Neutralino binaries updated');
-
-  // Step 3: Build Neutralino
+  // Step 2: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
 
-  // Step 4: Build Bun executable for Windows
+  // Step 3: Build Bun executable for Windows
   console.log('\n📦 Building Bun executable for Windows...');
   await fs.ensureDir(bunBuildsDir);
 
@@ -214,23 +209,25 @@ async function buildWindows(): Promise<void> {
     .quiet();
   console.log('  ✓ Bun executable built');
 
-  // Step 5: Copy files to output directory
+  // Step 4: Copy files to output directory
   console.log('\n📁 Organizing output files...');
   await fs.ensureDir(winOutputDir);
 
-  // All files in the same directory (Buntralino requirement)
+  // Organize files in a flat structure for simplicity
   const finalBunPath = path.join(winOutputDir, `${displayName}.exe`);
   const finalNeuPath = path.join(winOutputDir, 'neutralino.exe');
   const finalResPath = path.join(winOutputDir, 'resources.neu');
+  const finalConfigPath = path.join(winOutputDir, 'neutralino.config.json');
 
   await Promise.all([
     fs.copy(bunExePath, finalBunPath),
     fs.copy(path.join(neuBuildsDir, `${appName}-win_x64.exe`), finalNeuPath),
     fs.copy(path.join(neuBuildsDir, 'resources.neu'), finalResPath),
+    fs.copy(path.join(projectRoot, 'neutralino.config.json'), finalConfigPath),
   ]);
-  console.log('  ✓ Files organized');
+  console.log('  ✓ Files organized (including neutralino.config.json)');
 
-  // Step 5b: Copy Stockfish engine files
+  // Step 4b: Copy Stockfish engine files
   // Bun's bundler cannot correctly bundle the stockfish.js IIFE module pattern,
   // so we distribute the files alongside the executable
   console.log('\n🎯 Copying Stockfish engine files...');
@@ -244,7 +241,7 @@ async function buildWindows(): Promise<void> {
   ]);
   console.log('  ✓ Stockfish engine files copied');
 
-  // Step 6: Try to patch with rcedit FIRST (before GUI conversion)
+  // Step 5: Try to patch with rcedit FIRST (before GUI conversion)
   // rcedit can sometimes reset subsystem, so we do GUI conversion after
   console.log('\n🎨 Patching executable metadata...');
   const rceditSuccess = await patchWithRcedit(finalBunPath, config);
@@ -259,7 +256,7 @@ async function buildWindows(): Promise<void> {
   console.log('\n⏳ Waiting for filesystem...');
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Step 7: Convert to GUI mode (hide command prompt window) - do this AFTER rcedit
+  // Step 6: Convert to GUI mode (hide command prompt window) - do this AFTER rcedit
   console.log('\n🖥️  Converting to GUI mode...');
   await makeWindowsBinGui(finalBunPath);
   console.log('  ✓ Subsystem set to GUI');
@@ -271,8 +268,9 @@ async function buildWindows(): Promise<void> {
   console.log(`\n✅ Build complete! Output: ${path.dirname(winOutputDir)}`);
   console.log(`\nFolder structure:`);
   console.log(`  ${displayName}/`);
-  console.log(`    ${displayName}.exe     (run with --dev for DevTools)`);
+  console.log(`    ${displayName}.exe           (run with --dev for DevTools)`);
   console.log(`    neutralino.exe`);
+  console.log(`    neutralino.config.json`);
   console.log(`    resources.neu`);
   console.log(`    stockfish/`);
   console.log(`      ${STOCKFISH_JS}`);

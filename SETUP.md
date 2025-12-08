@@ -1,13 +1,13 @@
 # Chess-Sensei Setup Complete
 
-The Chess-Sensei project has been successfully initialized as a Buntralino
-application.
+The Chess-Sensei project has been successfully initialized with a WebSocket IPC
+architecture (Bun backend + Neutralino.js 6.4.0 frontend).
 
 ## What Was Done
 
 ### 1. Project Initialization
 
-- Initialized Buntralino project with Vite template
+- Initialized WebSocket IPC project with Vite template
 - Configured package.json with project metadata
 - Set up Neutralino config with proper application settings
 - Created .gitignore for development artifacts
@@ -48,7 +48,7 @@ Chess-Sensei/
 ### 5. Initial Code
 
 - Frontend entry point with Neutralino initialization
-- Backend entry point with Buntralino IPC setup
+- Backend entry point with WebSocket IPC setup (port 9339)
 - Placeholder UI showing successful initialization
 
 ## Current Technology Stack
@@ -56,9 +56,9 @@ Chess-Sensei/
 ### Runtime & Framework
 
 - ✅ **Bun** v1.3+ - Runtime and package manager
-- ✅ **Buntralino** v1.0.10 - Desktop framework
-- ✅ **Neutralinojs** v5.6.0 - Native window shell
-- ✅ **Vite** v6.1.0 - Frontend build tool
+- ✅ **Neutralino.js** v6.4.0+ - Native window shell
+- ✅ **Vite** v7.2.10 - Frontend build tool
+- ✅ **WebSocket IPC** - Port 9339 (1M+ msgs/sec)
 - ✅ **TypeScript** - Type-safe development
 
 ### Chess Engine
@@ -95,7 +95,7 @@ The build process has two stages:
 # Build frontend assets only (Vite → app/)
 bun run build
 
-# Windows build (Vite + Buntralino with rcedit workaround)
+# Windows build (Vite + platform packaging with rcedit)
 bun run build:windows
 
 # Linux build
@@ -125,8 +125,7 @@ bun run format
 
 ## Project Status
 
-**Phase:** Phase 8 Complete ✓ **Version:** v0.8.0 **Next:** Phase 9 - Polish &
-Optimization
+**Phase:** Phase 9 Complete ✓ **Version:** v0.9.0
 
 ### Completed Phases
 
@@ -144,20 +143,22 @@ Optimization
   templates, engine analysis
 - ✅ **Phase 8:** Import/export system, data management UI, automatic backups,
   PGN/JSON export
+- ✅ **Phase 9:** Polish & optimization, WCAG AA accessibility, responsive design,
+  performance improvements, comprehensive test suite (114 tests)
 
 See [roadmap.md](source-docs/roadmap.md) for full development plan.
 
 ## Next Steps
 
-According to the roadmap, Phase 9 involves:
+According to the roadmap, v1.0 Public Release involves:
 
-1. **Performance Optimization**
-   - App startup time improvements
-   - Memory usage optimization
-   - Engine efficiency tuning
+1. **Final Testing & QA**
+   - Cross-platform testing
+   - Performance benchmarking
+   - User acceptance testing
 
-2. **Polish & Refinement**
-   - UI/UX improvements
+2. **Release Preparation**
+   - Final documentation review
    - Bug fixes and stability
    - Documentation updates
 
@@ -191,7 +192,7 @@ bun run format          # Format with Prettier
 bun --version
 
 # Run engine tests
-bun run src/engine/test-engine-interface.ts
+bun run src/engine/engine-interface-manual-test.ts
 ```
 
 ## Troubleshooting

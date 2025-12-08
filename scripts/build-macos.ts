@@ -1,8 +1,11 @@
 /**
  * macOS Build Script for Chess-Sensei
  *
- * Builds the application for macOS x64 and arm64 platforms.
- * Creates proper .app bundles for macOS distribution.
+ * Builds production-ready macOS applications for x64 and arm64 with:
+ * - Bun-compiled backend executables (with WebSocket IPC)
+ * - Neutralino 6.4.0 UI runtime
+ * - Stockfish 17.1 WASM engine
+ * - Proper .app bundles with icons and Info.plist
  */
 
 import * as fs from 'fs-extra';
@@ -162,17 +165,12 @@ async function buildMacOS(): Promise<void> {
   const appName = config.cli.binaryName;
   const distDir = path.join(projectRoot, config.cli.distributionPath ?? 'dist', appName);
 
-  // Step 1: Update Neutralino binaries (needed in CI)
-  console.log('📥 Updating Neutralino binaries...');
-  await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
-  console.log('  ✓ Neutralino binaries updated');
-
-  // Step 2: Build Neutralino
+  // Step 1: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
 
-  // Step 3: Build for both architectures
+  // Step 2: Build for both architectures
   await createMacOSBundle(config, distDir, 'x64');
   await createMacOSBundle(config, distDir, 'arm64');
 

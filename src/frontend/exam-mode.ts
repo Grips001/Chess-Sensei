@@ -12,7 +12,7 @@
  * @see source-docs/post-game-analysis.md - Analysis pipeline
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import type { BotPersonality, DifficultyPreset, AIPlayMode } from '../shared/bot-types';
 import { BOT_PERSONALITIES } from '../shared/bot-types';
 import type { PlayerColor } from '../shared/game-state';
@@ -268,7 +268,7 @@ export class ExamModeManager {
    */
   private async configureBot(): Promise<void> {
     try {
-      const response = (await buntralino.run(IPC_METHODS.CONFIGURE_BOT, {
+      const response = (await ipc.call(IPC_METHODS.CONFIGURE_BOT, {
         personality: this.config.botPersonality,
         difficultyPreset: this.config.difficultyPreset,
         playMode: 'punishing' as AIPlayMode, // Exam Mode uses punishing for real testing
@@ -346,7 +346,7 @@ export class ExamModeManager {
     this.onBotMoveStart?.();
 
     try {
-      const response = (await buntralino.run(IPC_METHODS.GET_BOT_MOVE, {
+      const response = (await ipc.call(IPC_METHODS.GET_BOT_MOVE, {
         fen,
         moves,
       })) as BotMoveResponse | ErrorResponse;

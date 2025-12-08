@@ -11,7 +11,8 @@
  * @see source-docs/data-storage.md - "Export/Import UI Flow" section
  */
 
-import * as buntralino from 'buntralino-client';
+import { os } from '@neutralinojs/lib';
+import { ipc } from './websocket-ipc-client';
 import { frontendLogger } from './frontend-logger';
 
 // ============================================
@@ -20,12 +21,6 @@ import { frontendLogger } from './frontend-logger';
 
 /** Export format options */
 type ExportFormat = 'pgn' | 'json';
-
-/** Export type options (used in UI) */
-type _ExportType = 'single-game' | 'all-games' | 'profile' | 'backup';
-
-/** Import format options (used in UI) */
-type _ImportFormat = 'json' | 'pgn' | 'batch';
 
 /** Game list entry for export selection */
 interface GameEntry {
@@ -47,18 +42,6 @@ interface ExportResult {
   size?: number;
 }
 
-/** Import result from backend (used in import handlers) */
-interface _ImportResult {
-  imported: number;
-  skipped: number;
-  errors: number;
-  details: Array<{
-    id: string;
-    status: 'imported' | 'skipped' | 'error';
-    reason?: string;
-  }>;
-}
-
 // ============================================
 // Data Management Manager
 // ============================================
@@ -68,7 +51,6 @@ interface _ImportResult {
  */
 export class DataManagementManager {
   private overlayElement: HTMLElement | null = null;
-  private currentView: 'main' | 'export' | 'import' | 'backup' = 'main';
   private gamesList: GameEntry[] = [];
 
   constructor() {
@@ -97,7 +79,6 @@ export class DataManagementManager {
     // Load games list
     await this.loadGamesList();
 
-    this.currentView = 'main';
     this.renderMainView();
     this.overlayElement.classList.remove('hidden');
 
@@ -118,7 +99,7 @@ export class DataManagementManager {
    */
   private async loadGamesList(): Promise<void> {
     try {
-      const response = (await buntralino.run('getGamesList', {})) as {
+      const response = (await ipc.call('getGamesList', {})) as {
         games: GameEntry[];
         success: boolean;
       };
@@ -218,7 +199,6 @@ export class DataManagementManager {
    * Show the export view
    */
   private showExportView(): void {
-    this.currentView = 'export';
     const content = this.overlayElement?.querySelector('#data-mgmt-content');
     if (!content) return;
 
@@ -357,7 +337,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Exporting game...', 'loading');
 
     try {
-      const response = (await buntralino.run('exportGame', {
+      const response = (await ipc.call('exportGame', {
         gameId,
         format,
       })) as { result: ExportResult; success: boolean } | { success: false; error: string };
@@ -399,7 +379,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Exporting all games...', 'loading');
 
     try {
-      const response = (await buntralino.run('exportAllGames', {
+      const response = (await ipc.call('exportAllGames', {
         includeAnalysis,
       })) as { result: ExportResult; success: boolean } | { success: false; error: string };
 
@@ -435,7 +415,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Exporting profile...', 'loading');
 
     try {
-      const response = (await buntralino.run('exportProfile', {})) as
+      const response = (await ipc.call('exportProfile', {})) as
         | {
             result: ExportResult;
             success: boolean;
@@ -471,7 +451,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Creating backup...', 'loading');
 
     try {
-      const response = (await buntralino.run('exportBackup', {})) as
+      const response = (await ipc.call('exportBackup', {})) as
         | {
             result: ExportResult;
             success: boolean;
@@ -502,7 +482,6 @@ export class DataManagementManager {
    * Show the import view
    */
   private showImportView(): void {
-    this.currentView = 'import';
     const content = this.overlayElement?.querySelector('#data-mgmt-content');
     if (!content) return;
 
@@ -735,7 +714,6 @@ export class DataManagementManager {
    * Show the backup view
    */
   private async showBackupView(): Promise<void> {
-    this.currentView = 'backup';
     const content = this.overlayElement?.querySelector('#data-mgmt-content');
     if (!content) return;
 
@@ -840,7 +818,7 @@ export class DataManagementManager {
     compression: boolean;
   }> {
     try {
-      const response = (await buntralino.run('getBackupSettings', {})) as {
+      const response = (await ipc.call('getBackupSettings', {})) as {
         settings: {
           enabled: boolean;
           frequency: string;
@@ -865,7 +843,7 @@ export class DataManagementManager {
     Array<{ filename: string; timestamp: string; type: string; gameCount: number; size: number }>
   > {
     try {
-      const response = (await buntralino.run('listBackups', {})) as {
+      const response = (await ipc.call('listBackups', {})) as {
         backups: Array<{
           filename: string;
           timestamp: string;
@@ -970,7 +948,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Saving settings...', 'loading');
 
     try {
-      const response = (await buntralino.run('saveBackupSettings', {
+      const response = (await ipc.call('saveBackupSettings', {
         enabled: enabledCheckbox.checked,
         frequency,
         compression: false,
@@ -1006,7 +984,7 @@ export class DataManagementManager {
       await this.exportBackup();
 
       // Also create an automatic backup (saves to backups folder)
-      const response = (await buntralino.run('createAutomaticBackup', { type: 'daily' })) as {
+      const response = (await ipc.call('createAutomaticBackup', { type: 'daily' })) as {
         backup: { filename: string; gameCount: number; size: number } | null;
         success: boolean;
       };
@@ -1037,7 +1015,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Verifying backup...', 'loading');
 
     try {
-      const response = (await buntralino.run('verifyBackup', { filename })) as {
+      const response = (await ipc.call('verifyBackup', { filename })) as {
         valid: boolean;
         issues: string[];
         success: boolean;
@@ -1077,7 +1055,7 @@ export class DataManagementManager {
     if (!pathEl) return;
 
     try {
-      const response = (await buntralino.run('getStoragePath', {})) as {
+      const response = (await ipc.call('getStoragePath', {})) as {
         path: string;
         success: boolean;
       };
@@ -1146,18 +1124,26 @@ export class DataManagementManager {
    */
   private async openDataFolder(): Promise<void> {
     try {
-      const response = (await buntralino.run('getExportsPath', {})) as {
+      const response = (await ipc.call('getExportsPath', {})) as {
         path: string;
         success: boolean;
       };
       if (response.success) {
-        // In a full implementation, we'd use Neutralino's os.open() to open the folder
-        frontendLogger.info('DataManagement', 'Open folder requested', { path: response.path });
-        // Alert is appropriate here to show path to user (TODO: replace with Neutralino os.open)
-        // eslint-disable-next-line no-alert
-        alert(
-          `Data is stored at: ${response.path}\n\nUse your file explorer to navigate to this location.`
-        );
+        frontendLogger.info('DataManagement', 'Opening data folder', { path: response.path });
+        try {
+          // Open folder in native file explorer using Neutralino os.open()
+          await os.open(response.path);
+        } catch (openError) {
+          // Fallback: show path if os.open fails (e.g., folder doesn't exist yet)
+          frontendLogger.warn('DataManagement', 'Could not open folder, showing path instead', {
+            path: response.path,
+            error: openError,
+          });
+          // eslint-disable-next-line no-alert
+          alert(
+            `Data is stored at: ${response.path}\n\nUse your file explorer to navigate to this location.`
+          );
+        }
       }
     } catch (error) {
       frontendLogger.error('DataManagement', 'Failed to get exports path', error);

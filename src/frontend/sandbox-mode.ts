@@ -12,7 +12,7 @@
  * @see source-docs/TASKS.md - Phase 7
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import { IPC_METHODS } from '../shared/ipc-types';
 import type { BestMovesResponse, ErrorResponse } from '../shared/ipc-types';
 import { formatScore } from '../shared/engine-types';
@@ -673,7 +673,7 @@ export class SandboxModeManager {
 
     try {
       // Always request 3 moves for display
-      const response = (await buntralino.run(IPC_METHODS.GET_GUIDANCE_MOVES, {
+      const response = (await ipc.call(IPC_METHODS.GET_GUIDANCE_MOVES, {
         fen,
         count: 3,
         depth: 18,

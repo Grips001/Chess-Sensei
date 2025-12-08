@@ -41,13 +41,25 @@ updates first.
 
 ## Current Status
 
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-08
 
-**Current Version:** v0.8.0
+**Current Version:** v0.9.0
 
-**Current Phase:** Phase 9 - Polish & Optimization 📋 PLANNED
+**Current Phase:** Phase 9 - Polish & Optimization ✅ COMPLETE
 
 **Previous Phase:** Phase 8 - Import/Export & Data Management ✅ COMPLETE
+
+**Phase 9 Completion Summary:**
+
+All Phase 9 tasks have been completed:
+
+- ✅ Task 9.1: UI/UX Refinements (animations, colors, loading states)
+- ✅ Task 9.2: Performance Optimization (MultiPV caching, UCI optimization)
+- ✅ Task 9.3: Accessibility (WCAG AA, keyboard nav, screen readers)
+- ✅ Task 9.4: Responsiveness (tablet, mobile, large screen layouts)
+- ✅ Task 9.5: Bug Fixes & Stability (in-memory fallback, defensive coding)
+- ✅ Task 9.6: Testing (114 tests, 40 new chess logic tests)
+- ✅ Task 9.7: Documentation Updates (README, roadmap, user guide)
 
 **Phase 8 Completion Summary:**
 
@@ -268,13 +280,14 @@ incompatibility with Bun executables).
 All foundational work has been completed:
 
 - [x] Project architecture defined
-- [x] Technology stack selected (Buntralino, Bun, Neutralinojs, Stockfish WASM)
+- [x] Technology stack selected (Bun, Neutralino.js 6.4.0, WebSocket IPC,
+      Stockfish WASM)
 - [x] Comprehensive source documentation written (all 12 docs)
 - [x] Repository structure established
 - [x] Development best practices documented
 - [x] Metrics framework defined
 - [x] Build environment configured
-- [x] Buntralino initialized with proper structure
+- [x] Bun + Neutralino.js initialized with WebSocket IPC structure
 - [x] Code quality tools configured (ESLint, Stylelint, Prettier, Markdownlint)
 - [x] Windows build workaround implemented (rcedit instead of resedit)
 
@@ -312,7 +325,7 @@ Integration" sections
   - **COMPLETED:** Selected `stockfish` npm package v17.1 (NNUE Lite
     Single-threaded)
   - See: `src/engine/STOCKFISH_SELECTION.md` for full rationale
-- [x] **1.1.2** Integrate WASM module into Buntralino
+- [x] **1.1.2** Integrate WASM module into Bun backend
   - Add WASM files to project structure (`src/engine/`)
   - Configure Bun backend to load WASM module at startup
   - Maintain persistent engine instance(s) in memory
@@ -479,13 +492,13 @@ Integration" sections
 ### 1.4 IPC Bridge Setup
 
 **Source:** [architecture.md](architecture.md) - "Backend / Logic Layer",
-[ai-engine.md](ai-engine.md) - "WASM Integration in Buntralino"
+[ai-engine.md](ai-engine.md) - "WASM Integration with WebSocket IPC"
 
 - [x] **1.4.1** Implement Neutralino IPC methods for engine
   - Register `requestBestMoves` method
   - Register `evaluatePosition` method
   - Register `startNewGame` method
-  - Use Buntralino's `registerMethodMap()` pattern
+  - Use WebSocket IPC pattern (port 9339)
   - **COMPLETED:** Registered 8 IPC methods in `src/backend/index.ts`:
     - `sayHello`, `startNewGame`, `requestBestMoves`, `evaluatePosition`
     - `analyzeMove`, `getGuidanceMoves`, `setSkillLevel`, `getEngineStatus`
@@ -2581,17 +2594,17 @@ If any deviation from this plan is required:
 
 ### All 12 Source Documents
 
-| Document                                       | Key Content                                                |
-| ---------------------------------------------- | ---------------------------------------------------------- |
-| [overview.md](overview.md)                     | Core concept, top 3 moves, training philosophy             |
-| [roadmap.md](roadmap.md)                       | All phases, milestones, success criteria                   |
-| [architecture.md](architecture.md)             | Buntralino, Bun, Neutralino, project structure, code tools |
-| [ai-engine.md](ai-engine.md)                   | Stockfish WASM, UCI, bot personalities, difficulty         |
-| [ui-ux-design.md](ui-ux-design.md)             | Neomorphism, glassmorphism, right panel, accessibility     |
-| [game-modes.md](game-modes.md)                 | Training/Exam/Sandbox specs, state management              |
-| [move-guidance.md](move-guidance.md)           | Color coding, three-way sync, hover behavior               |
-| [player-progress.md](player-progress.md)       | 9 composite indexes, dashboard, achievements               |
-| [tracked-metrics.md](tracked-metrics.md)       | 100+ individual metrics by category                        |
-| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations            |
-| [data-storage.md](data-storage.md)             | JSON formats, file paths, import/export, backups           |
-| [development.md](development.md)               | Git workflow, linting tools, CI/CD, release process        |
+| Document                                       | Key Content                                                            |
+| ---------------------------------------------- | ---------------------------------------------------------------------- |
+| [overview.md](overview.md)                     | Core concept, top 3 moves, training philosophy                         |
+| [roadmap.md](roadmap.md)                       | All phases, milestones, success criteria                               |
+| [architecture.md](architecture.md)             | WebSocket IPC, Bun, Neutralino.js 6.4.0, project structure, code tools |
+| [ai-engine.md](ai-engine.md)                   | Stockfish WASM, UCI, bot personalities, difficulty                     |
+| [ui-ux-design.md](ui-ux-design.md)             | Neomorphism, glassmorphism, right panel, accessibility                 |
+| [game-modes.md](game-modes.md)                 | Training/Exam/Sandbox specs, state management                          |
+| [move-guidance.md](move-guidance.md)           | Color coding, three-way sync, hover behavior                           |
+| [player-progress.md](player-progress.md)       | 9 composite indexes, dashboard, achievements                           |
+| [tracked-metrics.md](tracked-metrics.md)       | 100+ individual metrics by category                                    |
+| [post-game-analysis.md](post-game-analysis.md) | Analysis UI, mistake deep dive, recommendations                        |
+| [data-storage.md](data-storage.md)             | JSON formats, file paths, import/export, backups                       |
+| [development.md](development.md)               | Git workflow, linting tools, CI/CD, release process                    |

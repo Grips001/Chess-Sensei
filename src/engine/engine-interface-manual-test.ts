@@ -1,8 +1,11 @@
 /**
- * Test script for Engine Interface
+ * Manual Test Script for Engine Interface
  *
  * Tests the StockfishEngine implementation of the Engine interface.
- * Run with: bun src/engine/test-engine-interface.ts
+ * This is NOT a Bun unit test - it's a manual integration test that requires
+ * the actual Stockfish WASM engine. Run manually when testing engine changes.
+ *
+ * Run with: bun src/engine/engine-interface-manual-test.ts
  */
 
 import { createEngine } from './stockfish-engine';

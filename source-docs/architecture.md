@@ -7,12 +7,23 @@ development workflows.
 
 ## Core Technology Stack
 
-- **Buntralino** The project is built using Buntralino as the primary
-  application framework, combining:
-  - The raw performance of **Bun**
-  - The lightweight, native desktop shell of **Neutralinojs**
+- **Bun** (1.3.4+) - High-performance JavaScript runtime
+  - 7x faster WebSocket than Node.js (1M+ messages/second)
+  - 2-3x faster file I/O with `Bun.file()`
+  - Native process management with `Bun.spawn()`
+  - Built-in SQLite support
+- **Neutralino.js** (6.4.0+) - Lightweight, native desktop shell
+  - Native window menus with keyboard shortcuts
+  - Print and clipboard HTML support
+  - No Chromium bundling (uses OS native webview)
+  - Cross-platform (Windows, macOS, Linux)
+- **WebSocket IPC Architecture**
+  - Native Bun WebSocket server (port 9339) for all frontend↔backend
+    communication
+  - Single protocol handles both RPC calls and real-time streaming
 - This architecture enables:
   - Native desktop execution without bundling Chromium
+  - Sub-millisecond IPC latency for real-time updates
   - Faster startup times
   - Lower RAM and CPU usage compared to Electron-based apps
 
@@ -48,8 +59,12 @@ development workflows.
   - Game state management
   - Notation generation
   - Training logic
-  - Save/load operations
-- Communicates with the frontend via Neutralino's native IPC bridge
+  - Save/load operations (using `Bun.file()` for 2-3x faster I/O)
+  - Stockfish engine management (using `Bun.spawn()`)
+- Communicates with the frontend via:
+  - **Bun WebSocket Server** (port 9339) for all IPC communication
+  - RPC calls for commands (request/response pattern)
+  - Pub/sub channels for real-time streaming (engine analysis, progress updates)
 
 ## Open Source Assets & Licensing Strategy
 
@@ -117,11 +132,10 @@ Run `bun run lint` to check all files, `bun run lint:fix` to auto-fix issues.
 - Auto-updater architecture designed but disabled by default.
 - Offline-first execution model.
 
-### Windows Build Workaround
+### Windows Build Process
 
-The standard Buntralino build uses `resedit` for Windows executable patching,
-which has compatibility issues with Bun-compiled executables. Chess-Sensei uses
-a custom build script (`scripts/build-windows.ts`) that uses `rcedit` instead.
+Chess-Sensei uses a custom build script (`scripts/build-windows.ts`) that uses
+`rcedit` for Windows executable metadata patching (icon, version info, etc.).
 
 Use `bun run build:windows` for Windows builds. See
 [documents/building.md](../documents/building.md) for details.

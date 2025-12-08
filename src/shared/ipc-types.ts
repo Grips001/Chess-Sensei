@@ -1,11 +1,11 @@
 /**
  * IPC Types for Frontend-Backend Communication
  *
- * Shared type definitions for Buntralino IPC calls.
+ * Shared type definitions for WebSocket IPC calls (port 9339).
  * These types are used by both frontend and backend.
  *
  * @see source-docs/architecture.md - "Backend / Logic Layer"
- * @see source-docs/ai-engine.md - "WASM Integration in Buntralino"
+ * @see source-docs/ai-engine.md - "WASM Integration with WebSocket IPC"
  */
 
 import type { BestMove, PositionEvaluation, MoveAnalysis } from './engine-types';
@@ -187,7 +187,7 @@ export interface BotConfigResponse {
 
 /**
  * IPC Method Names
- * All available backend methods that can be called via buntralino.run()
+ * All available backend methods that can be called via ipc.call()
  */
 export const IPC_METHODS = {
   /** Health check method */
@@ -255,11 +255,11 @@ export const IPC_METHODS = {
 
   // Debug Logging Methods (--dev mode only)
   /** Log a message from frontend to backend file logger */
-  LOG_MESSAGE: 'logMessage',
+  LOG_MESSAGE: 'chess:logMessage',
   /** Get log file path */
-  GET_LOG_PATH: 'getLogPath',
+  GET_LOG_PATH: 'chess:getLogPath',
   /** Check if debug logging is enabled */
-  IS_LOGGING_ENABLED: 'isLoggingEnabled',
+  IS_LOGGING_ENABLED: 'chess:isLoggingEnabled',
 } as const;
 
 /**

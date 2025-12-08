@@ -1,10 +1,13 @@
 /**
- * Test script for Basic Engine Operations (Task 1.3)
+ * Manual Test Script for Basic Engine Operations (Task 1.3)
  *
  * Tests position evaluation, best move calculation, move analysis,
  * multi-PV extraction, and performance benchmarks.
  *
- * Run with: bun src/engine/test-engine-operations.ts
+ * This is NOT a Bun unit test - it's a manual integration test that requires
+ * the actual Stockfish WASM engine. Run manually when testing engine changes.
+ *
+ * Run with: bun src/engine/engine-operations-manual-test.ts
  */
 
 import { createEngine, StockfishEngine } from './stockfish-engine';

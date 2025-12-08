@@ -2,22 +2,19 @@
  * Chess-Sensei Backend Entry Point
  *
  * This file initializes the Bun backend and sets up IPC with the frontend.
- * Provides engine operations and game logic via Buntralino IPC.
+ * Provides engine operations and game logic via WebSocket IPC (port 9339).
  *
  * @see source-docs/architecture.md - "Backend / Logic Layer"
- * @see source-docs/ai-engine.md - "WASM Integration in Buntralino"
+ * @see source-docs/ai-engine.md - "WASM Integration with WebSocket IPC"
  */
 
-let viteHost: string | null = null;
 let devMode = false;
 {
-  const viteHostArg = process.argv.find((arg) => arg.startsWith('--vitehost'));
-  viteHost = viteHostArg?.split('=')[1]!;
   // Check for --dev flag to enable developer mode (console + inspector)
   devMode = process.argv.includes('--dev');
 }
 
-import { create, events, registerMethodMap } from 'buntralino';
+import { createWebSocketServer, WebSocketServer } from './websocket-server';
 import { createEngine, StockfishEngine } from '../engine/stockfish-engine';
 import { AIOpponent } from './ai-opponent';
 import {
@@ -104,6 +101,9 @@ let dataStorage: DataStorage | null = null;
 
 // Global export/import manager instance
 let exportImportManager: ExportImportManager | null = null;
+
+// Global WebSocket server instance for real-time streaming
+let wsServer: WebSocketServer | null = null;
 
 /**
  * Initialize the chess engine
@@ -475,9 +475,9 @@ interface ImportGameResponse {
 }
 
 /**
- * Function map that allows running named functions with `buntralino.run` on the client (Neutralino) side.
+ * Function map that allows running named functions with `ipc.call()` on the client (Neutralino) side.
  *
- * Per architecture.md: All frontend↔backend communication goes through Buntralino
+ * Per architecture.md: All frontend↔backend communication goes through WebSocket IPC (port 9339)
  * Per ai-engine.md: Backend maintains persistent engine instance
  */
 const functionMap = {
@@ -1553,7 +1553,7 @@ const functionMap = {
 
       if (payload.format === 'pgn') {
         const result = await exportImportManager.importFromPGN(payload.filePath);
-        if (!result.success) {
+        if ('success' in result && result.success === false) {
           return result as ErrorResponse;
         }
         const pgnResult = result as { game: StoredGameData; needsAnalysis: true };
@@ -1605,7 +1605,7 @@ const functionMap = {
         };
       } else {
         const result = await exportImportManager.importGameFromJSON(payload.filePath, existingIds);
-        if (!result.success) {
+        if ('success' in result && result.success === false) {
           return result as ErrorResponse;
         }
         const jsonResult = result as { game: StoredGameData; analysis?: StoredAnalysisData };
@@ -1707,7 +1707,7 @@ const functionMap = {
       const existingIds = new Set(gamesList.map((g) => g.gameId));
 
       const result = await exportImportManager.importBatchGames(payload.filePath, existingIds);
-      if (!result.success) {
+      if ('success' in result && result.success === false) {
         return result as ErrorResponse;
       }
 
@@ -1759,12 +1759,21 @@ const functionMap = {
       }
 
       for (const analysis of batchResult.analyses) {
+        // Calculate totalMoves from moveAnalysis if not present in summary
+        const totalMoves =
+          'totalMoves' in analysis.summary
+            ? (analysis.summary as { totalMoves: number }).totalMoves
+            : analysis.moveAnalysis.length;
+
         await dataStorage.saveAnalysis({
           gameId: analysis.gameId,
           analysisVersion: analysis.analysisVersion,
           analysisTimestamp: analysis.analysisTimestamp,
           engineVersion: analysis.engineVersion,
-          summary: analysis.summary,
+          summary: {
+            ...analysis.summary,
+            totalMoves,
+          },
           moveAnalysis: analysis.moveAnalysis,
           criticalMoments: analysis.criticalMoments,
           tacticalOpportunities: analysis.tacticalOpportunities,
@@ -2041,7 +2050,120 @@ const functionMap = {
   },
 };
 
-registerMethodMap(functionMap);
+// Initialize WebSocket server (handles both RPC commands and real-time streaming)
+wsServer = createWebSocketServer(9339, devMode);
+
+// Register all IPC methods on WebSocket server
+// Core Engine Methods
+wsServer.registerMethod('chess:sayHello', functionMap.sayHello);
+wsServer.registerMethod('chess:startNewGame', functionMap.startNewGame);
+wsServer.registerMethod('chess:requestBestMoves', functionMap.requestBestMoves);
+wsServer.registerMethod('chess:evaluatePosition', functionMap.evaluatePosition);
+wsServer.registerMethod('chess:analyzeMove', functionMap.analyzeMove);
+wsServer.registerMethod('chess:getGuidanceMoves', functionMap.getGuidanceMoves);
+wsServer.registerMethod('chess:setSkillLevel', functionMap.setSkillLevel);
+wsServer.registerMethod('chess:getEngineStatus', functionMap.getEngineStatus);
+
+// AI Opponent Methods
+wsServer.registerMethod('chess:configureBot', functionMap.configureBot);
+wsServer.registerMethod('chess:getBotMove', functionMap.getBotMove);
+wsServer.registerMethod('chess:getBotProfiles', functionMap.getBotProfiles);
+wsServer.registerMethod('chess:getCurrentBotConfig', functionMap.getCurrentBotConfig);
+wsServer.registerMethod('chess:getDifficultyPresets', functionMap.getDifficultyPresets);
+
+// Analysis Pipeline Methods
+wsServer.registerMethod('chess:analyzeGame', functionMap.analyzeGame);
+wsServer.registerMethod('chess:getAnalysisConfig', functionMap.getAnalysisConfig);
+wsServer.registerMethod('chess:calculateMetrics', functionMap.calculateMetrics);
+
+// Data Storage Methods
+wsServer.registerMethod('chess:initializeStorage', functionMap.initializeStorage);
+wsServer.registerMethod('chess:saveGame', functionMap.saveGame);
+wsServer.registerMethod('chess:saveAnalysis', functionMap.saveAnalysis);
+wsServer.registerMethod('chess:getGamesList', functionMap.getGamesList);
+wsServer.registerMethod('chess:loadGame', functionMap.loadGame);
+wsServer.registerMethod('chess:loadAnalysis', functionMap.loadAnalysis);
+wsServer.registerMethod('chess:getStoragePath', functionMap.getStoragePath);
+
+// Player Progress Methods
+wsServer.registerMethod('chess:loadPlayerProfile', functionMap.loadPlayerProfile);
+wsServer.registerMethod('chess:savePlayerProfile', functionMap.savePlayerProfile);
+wsServer.registerMethod('chess:getAchievements', functionMap.getAchievements);
+wsServer.registerMethod('chess:unlockAchievement', functionMap.unlockAchievement);
+
+// Export/Import Methods
+wsServer.registerMethod('chess:exportGame', functionMap.exportGame);
+wsServer.registerMethod('chess:exportAllGames', functionMap.exportAllGames);
+wsServer.registerMethod('chess:exportProfile', functionMap.exportProfile);
+wsServer.registerMethod('chess:exportBackup', functionMap.exportBackup);
+wsServer.registerMethod('chess:importGame', functionMap.importGame);
+wsServer.registerMethod('chess:importBatchGames', functionMap.importBatchGames);
+wsServer.registerMethod('chess:mergeProfiles', functionMap.mergeProfiles);
+wsServer.registerMethod('chess:getExportsPath', functionMap.getExportsPath);
+
+// Backup & Restore Methods
+wsServer.registerMethod('chess:getBackupSettings', functionMap.getBackupSettings);
+wsServer.registerMethod('chess:saveBackupSettings', functionMap.saveBackupSettings);
+wsServer.registerMethod('chess:checkBackupNeeded', functionMap.checkBackupNeeded);
+wsServer.registerMethod('chess:createAutomaticBackup', functionMap.createAutomaticBackup);
+wsServer.registerMethod('chess:listBackups', functionMap.listBackups);
+wsServer.registerMethod('chess:verifyBackup', functionMap.verifyBackup);
+wsServer.registerMethod('chess:getBackupsPath', functionMap.getBackupsPath);
+
+// Debug Logging Methods
+wsServer.registerMethod('chess:logMessage', functionMap.logMessage);
+wsServer.registerMethod('chess:getLogPath', functionMap.getLogPath);
+wsServer.registerMethod('chess:isLoggingEnabled', functionMap.isLoggingEnabled);
+
+// Start WebSocket server
+await wsServer.start();
+console.log(`[WebSocket] Server started on port ${wsServer.getPort()}`);
+console.log(`[WebSocket] Registered ${Object.keys(functionMap).length} RPC methods`);
+
+// Launch Neutralino UI after WebSocket server is ready
+// Only launch in production mode (when running from built executable)
+const isBuiltExecutable = process.execPath.includes('Chess-Sensei');
+if (isBuiltExecutable) {
+  const { spawn } = await import('child_process');
+  const path = await import('path');
+
+  // Get the directory containing the executable
+  const exeDir = path.dirname(process.execPath);
+  const neutralinoPath = path.join(exeDir, 'neutralino.exe');
+
+  logger.info('Backend', 'Launching Neutralino UI', { path: neutralinoPath, devMode });
+
+  // Build command line arguments for Neutralino
+  const neutralinoArgs: string[] = [];
+  if (devMode) {
+    // Enable inspector (DevTools) in dev mode
+    neutralinoArgs.push('--window-enable-inspector=true');
+  }
+
+  // Spawn Neutralino process
+  const neutralinoProcess = spawn(neutralinoPath, neutralinoArgs, {
+    cwd: exeDir,
+    stdio: 'inherit',
+    detached: false,
+  });
+
+  neutralinoProcess.on('error', (error) => {
+    logger.error('Backend', 'Failed to launch Neutralino', error);
+    console.error('[Neutralino] Failed to launch:', error.message);
+  });
+
+  neutralinoProcess.on('exit', (code) => {
+    logger.info('Backend', 'Neutralino exited', { code });
+    console.log(`[Neutralino] Process exited with code ${code}`);
+    // Exit the backend when Neutralino closes
+    process.exit(code ?? 0);
+  });
+
+  console.log('[Neutralino] UI launched');
+} else {
+  // Development mode - Neutralino is launched separately via `bun run dev`
+  console.log('[Backend] Running in development mode - Neutralino should be launched separately');
+}
 
 // Export types for frontend use
 export type {
@@ -2053,18 +2175,8 @@ export type {
   ErrorResponse,
 };
 
-await create(viteHost ?? '/', {
-  // Name windows to easily manipulate them and distinguish them in events
-  name: 'main',
-  // We need this option to add Neutralino globals to the Vite-hosted page
-  injectGlobals: true,
-  // Enable inspector (DevTools) only in dev mode
-  enableInspector: devMode,
-});
+// Export WebSocket server instance for use in other modules
+export { wsServer };
 
-// Exit the app completely when the main window is closed without the `shutdown` command.
-events.on('close', (windowName: string) => {
-  if (windowName === 'main') {
-    process.exit();
-  }
-});
+// Backend initialization complete
+console.log('Chess-Sensei backend initialized successfully');
