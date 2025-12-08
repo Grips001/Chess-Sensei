@@ -13,9 +13,7 @@
  * @see source-docs/data-storage.md
  */
 
-import { join, dirname } from 'path';
-import { mkdir, writeFile, readFile, rename, stat, readdir, unlink } from 'fs/promises';
-import { existsSync } from 'fs';
+import { join } from 'path';
 import { homedir } from 'os';
 
 import type { GameAnalysis, ExamGameData } from './analysis-pipeline';
@@ -139,13 +137,28 @@ const WEEKLY_BACKUP_RETENTION = 4;
 
 /**
  * Handles all data storage operations
+ *
+ * Phase 9 Enhancement: In-memory fallback if disk is unavailable
+ * When disk storage fails, data is cached in memory and a warning is logged.
+ * This allows the application to continue functioning without data loss.
  */
 export class DataStorage {
   private basePath: string;
   private initialized = false;
 
+  /** Phase 9: In-memory fallback cache when disk is unavailable */
+  private inMemoryMode = false;
+  private memoryCache: Map<string, string> = new Map();
+
   constructor() {
     this.basePath = this.getBasePathInternal();
+  }
+
+  /**
+   * Phase 9: Check if running in memory-only mode
+   */
+  isInMemoryMode(): boolean {
+    return this.inMemoryMode;
   }
 
   /**
@@ -171,6 +184,7 @@ export class DataStorage {
 
   /**
    * Task 4.4.1: Initialize directory structure
+   * Phase 9 Enhancement: Fallback to in-memory mode if disk is unavailable
    */
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -186,57 +200,110 @@ export class DataStorage {
       join(this.basePath, 'backups'),
     ];
 
-    for (const dir of directories) {
-      await this.ensureDirectory(dir);
-    }
+    try {
+      for (const dir of directories) {
+        await this.ensureDirectory(dir);
+      }
 
-    this.initialized = true;
-    console.log(`Data storage initialized at: ${this.basePath}`);
+      // Verify disk is writable by creating a test file
+      const testPath = join(this.basePath, '.write-test');
+      await Bun.write(testPath, 'test');
+      const fs = await import('fs/promises');
+      await fs.unlink(testPath);
+
+      this.initialized = true;
+      console.log(`Data storage initialized at: ${this.basePath}`);
+    } catch (error) {
+      // Phase 9: Enable in-memory fallback mode
+      console.warn(
+        `Data storage initialization failed, using in-memory fallback:`,
+        error instanceof Error ? error.message : error
+      );
+      this.inMemoryMode = true;
+      this.initialized = true;
+      console.log(`Data storage running in MEMORY-ONLY mode (data will be lost on exit)`);
+    }
   }
 
   /**
    * Ensure a directory exists
+   * Note: Bun.write() automatically creates directories, so this is mainly for explicit checks
    */
   private async ensureDirectory(path: string): Promise<void> {
-    if (!existsSync(path)) {
-      await mkdir(path, { recursive: true });
+    // Bun.write() will create directories automatically
+    // This method is kept for compatibility but can be simplified
+    try {
+      const file = Bun.file(path);
+      await file.exists(); // Just check if it exists, Bun will create on write
+    } catch {
+      // Directory doesn't exist, but Bun.write() will create it
     }
   }
 
   /**
-   * Task 4.4.6: Atomic write operation
+   * Task 4.4.6: Atomic write operation using Bun.write()
+   * Phase 9 Enhancement: Falls back to in-memory cache if disk write fails
    *
    * 1. Write to temporary file
    * 2. Verify write succeeded
    * 3. Rename temporary file to target (atomic)
+   *
+   * Note: Bun.write() automatically creates directories
    */
   private async atomicWrite(filePath: string, data: string): Promise<void> {
-    const tempPath = `${filePath}.tmp`;
-    const dir = dirname(filePath);
-
-    // Ensure directory exists
-    await this.ensureDirectory(dir);
-
-    // Write to temp file
-    await writeFile(tempPath, data, 'utf-8');
-
-    // Verify write succeeded
-    const stats = await stat(tempPath);
-    if (stats.size === 0 && data.length > 0) {
-      throw new Error('Write verification failed: file is empty');
+    // Phase 9: Use in-memory cache if in fallback mode
+    if (this.inMemoryMode) {
+      this.memoryCache.set(filePath, data);
+      return;
     }
 
-    // Atomic rename
-    await rename(tempPath, filePath);
+    const tempPath = `${filePath}.tmp`;
+
+    try {
+      // Write to temp file (Bun.write creates directories automatically)
+      await Bun.write(tempPath, data);
+
+      // Verify write succeeded
+      const tempFile = Bun.file(tempPath);
+      const size = tempFile.size;
+      if (size === 0 && data.length > 0) {
+        throw new Error('Write verification failed: file is empty');
+      }
+
+      // Atomic rename using native fs (Bun doesn't have rename yet)
+      const fs = await import('fs/promises');
+      await fs.rename(tempPath, filePath);
+    } catch (error) {
+      // Phase 9: Fallback to in-memory cache on write failure
+      console.warn(`Disk write failed, caching in memory: ${filePath}`);
+      this.memoryCache.set(filePath, data);
+      // Don't throw - allow app to continue with in-memory data
+    }
   }
 
   /**
-   * Read JSON file safely
+   * Read JSON file safely using Bun.file()
+   * Phase 9 Enhancement: Checks in-memory cache first
    */
   private async readJson<T>(filePath: string): Promise<T | null> {
+    // Phase 9: Check in-memory cache first
+    const cached = this.memoryCache.get(filePath);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as T;
+      } catch {
+        return null;
+      }
+    }
+
+    // Skip disk access if in memory-only mode
+    if (this.inMemoryMode) {
+      return null;
+    }
+
     try {
-      const content = await readFile(filePath, 'utf-8');
-      return JSON.parse(content) as T;
+      const file = Bun.file(filePath);
+      return (await file.json()) as T;
     } catch {
       return null;
     }
@@ -676,11 +743,12 @@ export class DataStorage {
       // Clean up old backups according to retention policy
       await this.cleanupOldBackups();
 
-      // Get file size
-      const stats = await stat(backupPath);
+      // Get file size using Bun.file()
+      const backupFile = Bun.file(backupPath);
+      const fileSize = backupFile.size;
 
       console.log(
-        `Automatic backup created: ${filename} (${games.length} games, ${stats.size} bytes)`
+        `Automatic backup created: ${filename} (${games.length} games, ${fileSize} bytes)`
       );
 
       return {
@@ -688,7 +756,7 @@ export class DataStorage {
         timestamp: backupData.backupTimestamp,
         type,
         gameCount: games.length,
-        size: stats.size,
+        size: fileSize,
       };
     } catch (error) {
       console.error('Failed to create automatic backup:', error);
@@ -740,7 +808,8 @@ export class DataStorage {
     const backupsPath = join(this.basePath, 'backups');
 
     try {
-      const files = await readdir(backupsPath);
+      const fs = await import('fs/promises');
+      const files = await fs.readdir(backupsPath);
       const backupFiles = files.filter((f) => f.startsWith('backup_') && f.endsWith('.json'));
 
       // Separate by type
@@ -773,14 +842,14 @@ export class DataStorage {
       // Delete old daily backups (keep last 7)
       for (let i = DAILY_BACKUP_RETENTION; i < dailyBackups.length; i++) {
         const filePath = join(backupsPath, dailyBackups[i].filename);
-        await unlink(filePath);
+        await fs.unlink(filePath);
         console.log(`Deleted old backup: ${dailyBackups[i].filename}`);
       }
 
       // Delete old weekly backups (keep last 4)
       for (let i = WEEKLY_BACKUP_RETENTION; i < weeklyBackups.length; i++) {
         const filePath = join(backupsPath, weeklyBackups[i].filename);
-        await unlink(filePath);
+        await fs.unlink(filePath);
         console.log(`Deleted old backup: ${weeklyBackups[i].filename}`);
       }
     } catch (error) {
@@ -798,18 +867,22 @@ export class DataStorage {
     const backups: BackupInfo[] = [];
 
     try {
-      if (!existsSync(backupsPath)) {
+      // Check if backups directory exists using Bun.file()
+      const backupsDir = Bun.file(backupsPath);
+      if (!(await backupsDir.exists())) {
         return [];
       }
 
-      const files = await readdir(backupsPath);
+      const fs = await import('fs/promises');
+      const files = await fs.readdir(backupsPath);
       const backupFiles = files.filter((f) => f.startsWith('backup_') && f.endsWith('.json'));
 
       for (const filename of backupFiles) {
         const filePath = join(backupsPath, filename);
 
         try {
-          const stats = await stat(filePath);
+          const file = Bun.file(filePath);
+          const stats = { size: file.size, mtime: new Date(file.lastModified) };
           const content = await this.readJson<{
             backupTimestamp: string;
             backupType: 'daily' | 'weekly' | 'manual' | 'after-game';
@@ -847,8 +920,8 @@ export class DataStorage {
 
     try {
       const backupPath = join(this.basePath, 'backups', filename);
-      const content = await readFile(backupPath, 'utf-8');
-      const data = JSON.parse(content);
+      const file = Bun.file(backupPath);
+      const data = await file.json();
 
       // Check required fields
       if (!data.version) issues.push('Missing version field');

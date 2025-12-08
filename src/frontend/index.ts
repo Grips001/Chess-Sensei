@@ -9,7 +9,7 @@
 
 import neutralino from '@neutralinojs/lib';
 neutralino.init();
-import * as buntralino from 'buntralino-client';
+import { ipc, initializeIPC } from './websocket-ipc-client';
 import {
   IPC_METHODS,
   isErrorResponse,
@@ -31,6 +31,7 @@ import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
 import { createDataManagement } from './data-management';
 import { frontendLogger } from './frontend-logger';
+import { initializeNativeMenu, type MenuActionHandlers } from './native-menu';
 
 console.log('Chess-Sensei Frontend initialized');
 frontendLogger.info('App', 'Chess-Sensei Frontend initializing');
@@ -290,7 +291,7 @@ async function saveAndAnalyzeGame(gameRecord: ExamGameRecord): Promise<boolean> 
     // Step 1: Analyze the game
     console.log('Analyzing game...');
     frontendLogger.info('SaveAnalyze', 'Step 1: Calling ANALYZE_GAME IPC');
-    const analysisResponse = await buntralino.run(IPC_METHODS.ANALYZE_GAME, {
+    const analysisResponse = await ipc.call(IPC_METHODS.ANALYZE_GAME, {
       gameData,
       deepAnalysis: false, // Quick analysis for now
     });
@@ -313,7 +314,7 @@ async function saveAndAnalyzeGame(gameRecord: ExamGameRecord): Promise<boolean> 
     // Step 2: Save the game data
     console.log('Saving game data...');
     frontendLogger.info('SaveAnalyze', 'Step 2: Calling SAVE_GAME IPC');
-    const saveGameResponse = await buntralino.run(IPC_METHODS.SAVE_GAME, {
+    const saveGameResponse = await ipc.call(IPC_METHODS.SAVE_GAME, {
       gameData,
     });
 
@@ -332,7 +333,7 @@ async function saveAndAnalyzeGame(gameRecord: ExamGameRecord): Promise<boolean> 
     // Step 3: Save the analysis
     console.log('Saving analysis...');
     frontendLogger.info('SaveAnalyze', 'Step 3: Calling SAVE_ANALYSIS IPC');
-    const saveAnalysisResponse = await buntralino.run(IPC_METHODS.SAVE_ANALYSIS, {
+    const saveAnalysisResponse = await ipc.call(IPC_METHODS.SAVE_ANALYSIS, {
       analysis,
     });
 
@@ -1844,15 +1845,15 @@ function showSandboxLegalMoves(square: string, _piece: EditorPiece): void {
     selectedSquare.classList.add('sandbox-selected');
   }
 
-  // Get FEN and use chess.js to find legal moves
+  // Get FEN and use chess-logic to find legal moves
   const fen = sandboxManager.getFen();
   try {
     // Create a temporary chess instance to check legal moves
-    const tempGame = new Chess(fen);
-    const moves = tempGame.moves({ square: square as Square, verbose: true });
+    const tempGame = new ChessGame(fen);
+    const moves = tempGame.getLegalMoves({ square: square as Square, verbose: true });
 
     // Highlight legal moves
-    moves.forEach((move) => {
+    moves.forEach((move: { to: string; captured?: string }) => {
       const targetSquare = boardElement.querySelector(`[data-square="${move.to}"]`);
       if (targetSquare) {
         if (move.captured) {
@@ -1988,7 +1989,7 @@ async function testIPCCommunication(): Promise<void> {
 
   // Test 1: Health check
   console.log('1. Testing sayHello...');
-  const helloResult = await buntralino.run(IPC_METHODS.SAY_HELLO, {
+  const helloResult = await ipc.call(IPC_METHODS.SAY_HELLO, {
     message: 'Hello from frontend!',
   });
   console.log('   Response:', helloResult);
@@ -1996,21 +1997,19 @@ async function testIPCCommunication(): Promise<void> {
 
   // Test 2: Engine status
   console.log('2. Testing getEngineStatus...');
-  const statusResult = (await buntralino.run(
-    IPC_METHODS.GET_ENGINE_STATUS
-  )) as EngineStatusResponse;
+  const statusResult = (await ipc.call(IPC_METHODS.GET_ENGINE_STATUS)) as EngineStatusResponse;
   console.log('   Engine initialized:', statusResult.initialized);
   displayResults('2. getEngineStatus', statusResult);
 
   // Test 3: Start new game
   console.log('3. Testing startNewGame...');
-  const newGameResult = await buntralino.run(IPC_METHODS.START_NEW_GAME);
+  const newGameResult = await ipc.call(IPC_METHODS.START_NEW_GAME);
   console.log('   Result:', newGameResult);
   displayResults('3. startNewGame', newGameResult);
 
   // Test 4: Get best moves from starting position
   console.log('4. Testing requestBestMoves...');
-  const bestMovesResult = (await buntralino.run(IPC_METHODS.REQUEST_BEST_MOVES, {
+  const bestMovesResult = (await ipc.call(IPC_METHODS.REQUEST_BEST_MOVES, {
     fen: STARTPOS_FEN,
     depth: 10,
     count: 3,
@@ -2025,7 +2024,7 @@ async function testIPCCommunication(): Promise<void> {
 
   // Test 5: Evaluate position
   console.log('5. Testing evaluatePosition...');
-  const evalResult = (await buntralino.run(IPC_METHODS.EVALUATE_POSITION, {
+  const evalResult = (await ipc.call(IPC_METHODS.EVALUATE_POSITION, {
     fen: STARTPOS_FEN,
     depth: 12,
   })) as EvaluationResponse;
@@ -2038,7 +2037,7 @@ async function testIPCCommunication(): Promise<void> {
 
   // Test 6: Get guidance moves (for Training Mode)
   console.log('6. Testing getGuidanceMoves...');
-  const guidanceResult = (await buntralino.run(IPC_METHODS.GET_GUIDANCE_MOVES, {
+  const guidanceResult = (await ipc.call(IPC_METHODS.GET_GUIDANCE_MOVES, {
     fen: STARTPOS_FEN,
     depth: 12,
   })) as BestMovesResponse;
@@ -2054,7 +2053,7 @@ async function testIPCCommunication(): Promise<void> {
 
   // Test 7: Analyze a move
   console.log('7. Testing analyzeMove...');
-  const analysisResult = await buntralino.run(IPC_METHODS.ANALYZE_MOVE, {
+  const analysisResult = await ipc.call(IPC_METHODS.ANALYZE_MOVE, {
     fen: STARTPOS_FEN,
     playedMove: 'g2g4', // Bad move for testing
     depth: 10,
@@ -2168,6 +2167,16 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
 
 // Initialize application
 (async () => {
+  // Initialize WebSocket IPC connection
+  try {
+    await initializeIPC();
+    frontendLogger.info('App', 'WebSocket IPC connection established');
+    console.log('[IPC] Connection established successfully');
+  } catch (error) {
+    frontendLogger.error('App', 'Failed to initialize IPC connection', { error });
+    console.error('[IPC] Failed to connect:', error);
+  }
+
   // Render the chessboard immediately
   renderChessboard();
 
@@ -2400,23 +2409,9 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   // Set initial button states
   updateUndoRedoButtons();
 
-  // Add keyboard shortcuts for undo/redo (Ctrl+Z, Ctrl+Y)
-  document.addEventListener('keydown', (event) => {
-    if (event.ctrlKey || event.metaKey) {
-      if (event.key === 'z' || event.key === 'Z') {
-        event.preventDefault();
-        handleUndo();
-      } else if (event.key === 'y' || event.key === 'Y') {
-        event.preventDefault();
-        handleRedo();
-      }
-    }
-  });
+  // Note: Keyboard shortcuts now handled by native-menu.ts (Phase 4 Modernization)
 
-  // Wait for Buntralino connection
-  await buntralino.ready;
-  console.log('Buntralino connection established');
-  frontendLogger.info('App', 'Buntralino connection established');
+  // WebSocket IPC connection already established in initialization above
 
   // Initialize the frontend logger (checks if dev mode is enabled)
   await frontendLogger.initialize();
@@ -2467,4 +2462,70 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
 
   frontendLogger.info('App', 'Phase 8: Data Management UI initialized');
   console.log('Phase 8: Data Management UI initialized');
+
+  // Phase 4 Modernization: Initialize native window menus with keyboard shortcuts
+  const menuHandlers: MenuActionHandlers = {
+    onNewGame: () => {
+      frontendLogger.info('Menu', 'New Game requested via menu');
+      // Show mode selection screen
+      showModeSelection();
+    },
+    onImportPGN: () => {
+      frontendLogger.info('Menu', 'Import PGN requested via menu');
+      // Open data management and trigger import
+      dataManagement.show();
+      // Note: The import button will need to be clicked manually
+      // We could expose a direct import method from dataManagement in the future
+    },
+    onExportPGN: () => {
+      frontendLogger.info('Menu', 'Export PGN requested via menu');
+      // Open data management to access export functionality
+      dataManagement.show();
+    },
+    onExit: () => {
+      // Handled by native-menu.ts (calls app.exit)
+      frontendLogger.info('Menu', 'Exit requested via menu');
+    },
+    onUndo: () => {
+      frontendLogger.info('Menu', 'Undo requested via menu');
+      handleUndo();
+    },
+    onRedo: () => {
+      frontendLogger.info('Menu', 'Redo requested via menu');
+      handleRedo();
+    },
+    onFlipBoard: () => {
+      frontendLogger.info('Menu', 'Flip Board requested via menu');
+      handleFlipBoard();
+    },
+    onResign: () => {
+      frontendLogger.info('Menu', 'Resign requested via menu');
+      handleResign();
+    },
+    onViewDashboard: () => {
+      frontendLogger.info('Menu', 'View Dashboard requested via menu');
+      progressDashboard.open();
+    },
+    onViewDataManagement: () => {
+      frontendLogger.info('Menu', 'View Data Management requested via menu');
+      dataManagement.show();
+    },
+    onToggleInspector: () => {
+      // Handled by native-menu.ts
+      frontendLogger.info('Menu', 'Toggle Inspector requested via menu');
+    },
+    onUserGuide: () => {
+      // Handled by native-menu.ts
+      frontendLogger.info('Menu', 'User Guide requested via menu');
+    },
+    onAbout: () => {
+      // Handled by native-menu.ts
+      frontendLogger.info('Menu', 'About requested via menu');
+    },
+  };
+
+  // Initialize native menus
+  await initializeNativeMenu(menuHandlers);
+  frontendLogger.info('App', 'Phase 4 Modernization: Native window menus initialized');
+  console.log('Phase 4 Modernization: Native window menus with keyboard shortcuts initialized');
 })();

@@ -8,10 +8,12 @@
  * @see source-docs/TASKS.md - Phase 5
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import { IPC_METHODS, isErrorResponse } from '../shared/ipc-types';
 import { ChessGame } from '../shared/chess-logic';
 import { frontendLogger } from './frontend-logger';
+import { printAnalysis } from './print-utils';
+import { copyAnalysisAsHTML } from './clipboard-utils';
 
 // ============================================
 // Frontend Types for Analysis Data
@@ -495,7 +497,7 @@ export class AnalysisUIManager {
   private async loadGame(gameId: string): Promise<StoredGameData | null> {
     frontendLogger.ipc('AnalysisUI', 'LOAD_GAME', { gameId });
     try {
-      const response = await buntralino.run(IPC_METHODS.LOAD_GAME, { gameId });
+      const response = await ipc.call(IPC_METHODS.LOAD_GAME, { gameId });
       if (isErrorResponse(response)) {
         frontendLogger.error('AnalysisUI', 'Error loading game', undefined, {
           gameId,
@@ -525,7 +527,7 @@ export class AnalysisUIManager {
   private async loadAnalysis(gameId: string): Promise<StoredAnalysisData | null> {
     frontendLogger.ipc('AnalysisUI', 'LOAD_ANALYSIS', { gameId });
     try {
-      const response = await buntralino.run(IPC_METHODS.LOAD_ANALYSIS, { gameId });
+      const response = await ipc.call(IPC_METHODS.LOAD_ANALYSIS, { gameId });
       if (isErrorResponse(response)) {
         frontendLogger.error('AnalysisUI', 'Error loading analysis', undefined, {
           gameId,
@@ -564,7 +566,7 @@ export class AnalysisUIManager {
    */
   async getGamesList(): Promise<GameIndexEntry[]> {
     try {
-      const response = await buntralino.run(IPC_METHODS.GET_GAMES_LIST, {});
+      const response = await ipc.call(IPC_METHODS.GET_GAMES_LIST, {});
       if (isErrorResponse(response)) {
         console.error('Error getting games list:', response.error);
         return [];
@@ -1579,6 +1581,25 @@ export class AnalysisUIManager {
     document
       .getElementById('analysis-close-btn')
       ?.addEventListener('click', () => this.closeAnalysis());
+
+    // Phase 4 Modernization: Add print and copy buttons to analysis header
+    const analysisHeader = document.querySelector('.analysis-header');
+    if (analysisHeader) {
+      const printBtn = document.createElement('button');
+      printBtn.className = 'analysis-print-btn';
+      printBtn.innerHTML = '🖨️ Print';
+      printBtn.onclick = () => printAnalysis();
+      printBtn.style.marginLeft = 'auto';
+      printBtn.style.marginRight = '5px';
+      analysisHeader.appendChild(printBtn);
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'analysis-copy-btn';
+      copyBtn.innerHTML = '📋 Copy HTML';
+      copyBtn.onclick = () => copyAnalysisAsHTML();
+      copyBtn.style.marginRight = '10px';
+      analysisHeader.appendChild(copyBtn);
+    }
   }
 
   /**

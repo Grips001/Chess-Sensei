@@ -42,10 +42,14 @@ system**:
 
 ## Tech Stack
 
-- **Buntralino** (Bun + Neutralinojs)
-  - Bun runtime for backend performance
-  - Neutralinojs for native desktop shell
-- **Stockfish (WebAssembly)** for chess engine
+- **WebSocket IPC Architecture** (Bun 1.3.4 + Neutralino.js 6.4.0)
+  - Bun runtime for high-performance backend (7x faster WebSocket, 2-3x faster
+    file I/O)
+  - Neutralino.js 6.4.0 for native desktop shell (no Chromium bundling)
+  - Native window menus, print, and clipboard HTML support
+  - WebSocket server (port 9339) for all IPC (1M+ messages/second)
+- **Stockfish 17.1 (WebAssembly)** for chess engine
+- **Vite 7.2.7** for frontend build tooling
 - **Modern HTML/CSS/JS** for frontend UI
 
 ## Documentation
@@ -99,10 +103,10 @@ User guides and operational documentation will be available in the
 
 ## Project Status
 
-**Current Phase:** Phase 8 Complete ✓ → Phase 9 Next
+**Current Phase:** Phase 9 Complete ✓ (Polish & Optimization)
 
 - ✅ Foundation and project setup complete
-- ✅ Buntralino initialized with proper structure
+- ✅ WebSocket IPC architecture initialized (port 9339)
 - ✅ Comprehensive documentation written
 - ✅ Phase 1: Core Chess Engine Integration complete
   - Stockfish WASM integrated (v17.1 NNUE Lite)
@@ -178,7 +182,17 @@ User guides and operational documentation will be available in the
   - Backup retention policy (7 daily, 4 weekly)
   - Data Management UI with export/import wizards
   - Complete documentation (documents/data-management.md)
-- 🚧 Phase 9: Polish & Optimization (Next)
+- ✅ Phase 9: Polish & Optimization complete
+  - Enhanced animations with soft haptic-feel transitions
+  - Comprehensive WCAG AA compliant color system
+  - Loading states (progress bars, skeleton loaders, spinners)
+  - Toast notifications and inline alerts for error handling
+  - Engine performance optimization (MultiPV caching)
+  - Accessibility improvements (keyboard navigation, screen reader support)
+  - Responsive design for tablet, mobile, and large screens
+  - Bug fixes including in-memory storage fallback
+  - Comprehensive test suite (114 tests, 40 chess logic tests)
+  - In-app user guide with keyboard shortcuts reference
 
 See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
 for detailed development plan and current progress.
@@ -196,7 +210,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v0.8.0 (Phase 8: Import/Export & Data Management)
+**Current Version:** v0.9.0 (Phase 9: Polish & Optimization)
 
 ### Installation
 
@@ -295,7 +309,7 @@ including:
 - **Stockfish** (GPL-3.0) - Chess engine
 - **chess.js** (BSD-2-Clause) - Chess logic library
 - **Neutralino.js** (MIT) - Desktop framework
-- **Buntralino** (MIT) - IPC bridge
+- **Bun** (MIT) - JavaScript runtime
 - **Chess pieces** (CC BY-SA 3.0) - SVG graphics
 - **Sound effects** (CC0) - Move sounds from Chess.com
 

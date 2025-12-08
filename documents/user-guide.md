@@ -310,9 +310,19 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 Chess-Sensei is under active development!
 
-### Current Release: Phase 8 (v0.8.0)
+### Current Release: Phase 9 (v0.9.0)
 
-**Import/Export & Data Management** is now available:
+**Polish & Optimization** is now complete:
+
+- **Enhanced UI/UX** - Soft haptic-feel animations, WCAG AA compliant colors
+- **Accessibility** - Keyboard navigation, screen reader support, color-blind modes
+- **Responsive Design** - Tablet, mobile, and large screen layouts
+- **Performance** - Engine optimization with MultiPV caching
+- **Stability** - In-memory storage fallback, comprehensive test suite (114 tests)
+
+### Previous Release: Phase 8 (v0.8.0)
+
+**Import/Export & Data Management**:
 
 - **Export Data** - Export games (PGN/JSON), player profile, or full backups
 - **Import Data** - Import JSON/PGN files with duplicate detection

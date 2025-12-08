@@ -9,7 +9,7 @@
  * @see source-docs/move-guidance.md - "Best-Move Guidance System"
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import type { BotPersonality, DifficultyPreset, AIPlayMode } from '../shared/bot-types';
 import { BOT_PERSONALITIES } from '../shared/bot-types';
 import type { PlayerColor } from '../shared/game-state';
@@ -160,7 +160,7 @@ export class TrainingModeManager {
    */
   private async configureBot(): Promise<void> {
     try {
-      const response = (await buntralino.run(IPC_METHODS.CONFIGURE_BOT, {
+      const response = (await ipc.call(IPC_METHODS.CONFIGURE_BOT, {
         personality: this.config.botPersonality,
         difficultyPreset: this.config.difficultyPreset,
         playMode: 'training' as AIPlayMode,
@@ -209,7 +209,7 @@ export class TrainingModeManager {
     this.onBotMoveStart?.();
 
     try {
-      const response = (await buntralino.run(IPC_METHODS.GET_BOT_MOVE, {
+      const response = (await ipc.call(IPC_METHODS.GET_BOT_MOVE, {
         fen,
         moves,
       })) as BotMoveResponse | ErrorResponse;

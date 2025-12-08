@@ -1,10 +1,13 @@
 /**
- * AI Opponent Test Script
+ * Manual Test Script for AI Opponent
  *
  * Tests the AI opponent at different difficulty levels to verify
  * strength calibration and behavior.
  *
- * Run with: bun run src/backend/test-ai-opponent.ts
+ * This is NOT a Bun unit test - it's a manual integration test that requires
+ * the actual Stockfish WASM engine. Run manually when testing AI changes.
+ *
+ * Run with: bun src/backend/ai-opponent-manual-test.ts
  *
  * @see source-docs/ai-engine.md - "Difficulty & Strength Scaling"
  */

@@ -10,10 +10,11 @@
  * @see source-docs/TASKS.md - Phase 6
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import { IPC_METHODS, isErrorResponse } from '../shared/ipc-types';
 import type { GameIndexEntry, StoredAnalysisData, CompositeScores } from './analysis-ui';
 import { frontendLogger } from './frontend-logger';
+import { printProgressDashboard } from './print-utils';
 
 // ============================================
 // Types
@@ -246,7 +247,7 @@ export class ProgressDashboardManager {
   private async loadPlayerProfile(): Promise<void> {
     frontendLogger.ipc('Dashboard', 'LOAD_PLAYER_PROFILE', {});
     try {
-      const response = await buntralino.run(IPC_METHODS.LOAD_PLAYER_PROFILE, {});
+      const response = await ipc.call(IPC_METHODS.LOAD_PLAYER_PROFILE, {});
       if (isErrorResponse(response)) {
         // Profile may not exist yet - create default
         this.state.profile = this.createDefaultProfile();
@@ -266,7 +267,7 @@ export class ProgressDashboardManager {
   private async loadGameHistory(): Promise<void> {
     frontendLogger.ipc('Dashboard', 'GET_GAMES_LIST', {});
     try {
-      const response = await buntralino.run(IPC_METHODS.GET_GAMES_LIST, {});
+      const response = await ipc.call(IPC_METHODS.GET_GAMES_LIST, {});
       if (isErrorResponse(response)) {
         this.state.games = [];
         return;
@@ -296,7 +297,7 @@ export class ProgressDashboardManager {
    */
   private async loadGameAnalysis(gameId: string): Promise<StoredAnalysisData | null> {
     try {
-      const response = await buntralino.run(IPC_METHODS.LOAD_ANALYSIS, { gameId });
+      const response = await ipc.call(IPC_METHODS.LOAD_ANALYSIS, { gameId });
       if (isErrorResponse(response)) {
         return null;
       }
@@ -1656,6 +1657,18 @@ export class ProgressDashboardManager {
     document.getElementById('dashboard-close-btn')?.addEventListener('click', () => {
       this.close();
     });
+
+    // Phase 4 Modernization: Add print button to dashboard header
+    const dashboardHeader = document.querySelector('.dashboard-header');
+    if (dashboardHeader) {
+      const printBtn = document.createElement('button');
+      printBtn.className = 'dashboard-print-btn';
+      printBtn.innerHTML = '🖨️ Print Dashboard';
+      printBtn.onclick = () => printProgressDashboard();
+      printBtn.style.marginLeft = 'auto';
+      printBtn.style.marginRight = '10px';
+      dashboardHeader.appendChild(printBtn);
+    }
 
     // Game row clicks
     document.querySelectorAll('.game-row, .table-row').forEach((row) => {

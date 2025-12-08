@@ -31,8 +31,9 @@ selection rationale.
 │                     Frontend (Neutralino)                    │
 │                                                             │
 │  ┌──────────────────────────────────────────────────────┐  │
-│  │                   Buntralino IPC                      │  │
-│  │  requestBestMoves, evaluatePosition, analyzeMove     │  │
+│  │                WebSocket IPC Client                   │  │
+│  │  RPC calls: commands (requestBestMoves, evaluate)    │  │
+│  │  Pub/sub: real-time updates (engine analysis)        │  │
 │  └──────────────────────────────────────────────────────┘  │
 └────────────────────────────┬────────────────────────────────┘
                              │
@@ -106,7 +107,7 @@ interface BestMovesResponse {
 
 ## IPC Methods
 
-The following methods are available via Buntralino IPC:
+The following methods are available via WebSocket IPC (port 9339):
 
 ### Core Engine Methods (Phase 1)
 
@@ -173,11 +174,11 @@ Benchmarked performance (depth 20 analysis):
 ### Frontend (TypeScript)
 
 ```typescript
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import { IPC_METHODS, STARTPOS_FEN } from '../shared/ipc-types';
 
-// Get top 3 moves from starting position
-const result = await buntralino.run(IPC_METHODS.REQUEST_BEST_MOVES, {
+// Get top 3 moves from starting position (via WebSocket RPC)
+const result = await ipc.call(IPC_METHODS.REQUEST_BEST_MOVES, {
   fen: STARTPOS_FEN,
   depth: 15,
   count: 3,
@@ -186,13 +187,19 @@ const result = await buntralino.run(IPC_METHODS.REQUEST_BEST_MOVES, {
 if (result.success) {
   console.log('Top moves:', result.moves);
 }
+
+// Real-time engine analysis updates (via WebSocket pub/sub)
+ipc.subscribe('engine:analysis', (data) => {
+  console.log('Analysis update:', data.depth, data.eval, data.pv);
+  updateAnalysisUI(data);
+});
 ```
 
 ### Move Analysis
 
 ```typescript
-// Analyze a played move
-const analysis = await buntralino.run(IPC_METHODS.ANALYZE_MOVE, {
+// Analyze a played move (via WebSocket RPC)
+const analysis = await ipc.call(IPC_METHODS.ANALYZE_MOVE, {
   fen: 'current-position-fen',
   playedMove: 'e2e4',
   depth: 20,
@@ -213,15 +220,15 @@ src/
 │   ├── stockfish-loader.ts      # WASM loader
 │   ├── stockfish-engine.ts      # Engine implementation
 │   ├── STOCKFISH_SELECTION.md   # Selection rationale
-│   ├── test-engine-interface.ts # Engine tests
-│   └── test-engine-operations.ts # Operation tests
+│   ├── engine-interface-manual-test.ts # Engine tests
+│   └── engine-operations-manual-test.ts # Operation tests
 ├── shared/
 │   ├── engine-types.ts          # Engine interfaces
 │   ├── ipc-types.ts             # IPC interfaces (all methods)
 │   ├── bot-types.ts             # AI opponent types (Phase 3)
 │   ├── game-state.ts            # Game state management
 │   ├── chess-logic.ts           # Chess.js wrapper
-│   └── test-chess-logic.ts      # Chess logic tests
+│   └── chess-logic-manual-test.ts  # Chess logic tests
 ├── backend/
 │   ├── index.ts                 # IPC registration (all methods)
 │   ├── ai-opponent.ts           # AI opponent logic (Phase 3)

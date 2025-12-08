@@ -45,14 +45,6 @@ open-source projects and resources that make Chess-Sensei possible.
 - **Usage:** Lightweight desktop application framework
 - **Notes:** Creates native desktop apps with minimal resource usage
 
-#### Buntralino
-
-- **Project:** Buntralino
-- **License:** MIT
-- **Repository:** <https://github.com/buntralino/buntralino>
-- **Usage:** Bridge between Bun runtime and Neutralino.js
-- **Notes:** Enables Bun backend with Neutralino frontend
-
 #### Bun
 
 - **Project:** Bun
@@ -166,7 +158,6 @@ No web fonts are loaded, respecting user bandwidth and privacy.
 | Stockfish     | GPL-3.0             | Chess Engine       |
 | chess.js      | BSD-2-Clause        | Chess Logic        |
 | Neutralino.js | MIT                 | Desktop Framework  |
-| Buntralino    | MIT                 | IPC Bridge         |
 | Bun           | MIT                 | JavaScript Runtime |
 | Vite          | MIT                 | Build Tool         |
 | TypeScript    | Apache-2.0          | Language           |

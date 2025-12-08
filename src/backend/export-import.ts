@@ -16,9 +16,6 @@
  */
 
 import { join } from 'path';
-import { writeFile, readFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import { createHash } from 'crypto';
 
 import type { StoredGameData, StoredAnalysisData } from './data-storage';
 import type { PlayerProfile } from './metrics-calculator';
@@ -127,20 +124,23 @@ const EXPORT_SOURCE = 'Chess-Sensei';
  * Handles all export and import operations
  */
 export class ExportImportManager {
-  private basePath: string;
   private exportsPath: string;
 
   constructor(storagePath: string) {
-    this.basePath = storagePath;
     this.exportsPath = join(storagePath, 'exports');
   }
 
   /**
    * Ensure exports directory exists
+   * Bun.write() creates directories automatically
    */
   private async ensureExportsDir(): Promise<void> {
-    if (!existsSync(this.exportsPath)) {
-      await mkdir(this.exportsPath, { recursive: true });
+    // Check if directory exists using Bun.file()
+    try {
+      const file = Bun.file(this.exportsPath);
+      await file.exists();
+    } catch {
+      // Directory doesn't exist, but Bun.write() will create it automatically
     }
   }
 
@@ -150,13 +150,6 @@ export class ExportImportManager {
   private generateFilename(prefix: string, extension: string): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     return `${prefix}_${timestamp}.${extension}`;
-  }
-
-  /**
-   * Calculate content hash for duplicate detection
-   */
-  private calculateHash(content: string): string {
-    return createHash('sha256').update(content).digest('hex').slice(0, 16);
   }
 
   // ============================================
@@ -194,7 +187,7 @@ export class ExportImportManager {
           game.metadata.playerColor === 'black'
             ? 'Player'
             : `${game.metadata.botPersonality} (${game.metadata.botElo})`,
-        Result: game.result ?? game.metadata.result,
+        Result: game.metadata.result,
       };
 
       // Add optional headers
@@ -219,7 +212,8 @@ export class ExportImportManager {
       const filename = this.generateFilename(`game_${game.gameId.slice(0, 8)}`, 'pgn');
       const outputPath = destinationPath || join(this.exportsPath, filename);
 
-      await writeFile(outputPath, pgnContent, 'utf-8');
+      // Use Bun.write() for faster file I/O (creates directories automatically)
+      await Bun.write(outputPath, pgnContent);
 
       logger.info('ExportManager', 'PGN export complete', { path: outputPath });
 
@@ -288,7 +282,7 @@ export class ExportImportManager {
     }
 
     // Add result
-    const result = game.result ?? game.metadata.result;
+    const result = game.metadata.result;
     moveText += result;
 
     // Wrap lines at ~80 characters
@@ -353,7 +347,7 @@ export class ExportImportManager {
       const filename = this.generateFilename(`game_${game.gameId.slice(0, 8)}`, 'json');
       const outputPath = destinationPath || join(this.exportsPath, filename);
 
-      await writeFile(outputPath, jsonContent, 'utf-8');
+      await Bun.write(outputPath, jsonContent);
 
       logger.info('ExportManager', 'JSON game export complete', { path: outputPath });
 
@@ -417,7 +411,7 @@ export class ExportImportManager {
       const filename = this.generateFilename('all_games', 'json');
       const outputPath = destinationPath || join(this.exportsPath, filename);
 
-      await writeFile(outputPath, jsonContent, 'utf-8');
+      await Bun.write(outputPath, jsonContent);
 
       logger.info('ExportManager', 'Batch export complete', {
         path: outputPath,
@@ -472,7 +466,7 @@ export class ExportImportManager {
       const filename = this.generateFilename('player_profile', 'json');
       const outputPath = destinationPath || join(this.exportsPath, filename);
 
-      await writeFile(outputPath, jsonContent, 'utf-8');
+      await Bun.write(outputPath, jsonContent);
 
       logger.info('ExportManager', 'Profile export complete', { path: outputPath });
 
@@ -532,7 +526,7 @@ export class ExportImportManager {
       const filename = this.generateFilename('chess_sensei_backup', 'json');
       const outputPath = destinationPath || join(this.exportsPath, filename);
 
-      await writeFile(outputPath, jsonContent, 'utf-8');
+      await Bun.write(outputPath, jsonContent);
 
       logger.info('ExportManager', 'Full backup complete', { path: outputPath });
 
@@ -570,7 +564,9 @@ export class ExportImportManager {
     logger.info('ImportManager', 'Importing game from JSON', { path: filePath });
 
     try {
-      const content = await readFile(filePath, 'utf-8');
+      // Use Bun.file().text() for faster file reading
+      const file = Bun.file(filePath);
+      const content = await file.text();
       const data = JSON.parse(content);
 
       // Validate structure
@@ -641,7 +637,8 @@ export class ExportImportManager {
     logger.info('ImportManager', 'Importing batch games', { path: filePath });
 
     try {
-      const content = await readFile(filePath, 'utf-8');
+      const file = Bun.file(filePath);
+      const content = await file.text();
       const data = JSON.parse(content) as BatchGameExport;
 
       // Validate structure
@@ -664,31 +661,29 @@ export class ExportImportManager {
 
       for (let i = 0; i < data.games.length; i++) {
         const game = data.games[i];
+        const gameId = game.gameId; // Capture before type narrowing
 
         if (progressCallback) {
           progressCallback(i + 1, total);
         }
 
         // Check for duplicate by ID
-        if (existingGameIds.has(game.gameId)) {
-          // Calculate content hash to check if truly duplicate (for future enhancement)
-          const _gameHash = this.calculateHash(JSON.stringify(game.moves));
-
-          // For now, skip if ID exists (could be enhanced with content comparison using _gameHash)
+        if (existingGameIds.has(gameId)) {
+          // Skip if ID exists (could be enhanced with content hash comparison in future)
           skipped++;
           details.push({
-            id: game.gameId,
+            id: gameId,
             status: 'skipped',
             reason: 'Duplicate game ID',
           });
           continue;
         }
 
-        // Validate game data
-        if (!this.validateGameData(game)) {
+        // Validate game data structure (runtime validation)
+        if (!this.validateGameData(game as unknown)) {
           errors++;
           details.push({
-            id: game.gameId,
+            id: gameId,
             status: 'error',
             reason: 'Failed validation',
           });
@@ -754,7 +749,8 @@ export class ExportImportManager {
     logger.info('ImportManager', 'Importing from PGN', { path: filePath });
 
     try {
-      const content = await readFile(filePath, 'utf-8');
+      const file = Bun.file(filePath);
+      const content = await file.text();
 
       // Parse PGN
       const parsed = this.parsePGN(content);
@@ -1017,6 +1013,9 @@ export class ExportImportManager {
       lossRate: (records1.lossRate * totalGames1 + records2.lossRate * totalGames2) / totalGames,
       longestWinStreak: Math.max(records1.longestWinStreak, records2.longestWinStreak),
       longestLoseStreak: Math.max(records1.longestLoseStreak, records2.longestLoseStreak),
+      // Current streak can't be meaningfully merged - use the most recent one
+      currentStreak: records2.currentStreak,
+      currentStreakType: records2.currentStreakType,
     };
   }
 

@@ -6,7 +6,7 @@ The project strictly follows the **latest official best practices** for:
 
 - Bun
 - Neutralinojs
-- Buntralino
+- Bun + Neutralino.js (WebSocket IPC Architecture)
 - Modern JavaScript / TypeScript standards
 
 Key technical standards include:

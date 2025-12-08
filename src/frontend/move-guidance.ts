@@ -8,7 +8,7 @@
  * @see source-docs/ui-ux-design.md - "Visual Highlighting System"
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import type { BestMove } from '../shared/engine-types';
 import { formatScore } from '../shared/engine-types';
 import { IPC_METHODS } from '../shared/ipc-types';
@@ -186,7 +186,7 @@ export class MoveGuidanceManager {
     this.onLoadingChange?.(true);
 
     try {
-      const response = (await buntralino.run(IPC_METHODS.GET_GUIDANCE_MOVES, {
+      const response = (await ipc.call(IPC_METHODS.GET_GUIDANCE_MOVES, {
         fen,
         moves,
         count: 3,

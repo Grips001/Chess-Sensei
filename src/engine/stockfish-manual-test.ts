@@ -1,7 +1,10 @@
 /**
- * Test script for Stockfish WASM integration
+ * Manual Test Script for Stockfish WASM integration
  *
- * Run with: bun src/engine/test-stockfish.ts
+ * This is NOT a Bun unit test - it's a manual integration test that requires
+ * the actual Stockfish WASM engine. Run manually when testing engine changes.
+ *
+ * Run with: bun src/engine/stockfish-manual-test.ts
  */
 
 import { loadStockfish } from './stockfish-loader';

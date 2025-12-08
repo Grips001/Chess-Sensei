@@ -1,8 +1,10 @@
 /**
  * Linux Build Script for Chess-Sensei
  *
- * Builds the application for Linux x64 platform only.
- * This avoids cross-compilation issues with Buntralino trying to build all platforms.
+ * Builds a production-ready Linux x64 application with:
+ * - Bun-compiled backend executable (with WebSocket IPC)
+ * - Neutralino 6.4.0 UI runtime
+ * - Stockfish 17.1 WASM engine
  */
 
 import * as fs from 'fs-extra';
@@ -42,17 +44,12 @@ async function buildLinux(): Promise<void> {
   const STOCKFISH_JS = 'stockfish-17.1-lite-single-03e3232.js';
   const STOCKFISH_WASM = 'stockfish-17.1-lite-single-03e3232.wasm';
 
-  // Step 1: Update Neutralino binaries (needed in CI)
-  console.log('📥 Updating Neutralino binaries...');
-  await $`bunx @neutralinojs/neu update`.cwd(projectRoot).quiet();
-  console.log('  ✓ Neutralino binaries updated');
-
-  // Step 2: Build Neutralino
+  // Step 1: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
 
-  // Step 3: Build Bun executable for Linux x64
+  // Step 2: Build Bun executable for Linux x64
   console.log('\n📦 Building Bun executable for Linux x64...');
   const bunExePath = path.join(distDir, `${appName}-linux_x64`);
 
@@ -61,7 +58,7 @@ async function buildLinux(): Promise<void> {
     .quiet();
   console.log('  ✓ Bun executable built');
 
-  // Step 3: Make executable
+  // Step 3: Set permissions
   console.log('\n📁 Setting permissions...');
   await fs.chmod(bunExePath, 0o755);
   await fs.chmod(path.join(distDir, `${appName}-linux_x64`), 0o755);

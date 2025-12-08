@@ -75,6 +75,11 @@ function parseInfoLine(line: string): Partial<PositionEvaluation & { multipv: nu
 
 /**
  * Stockfish Engine implementation
+ *
+ * Phase 9 Optimizations:
+ * - Cached MultiPV setting to avoid redundant UCI commands
+ * - Reduced unnecessary isready calls
+ * - Optimized position/search flow
  */
 export class StockfishEngine implements Engine {
   private engine: StockfishInstance | null = null;
@@ -83,6 +88,9 @@ export class StockfishEngine implements Engine {
   private options: EngineOptions = {};
   private outputBuffer: string[] = [];
   private resolveCallback: ((value: unknown) => void) | null = null;
+
+  // Phase 9: Performance optimization - cache current MultiPV value
+  private currentMultiPV = 1;
 
   /**
    * Create a new Stockfish engine instance
@@ -124,6 +132,7 @@ export class StockfishEngine implements Engine {
 
   /**
    * Set the current position
+   * Phase 9: Removed redundant isready - position is applied synchronously
    */
   async setPosition(fen: string, moves?: string[]): Promise<void> {
     this.ensureInitialized();
@@ -135,23 +144,24 @@ export class StockfishEngine implements Engine {
       positionCmd += ` moves ${moves.join(' ')}`;
     }
 
+    // Position command is synchronous in Stockfish, no need to wait
     this.engine!.postMessage(positionCmd);
-
-    // Position command doesn't produce output, just wait briefly
-    await this.sendCommand('isready', 'readyok');
   }
 
   /**
    * Get best move recommendations
+   * Phase 9: Optimized MultiPV handling with caching
    */
   async getBestMoves(options?: GetBestMovesOptions): Promise<BestMove[]> {
     this.ensureInitialized();
 
     const count = options?.count ?? 1;
 
-    // Set MultiPV if requesting multiple moves
-    if (count > 1) {
+    // Phase 9: Only set MultiPV if it's different from current value
+    if (count !== this.currentMultiPV) {
       await this.sendCommand(`setoption name MultiPV value ${count}`);
+      this.currentMultiPV = count;
+      // Only need isready after changing options
       await this.sendCommand('isready', 'readyok');
     }
 
@@ -199,10 +209,7 @@ export class StockfishEngine implements Engine {
       }
     }
 
-    // Reset MultiPV to 1
-    if (count > 1) {
-      await this.sendCommand('setoption name MultiPV value 1');
-    }
+    // Phase 9: No longer reset MultiPV after each call - cached for next use
 
     return bestMoves;
   }
@@ -235,10 +242,17 @@ export class StockfishEngine implements Engine {
 
   /**
    * Set engine option
+   * Phase 9: Track MultiPV changes for caching optimization
    */
   async setOption(name: string, value: string | number | boolean): Promise<void> {
     this.ensureInitialized();
     await this.sendCommand(`setoption name ${name} value ${value}`);
+
+    // Track MultiPV changes for caching
+    if (name.toLowerCase() === 'multipv') {
+      this.currentMultiPV = typeof value === 'number' ? value : parseInt(String(value), 10);
+    }
+
     await this.sendCommand('isready', 'readyok');
   }
 

@@ -11,7 +11,7 @@
  * @see source-docs/development.md
  */
 
-import * as buntralino from 'buntralino-client';
+import { ipc } from './websocket-ipc-client';
 import { IPC_METHODS } from '../shared/ipc-types';
 import type { LogLevel, LogRequest } from '../shared/logger-types';
 
@@ -32,11 +32,8 @@ class FrontendLogger {
     if (this.initialized) return;
 
     try {
-      // Wait for buntralino connection
-      await buntralino.ready;
-
       // Check if logging is enabled
-      const response = (await buntralino.run(IPC_METHODS.IS_LOGGING_ENABLED)) as {
+      const response = (await ipc.call(IPC_METHODS.IS_LOGGING_ENABLED)) as {
         enabled: boolean;
         success: true;
       };
@@ -44,7 +41,7 @@ class FrontendLogger {
 
       if (this.enabled) {
         // Get log file path
-        const pathResponse = (await buntralino.run(IPC_METHODS.GET_LOG_PATH)) as {
+        const pathResponse = (await ipc.call(IPC_METHODS.GET_LOG_PATH)) as {
           path: string;
           enabled: boolean;
           success: true;
@@ -154,7 +151,7 @@ class FrontendLogger {
    */
   private sendToBackend(log: LogRequest): void {
     // Fire and forget - don't await to avoid blocking
-    buntralino.run(IPC_METHODS.LOG_MESSAGE, log).catch((err) => {
+    ipc.call(IPC_METHODS.LOG_MESSAGE, log).catch((err) => {
       console.warn('[FrontendLogger] Failed to send log to backend:', err);
     });
   }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
   "applicationId": "com.chess-sensei.app",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "applicationName": "Chess-Sensei",
   "author": "Jhon D. Vise",
   "description": "A modern chess training application with real-time AI-assisted move guidance",
@@ -16,7 +16,15 @@
     "enabled": true,
     "writeToLogFile": true
   },
-  "nativeAllowList": ["events.*", "app.*", "os.*", "debug.log"],
+  "nativeAllowList": [
+    "events.*",
+    "app.*",
+    "os.*",
+    "debug.log",
+    "window.setMainMenu",
+    "window.print",
+    "clipboard.writeHTML"
+  ],
   "modes": {
     "window": {
       "title": "Chess-Sensei",
@@ -33,7 +41,9 @@
       "maximize": false,
       "hidden": false,
       "resizable": true,
-      "exitProcessOnClose": true
+      "exitProcessOnClose": true,
+      "injectGlobals": true,
+      "injectClientLibrary": true
     }
   },
   "cli": {
@@ -41,7 +51,7 @@
     "resourcesPath": "/app/",
     "extensionsPath": "/extensions/",
     "distributionPath": "dist",
-    "binaryVersion": "5.6.0",
-    "clientVersion": "5.6.0"
+    "binaryVersion": "6.4.0",
+    "clientVersion": "6.4.0"
   }
 }

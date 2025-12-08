@@ -37,8 +37,8 @@ copied to `app/assets/` during the Vite build stage.
 
 ### Windows Build
 
-For Windows builds, use the custom build script that works around Buntralino's
-pe-library incompatibility:
+For Windows builds, use the custom build script that uses `rcedit` for Windows
+executable metadata patching:
 
 ```bash
 bun run build:windows
@@ -79,43 +79,21 @@ Creates `.app` bundles for both x64 and arm64 architectures.
 
 #### Technical Details
 
-The standard `buntralino build` command fails on Windows with:
-
-```text
-error: After Resource section, sections except for relocation are not supported
-```
-
-This error occurs because:
-
-1. Buntralino uses `pe-library` (via `resedit-cli`) to patch Windows executables
-2. Bun-compiled executables have a PE (Portable Executable) section layout that
-   `pe-library` cannot handle
-3. The error is thrown in `NtExecutableResource.from()` at line 434
-
-**Solution**: Our custom build script (`scripts/build-windows.ts`) uses
-[rcedit](https://github.com/electron/rcedit) instead, which handles Bun
-executables correctly.
-
-### Cross-Platform Build (Standard Buntralino)
-
-For other platforms (macOS, Linux), you can use the standard Buntralino build:
-
-```bash
-bun run build:app
-```
-
-Note: This may fail on Windows due to the pe-library issue described above.
+The Windows build script uses `rcedit` to patch Windows executable metadata
+(icon, version info, etc.). Our custom build script (`scripts/build-windows.ts`)
+uses [rcedit](https://github.com/electron/rcedit) for reliable Windows
+executable patching that works with Bun-compiled executables.
 
 ## Build Scripts
 
-| Script                  | Description                               |
-| ----------------------- | ----------------------------------------- |
-| `bun run dev`           | Development mode with hot reload          |
-| `bun run build`         | Build frontend assets only (Vite → app/)  |
-| `bun run build:windows` | Windows build with rcedit (includes Vite) |
-| `bun run build:linux`   | Linux x64 build (includes Vite)           |
-| `bun run build:macos`   | macOS x64/arm64 build (includes Vite)     |
-| `bun run build:app`     | Full app build via Buntralino (legacy)    |
+| Script                  | Description                                                    |
+| ----------------------- | -------------------------------------------------------------- |
+| `bun run dev`           | Development mode with hot reload                               |
+| `bun run build`         | Build frontend assets only (Vite → app/)                       |
+| `bun run build:windows` | Windows build with rcedit (includes Vite)                      |
+| `bun run build:linux`   | Linux x64 build (includes Vite)                                |
+| `bun run build:macos`   | macOS x64/arm64 build (includes Vite)                          |
+| `bun run build:app`     | Platform-agnostic build (see platform-specific commands above) |
 
 ## Build Output Structure
 

@@ -23,27 +23,32 @@ Benefits:
 - **Deterministic behavior** across Windows, macOS, and Linux.
 - **Single code path** for engine logic, simplifying testing and maintenance.
 
-## WASM Integration in Buntralino
+## WASM Integration with WebSocket IPC
 
-Chess-Sensei uses Buntralino (Bun + Neutralinojs) as the runtime and desktop
-shell. The Stockfish WASM engine is integrated as follows:
+Chess-Sensei uses Bun + Neutralino.js with a WebSocket IPC architecture
+(port 9339) for optimal performance. The Stockfish WASM engine is integrated as
+follows:
 
 - The **Bun backend**:
-  - Loads and initializes the `stockfish.wasm` module at startup.
-  - Maintains one or more persistent engine instances in memory.
+  - Loads and initializes the `stockfish.wasm` module at startup
+  - Maintains one or more persistent engine instances in memory
   - Exposes a clean internal API for:
     - Setting positions (via FEN + move history)
     - Requesting best moves / analysis
     - Controlling search depth, time, and skill level
+  - All communication via WebSocket server (port 9339):
+    - RPC calls for commands (position, analyze, start)
+    - Pub/sub channels for real-time streaming updates
 - The **Neutralino frontend**:
-  - Communicates with the backend via IPC messages such as:
-    - `requestBestMoves`
-    - `evaluatePosition`
-    - `startNewGame`
-  - Receives structured JSON responses that drive:
-    - The **top 3 move suggestions**
-    - Evaluation bars
+  - Sends commands via WebSocket RPC:
+    - `requestBestMoves` - Get top N moves
+    - `evaluatePosition` - Full position analysis
+    - `startNewGame` - Reset engine state
+  - Subscribes to real-time streaming data via WebSocket pub/sub:
+    - The **top 3 move suggestions** (as analysis progresses)
+    - Live evaluation bars
     - Training feedback
+    - Depth/node count progress
 
 ```ts
 interface Engine {
