@@ -51,12 +51,24 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Build frontend assets
-        run: bunx --bun vite build --mode production
+      # Note: Platform-specific build scripts handle frontend building internally
+      # No need for separate frontend build step
 
       - name: Build application (Windows)
         if: matrix.platform == 'windows'
-        run: bun run build:windows
+        shell: pwsh
+        run: |
+          # Run the Windows build script with verbose output
+          bun run build:windows
+          # Debug: List what was created
+          if (Test-Path "dist") {
+            Write-Host "Contents of dist/:"
+            Get-ChildItem -Recurse dist | Select-Object FullName
+          }
+          if (Test-Path "build") {
+            Write-Host "Contents of build/:"
+            Get-ChildItem -Recurse build | Select-Object FullName
+          }
 
       - name: Build application (Linux)
         if: matrix.platform == 'linux'
