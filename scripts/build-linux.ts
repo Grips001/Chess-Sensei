@@ -44,6 +44,11 @@ async function buildLinux(): Promise<void> {
   const STOCKFISH_JS = 'stockfish-17.1-lite-single-03e3232.js';
   const STOCKFISH_WASM = 'stockfish-17.1-lite-single-03e3232.wasm';
 
+  // Step 0: Build frontend with Vite (compiles TS/CSS and copies public/ to app/)
+  console.log('\n🏗️  Building frontend with Vite...');
+  await $`bun run build`.cwd(projectRoot).quiet();
+  console.log('  ✓ Vite build complete (frontend + assets)');
+
   // Step 1: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();

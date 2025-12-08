@@ -165,10 +165,24 @@ async function buildMacOS(): Promise<void> {
   const appName = config.cli.binaryName;
   const distDir = path.join(projectRoot, config.cli.distributionPath ?? 'dist', appName);
 
+  // Step 0: Build frontend with Vite (compiles TS/CSS and copies public/ to app/)
+  console.log('\n🏗️  Building frontend with Vite...');
+  await $`bun run build`.cwd(projectRoot).quiet();
+  console.log('  ✓ Vite build complete (frontend + assets)');
+
   // Step 1: Build Neutralino
   console.log('\n📦 Building Neutralino.js app...');
   await $`bunx @neutralinojs/neu build`.cwd(projectRoot).quiet();
   console.log('  ✓ Neutralino build complete');
+
+  // Debug: List Neutralino build output
+  console.log(`  → Looking for files in: ${distDir}`);
+  if (await fs.pathExists(distDir)) {
+    const neuFiles = await fs.readdir(distDir);
+    console.log(`  → Neutralino output files: ${neuFiles.join(', ')}`);
+  } else {
+    console.log(`  ⚠ Warning: Neutralino output directory not found: ${distDir}`);
+  }
 
   // Step 2: Build for both architectures
   await createMacOSBundle(config, distDir, 'x64');
