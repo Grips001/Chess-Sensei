@@ -2704,12 +2704,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgb(255 255 255 / 30%),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 30%), transparent);
   animation: progressShimmer 1.5s infinite;
 }
 
@@ -5645,6 +5640,10 @@ body {
   align-items: center;
   justify-content: center;
   overflow-y: auto;
+}
+
+.sandbox-overlay.hidden {
+  display: none;
 }
 
 .sandbox-container {

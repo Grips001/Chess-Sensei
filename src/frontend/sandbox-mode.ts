@@ -776,21 +776,8 @@ export class SandboxUIManager {
   private setupModeSelectionListeners(): void {
     const sandboxCard = document.querySelector('.mode-card[data-mode="sandbox"]');
     if (sandboxCard) {
-      // Remove disabled state (Phase 7 enables Sandbox Mode)
-      sandboxCard.classList.remove('disabled');
-      sandboxCard.classList.add('available');
-
-      // Update button
-      const button = sandboxCard.querySelector('.mode-card-button');
-      if (button) {
-        (button as HTMLButtonElement).disabled = false;
-        button.textContent = 'Start Sandbox';
-      }
-
       sandboxCard.addEventListener('click', () => {
-        if (!sandboxCard.classList.contains('disabled')) {
-          this.showSandboxMode();
-        }
+        this.showSandboxMode();
       });
     }
   }

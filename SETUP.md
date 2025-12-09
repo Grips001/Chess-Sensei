@@ -141,8 +141,8 @@ bun run format
   templates, engine analysis
 - ✅ **Phase 8:** Import/export system, data management UI, automatic backups,
   PGN/JSON export
-- ✅ **Phase 9:** Polish & optimization, WCAG AA accessibility, responsive design,
-  performance improvements, comprehensive test suite (114 tests)
+- ✅ **Phase 9:** Polish & optimization, WCAG AA accessibility, responsive
+  design, performance improvements, comprehensive test suite (114 tests)
 
 All nine development phases are complete. Chess-Sensei v1.0 release is next.
 
@@ -164,7 +164,8 @@ According to the roadmap, v1.0 Public Release involves:
 
 - **Documentation:** See [`documents/`](documents/) folder for all guides
 - **Building:** [documents/building.md](documents/building.md)
-- **Engine Details:** [documents/engine-integration.md](documents/engine-integration.md)
+- **Engine Details:**
+  [documents/engine-integration.md](documents/engine-integration.md)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Useful Commands

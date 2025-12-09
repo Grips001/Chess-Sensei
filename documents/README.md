@@ -4,20 +4,20 @@ This directory contains all user and technical documentation for Chess-Sensei.
 
 ## Quick Navigation
 
-| I want to...                | Go to                                           |
-| --------------------------- | ----------------------------------------------- |
-| Get started quickly         | [Quick Start Guide](quick-start.md)             |
-| Learn all features          | [User Guide](user-guide.md)                     |
-| Play against AI             | [Training Mode Guide](training-mode-guide.md)   |
-| Test my skills              | [Exam Mode & Metrics](exam-mode-metrics.md)     |
-| Review my games             | [Post-Game Analysis](post-game-analysis.md)     |
-| Track my progress           | [Progress Dashboard](progress-dashboard.md)     |
-| Analyze positions           | [Sandbox Mode](sandbox-mode.md)                 |
-| Backup/export my data       | [Data Management](data-management.md)           |
-| Fix a problem               | [Troubleshooting](troubleshooting.md)           |
-| Find answers                | [FAQ](faq.md)                                   |
-| Build from source           | [Building Guide](building.md)                   |
-| Understand the chess engine | [Engine Integration](engine-integration.md)     |
+| I want to...                | Go to                                         |
+| --------------------------- | --------------------------------------------- |
+| Get started quickly         | [Quick Start Guide](quick-start.md)           |
+| Learn all features          | [User Guide](user-guide.md)                   |
+| Play against AI             | [Training Mode Guide](training-mode-guide.md) |
+| Test my skills              | [Exam Mode & Metrics](exam-mode-metrics.md)   |
+| Review my games             | [Post-Game Analysis](post-game-analysis.md)   |
+| Track my progress           | [Progress Dashboard](progress-dashboard.md)   |
+| Analyze positions           | [Sandbox Mode](sandbox-mode.md)               |
+| Backup/export my data       | [Data Management](data-management.md)         |
+| Fix a problem               | [Troubleshooting](troubleshooting.md)         |
+| Find answers                | [FAQ](faq.md)                                 |
+| Build from source           | [Building Guide](building.md)                 |
+| Understand the chess engine | [Engine Integration](engine-integration.md)   |
 
 ## Documentation Index
 

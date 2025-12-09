@@ -125,9 +125,8 @@ bun run lint:format  # Prettier check (no write)
 
 ## Documentation
 
-All user-facing features should be documented in the
-[`documents/`](documents/) directory. See existing documentation for style and
-structure guidelines.
+All user-facing features should be documented in the [`documents/`](documents/)
+directory. See existing documentation for style and structure guidelines.
 
 ## Testing
 

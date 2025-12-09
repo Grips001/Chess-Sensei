@@ -316,7 +316,7 @@ return to normal orientation.
 
 **Workaround:** Adjust system volume or application volume in your OS mixer.
 
-**Coming Soon:** In-app volume slider planned for future update!
+**Future Enhancement:** In-app volume slider planned for a future update.
 
 ### Wrong Sound Plays
 
@@ -390,7 +390,7 @@ Have an idea for improvement?
 
 Current known limitations (will be addressed in future updates):
 
-1. **No volume control:** Fixed at 50% (settings panel coming soon)
+1. **No volume control:** Fixed at 50% (settings panel planned for future)
 2. **No time controls:** Untimed games only (chess clock planned for future
    release)
 

@@ -185,70 +185,105 @@ export interface BotConfigResponse {
 /**
  * IPC Method Names
  * All available backend methods that can be called via ipc.call()
+ * All methods are prefixed with 'chess:' namespace for consistency
  */
 export const IPC_METHODS = {
   /** Health check method */
-  SAY_HELLO: 'sayHello',
+  SAY_HELLO: 'chess:sayHello',
   /** Start a new game (clears engine state) */
-  START_NEW_GAME: 'startNewGame',
+  START_NEW_GAME: 'chess:startNewGame',
   /** Get best move recommendations */
-  REQUEST_BEST_MOVES: 'requestBestMoves',
+  REQUEST_BEST_MOVES: 'chess:requestBestMoves',
   /** Evaluate a position */
-  EVALUATE_POSITION: 'evaluatePosition',
+  EVALUATE_POSITION: 'chess:evaluatePosition',
   /** Analyze a played move (CPL, classification) */
-  ANALYZE_MOVE: 'analyzeMove',
+  ANALYZE_MOVE: 'chess:analyzeMove',
   /** Get top 3 guidance moves for Training Mode */
-  GET_GUIDANCE_MOVES: 'getGuidanceMoves',
+  GET_GUIDANCE_MOVES: 'chess:getGuidanceMoves',
   /** Set engine skill level (0-20) */
-  SET_SKILL_LEVEL: 'setSkillLevel',
+  SET_SKILL_LEVEL: 'chess:setSkillLevel',
   /** Get engine initialization status */
-  GET_ENGINE_STATUS: 'getEngineStatus',
+  GET_ENGINE_STATUS: 'chess:getEngineStatus',
 
   // Phase 3: AI Opponent Methods
   /** Configure bot opponent personality, difficulty, and play mode */
-  CONFIGURE_BOT: 'configureBot',
+  CONFIGURE_BOT: 'chess:configureBot',
   /** Get move from AI opponent */
-  GET_BOT_MOVE: 'getBotMove',
+  GET_BOT_MOVE: 'chess:getBotMove',
   /** Get all available bot personalities */
-  GET_BOT_PROFILES: 'getBotProfiles',
+  GET_BOT_PROFILES: 'chess:getBotProfiles',
   /** Get current bot configuration */
-  GET_CURRENT_BOT_CONFIG: 'getCurrentBotConfig',
+  GET_CURRENT_BOT_CONFIG: 'chess:getCurrentBotConfig',
   /** Get difficulty presets */
-  GET_DIFFICULTY_PRESETS: 'getDifficultyPresets',
+  GET_DIFFICULTY_PRESETS: 'chess:getDifficultyPresets',
 
   // Phase 4: Analysis Pipeline Methods
   /** Analyze an Exam Mode game (batch analysis, CPL, classification) */
-  ANALYZE_GAME: 'analyzeGame',
+  ANALYZE_GAME: 'chess:analyzeGame',
   /** Get analysis depth configuration */
-  GET_ANALYSIS_CONFIG: 'getAnalysisConfig',
+  GET_ANALYSIS_CONFIG: 'chess:getAnalysisConfig',
   /** Calculate metrics from game analysis (9 composite scores) */
-  CALCULATE_METRICS: 'calculateMetrics',
+  CALCULATE_METRICS: 'chess:calculateMetrics',
 
   // Phase 4: Data Storage Methods
   /** Initialize data storage directory structure */
-  INITIALIZE_STORAGE: 'initializeStorage',
+  INITIALIZE_STORAGE: 'chess:initializeStorage',
   /** Save game data to local storage */
-  SAVE_GAME: 'saveGame',
+  SAVE_GAME: 'chess:saveGame',
   /** Save analysis data to local storage */
-  SAVE_ANALYSIS: 'saveAnalysis',
+  SAVE_ANALYSIS: 'chess:saveAnalysis',
   /** Get list of saved games */
-  GET_GAMES_LIST: 'getGamesList',
+  GET_GAMES_LIST: 'chess:getGamesList',
   /** Load a saved game by ID */
-  LOAD_GAME: 'loadGame',
+  LOAD_GAME: 'chess:loadGame',
   /** Load analysis for a game by ID */
-  LOAD_ANALYSIS: 'loadAnalysis',
+  LOAD_ANALYSIS: 'chess:loadAnalysis',
   /** Get the storage base path */
-  GET_STORAGE_PATH: 'getStoragePath',
+  GET_STORAGE_PATH: 'chess:getStoragePath',
 
   // Phase 6: Player Progress Methods
   /** Load player profile with aggregated metrics */
-  LOAD_PLAYER_PROFILE: 'loadPlayerProfile',
+  LOAD_PLAYER_PROFILE: 'chess:loadPlayerProfile',
   /** Save updated player profile */
-  SAVE_PLAYER_PROFILE: 'savePlayerProfile',
+  SAVE_PLAYER_PROFILE: 'chess:savePlayerProfile',
   /** Get achievement list with unlock status */
-  GET_ACHIEVEMENTS: 'getAchievements',
+  GET_ACHIEVEMENTS: 'chess:getAchievements',
   /** Unlock an achievement */
-  UNLOCK_ACHIEVEMENT: 'unlockAchievement',
+  UNLOCK_ACHIEVEMENT: 'chess:unlockAchievement',
+
+  // Phase 8: Export/Import Methods
+  /** Export a single game to PGN */
+  EXPORT_GAME: 'chess:exportGame',
+  /** Export all games to a zip file */
+  EXPORT_ALL_GAMES: 'chess:exportAllGames',
+  /** Export player profile */
+  EXPORT_PROFILE: 'chess:exportProfile',
+  /** Export full backup */
+  EXPORT_BACKUP: 'chess:exportBackup',
+  /** Import a single game */
+  IMPORT_GAME: 'chess:importGame',
+  /** Import multiple games */
+  IMPORT_BATCH_GAMES: 'chess:importBatchGames',
+  /** Merge profiles */
+  MERGE_PROFILES: 'chess:mergeProfiles',
+  /** Get exports path */
+  GET_EXPORTS_PATH: 'chess:getExportsPath',
+
+  // Phase 8: Backup Methods
+  /** Get backup settings */
+  GET_BACKUP_SETTINGS: 'chess:getBackupSettings',
+  /** Save backup settings */
+  SAVE_BACKUP_SETTINGS: 'chess:saveBackupSettings',
+  /** Check if backup is needed */
+  CHECK_BACKUP_NEEDED: 'chess:checkBackupNeeded',
+  /** Create automatic backup */
+  CREATE_AUTOMATIC_BACKUP: 'chess:createAutomaticBackup',
+  /** List backups */
+  LIST_BACKUPS: 'chess:listBackups',
+  /** Verify backup integrity */
+  VERIFY_BACKUP: 'chess:verifyBackup',
+  /** Get backups path */
+  GET_BACKUPS_PATH: 'chess:getBackupsPath',
 
   // Debug Logging Methods (--dev mode only)
   /** Log a message from frontend to backend file logger */
