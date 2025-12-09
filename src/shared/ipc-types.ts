@@ -3,9 +3,6 @@
  *
  * Shared type definitions for WebSocket IPC calls (port 9339).
  * These types are used by both frontend and backend.
- *
- * @see source-docs/architecture.md - "Backend / Logic Layer"
- * @see source-docs/ai-engine.md - "WASM Integration with WebSocket IPC"
  */
 
 import type { BestMove, PositionEvaluation, MoveAnalysis } from './engine-types';

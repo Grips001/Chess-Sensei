@@ -3,8 +3,6 @@
  *
  * Defines the core interfaces for chess engine integration.
  * These types are shared between frontend and backend.
- *
- * @see source-docs/ai-engine.md for full specification
  */
 
 /**

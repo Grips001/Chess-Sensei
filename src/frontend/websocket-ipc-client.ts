@@ -10,8 +10,6 @@
  * - Automatic reconnection with exponential backoff
  * - Request ID tracking for async operations
  * - TypeScript types for all operations
- *
- * @see source-docs/architecture.md - "WebSocket IPC Architecture"
  */
 
 /**

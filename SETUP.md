@@ -14,9 +14,6 @@ architecture (Bun backend + Neutralino.js 6.4.0 frontend).
 
 ### 2. Directory Structure
 
-Created the following structure as per
-[architecture.md](source-docs/architecture.md):
-
 ```text
 Chess-Sensei/
 ├── src/
@@ -27,8 +24,9 @@ Chess-Sensei/
 │   └── assets/          # Source assets (development only)
 ├── public/              # Static files (copied to app/ during build)
 │   └── assets/          # Chess pieces, icons, sounds
-├── source-docs/         # Design & development specifications
-├── documents/           # End-user documentation
+├── documents/           # User guides and technical documentation
+├── tests/               # Test suites
+├── scripts/             # Build and utility scripts
 └── Configuration files
 ```
 
@@ -43,7 +41,7 @@ Chess-Sensei/
 
 - Created README files in each source directory
 - Added CONTRIBUTING.md with development guidelines
-- All comprehensive docs already in `source-docs/` folder
+- Complete documentation in `documents/` folder
 
 ### 5. Initial Code
 
@@ -146,7 +144,7 @@ bun run format
 - ✅ **Phase 9:** Polish & optimization, WCAG AA accessibility, responsive design,
   performance improvements, comprehensive test suite (114 tests)
 
-See [roadmap.md](source-docs/roadmap.md) for full development plan.
+All nine development phases are complete. Chess-Sensei v1.0 release is next.
 
 ## Next Steps
 
@@ -164,9 +162,9 @@ According to the roadmap, v1.0 Public Release involves:
 
 ## Development Resources
 
-- **Documentation:** See `source-docs/` folder for comprehensive guides
-- **Architecture:** [source-docs/architecture.md](source-docs/architecture.md)
-- **Roadmap:** [source-docs/roadmap.md](source-docs/roadmap.md)
+- **Documentation:** See [`documents/`](documents/) folder for all guides
+- **Building:** [documents/building.md](documents/building.md)
+- **Engine Details:** [documents/engine-integration.md](documents/engine-integration.md)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Useful Commands
@@ -231,7 +229,5 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei is ready for active development. Phase 8 (Import/Export & Data
-Management) is complete with version v0.8.0.
-
-Next up: Phase 9 - Polish & Optimization!
+Chess-Sensei development is complete through Phase 9 (v0.9.0). The application
+is ready for v1.0 public release.

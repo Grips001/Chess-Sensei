@@ -169,6 +169,6 @@ allowing you to re-analyze the new position.
 
 ## Related Documentation
 
-- [Game Modes Overview](../source-docs/game-modes.md)
-- [Move Guidance System](../source-docs/move-guidance.md)
-- [User Guide](./user-guide.md)
+- [User Guide](./user-guide.md) - Complete feature overview
+- [Training Mode Guide](./training-mode-guide.md) - AI opponents and guidance
+- [Post-Game Analysis](./post-game-analysis.md) - Game review and analysis

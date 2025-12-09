@@ -7,9 +7,6 @@
  * - Allows single-position analysis (no game progression)
  * - No metrics or game state persistence
  * - Pure exploration and analysis tool
- *
- * @see source-docs/game-modes.md - "Sandbox Mode"
- * @see source-docs/TASKS.md - Phase 7
  */
 
 import { ipc } from './websocket-ipc-client';

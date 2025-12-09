@@ -2,15 +2,13 @@
  * Data Storage Module
  *
  * Handles all data persistence for Exam Mode games, analysis results,
- * and player metrics. Implements the storage patterns from data-storage.md.
+ * and player metrics.
  *
- * Storage Philosophy (per data-storage.md):
+ * Storage Philosophy:
  * 1. Privacy First - All data stored locally by default
  * 2. Offline First - No dependencies on external services
  * 3. Portability - Standard JSON format for easy export/import
  * 4. Durability - Atomic writes, corruption detection, backups
- *
- * @see source-docs/data-storage.md
  */
 
 import { join } from 'path';

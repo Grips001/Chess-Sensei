@@ -2,9 +2,6 @@
  * Sound Manager for Chess-Sensei
  *
  * Handles playing sound effects for chess moves and game events.
- * Per Task 2.2.5: Move sound effects
- *
- * @see source-docs/TASKS.md - Task 2.2.5
  */
 
 export type SoundType =

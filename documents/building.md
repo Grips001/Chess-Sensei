@@ -162,6 +162,6 @@ bun install
 
 ## Related Documentation
 
-- [engine-integration.md](./engine-integration.md) - Chess engine details
-- [architecture.md](../source-docs/architecture.md) - System architecture
-- [development.md](../source-docs/development.md) - Development workflow
+- [Engine Integration](./engine-integration.md) - Chess engine details
+- [Troubleshooting](./troubleshooting.md) - Common problems and solutions
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Development workflow

@@ -275,6 +275,6 @@ The WASM module uses ~50-100MB. For long sessions:
 
 ## Related Documentation
 
-- [ai-engine.md](../source-docs/ai-engine.md) - Engine specification
-- [architecture.md](../source-docs/architecture.md) - System architecture
-- [roadmap.md](../source-docs/roadmap.md) - Development phases
+- [Building Guide](./building.md) - Build instructions
+- [Training Mode Guide](./training-mode-guide.md) - AI opponents and guidance
+- [Troubleshooting](./troubleshooting.md) - Common problems and solutions

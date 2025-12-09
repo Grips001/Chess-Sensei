@@ -1,12 +1,11 @@
 /**
  * Chess Logic Test Suite
  *
- * Phase 9: Comprehensive tests for core chess functionality.
+ * Comprehensive tests for core chess functionality.
  * Tests the ChessGame class, move validation, game state detection,
  * and various chess scenarios.
  *
  * @see src/shared/chess-logic.ts
- * @see source-docs/development.md - "Testing Strategy"
  */
 
 import { describe, test, expect, beforeEach } from 'bun:test';

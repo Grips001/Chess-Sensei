@@ -1,8 +1,6 @@
 /**
  * Export/Import Manager Module
  *
- * Phase 8: Import/Export & Data Management
- *
  * Handles all data export and import functionality:
  * - Export single game (PGN, JSON)
  * - Export all games (batch JSON)
@@ -11,8 +9,6 @@
  * - Import single/batch games (JSON)
  * - Import from PGN
  * - Merge player profiles
- *
- * @see source-docs/data-storage.md - "Import & Export" section
  */
 
 import { join } from 'path';

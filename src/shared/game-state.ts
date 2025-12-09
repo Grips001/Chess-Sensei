@@ -3,9 +3,6 @@
  *
  * Defines the game state management for Training Mode and other game modes.
  * Handles mode selection, game initialization, and state transitions.
- *
- * @see source-docs/game-modes.md - "Training Mode"
- * @see source-docs/game-modes.md - "Game Mode Comparison Table"
  */
 
 import type { BotPersonality, DifficultyPreset, AIPlayMode } from './bot-types';

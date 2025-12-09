@@ -3,9 +3,6 @@
  *
  * Handles bot move selection from the chess engine with human-like behavior.
  * Implements personality-based move selection, difficulty scaling, and timing.
- *
- * @see source-docs/ai-engine.md - "Bot Personalities & Human-Like Play"
- * @see source-docs/ai-engine.md - "Difficulty & Strength Scaling"
  */
 
 import type { StockfishEngine } from '../engine/stockfish-engine';

@@ -1,8 +1,7 @@
 /**
  * Post-Game Analysis Pipeline
  *
- * Implements the analysis pipeline for Exam Mode games as specified in
- * post-game-analysis.md and player-progress.md.
+ * Implements the analysis pipeline for Exam Mode games.
  *
  * Pipeline flow:
  * 1. Game Completion (Exam Mode)
@@ -16,9 +15,6 @@
  * 9. Generate recommendations
  * 10. Save analysis results to JSON
  * 11. Render analysis UI
- *
- * @see source-docs/post-game-analysis.md - "Analysis Pipeline"
- * @see source-docs/player-progress.md - "Metrics Collection Pipeline"
  */
 
 import type { StockfishEngine } from '../engine/stockfish-engine';

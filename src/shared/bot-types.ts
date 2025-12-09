@@ -3,9 +3,6 @@
  *
  * Defines the AI opponent system including bot personalities,
  * difficulty levels, and behavioral profiles.
- *
- * @see source-docs/ai-engine.md - "Bot Personalities & Human-Like Play"
- * @see source-docs/ai-engine.md - "Difficulty & Strength Scaling"
  */
 
 /**

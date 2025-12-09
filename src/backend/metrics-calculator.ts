@@ -1,8 +1,7 @@
 /**
  * Metrics Calculator
  *
- * Calculates all 9 composite score indexes from game analysis data
- * as specified in tracked-metrics.md and player-progress.md.
+ * Calculates all 9 composite score indexes from game analysis data.
  *
  * Master Composite Indexes:
  * 1. Precision Score - Move accuracy and error avoidance
@@ -14,9 +13,6 @@
  * 7. Aggression & Risk Score - Playing style indicator
  * 8. Simplification Preference Score - Trading patterns
  * 9. Training Transfer Score - Improvement trends
- *
- * @see source-docs/tracked-metrics.md
- * @see source-docs/player-progress.md
  */
 
 import type { GameAnalysis, AnalyzedMove } from './analysis-pipeline';

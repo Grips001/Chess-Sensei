@@ -131,4 +131,4 @@ as part of post-migration modernization:
 
 - **Audit Document:** `TESTING_INFRASTRUCTURE_AUDIT.md`
 - **Bun Test Docs:** <https://bun.sh/docs/cli/test>
-- **Project Docs:** `source-docs/development.md`
+- **Contributing:** [CONTRIBUTING.md](../CONTRIBUTING.md)

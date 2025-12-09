@@ -3,9 +3,6 @@
  *
  * Provides real-time best-move guidance for Training Mode.
  * Shows top 3 moves with color-coded highlighting (Blue/Green/Yellow).
- *
- * @see source-docs/move-guidance.md - "Best-Move Guidance System"
- * @see source-docs/ui-ux-design.md - "Visual Highlighting System"
  */
 
 import { ipc } from './websocket-ipc-client';

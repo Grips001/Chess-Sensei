@@ -112,5 +112,4 @@ bun add stockfish
 
 - [Stockfish.js GitHub](https://github.com/nmrugg/stockfish.js)
 - [Stockfish Official](https://stockfishchess.org/)
-- [ai-engine.md](../../source-docs/ai-engine.md)
-- [architecture.md](../../source-docs/architecture.md)
+- [Engine Integration](../../documents/engine-integration.md)

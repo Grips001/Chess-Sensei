@@ -3,9 +3,6 @@
  *
  * This file initializes the Bun backend and sets up IPC with the frontend.
  * Provides engine operations and game logic via WebSocket IPC (port 9339).
- *
- * @see source-docs/architecture.md - "Backend / Logic Layer"
- * @see source-docs/ai-engine.md - "WASM Integration with WebSocket IPC"
  */
 
 let devMode = false;

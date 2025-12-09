@@ -18,8 +18,6 @@ let neuProcess: ChildProcess | null = null;
  * - Icon copying during build
  * - Starting Bun backend (WebSocket server on port 9339)
  * - Starting Neutralino UI shell
- *
- * @see source-docs/architecture.md - "WebSocket IPC Architecture"
  */
 const chessenseiDev = (): PluginOption => [
   {

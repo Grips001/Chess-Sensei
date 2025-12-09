@@ -44,8 +44,9 @@ Chess-Sensei/
 │   └── assets/       # Source assets (development only)
 ├── public/           # Static files (copied to app/ during build)
 │   └── assets/       # Chess pieces, icons, sounds
-├── source-docs/      # Design & development specifications
-└── documents/        # End-user documentation
+├── documents/        # User guides and technical documentation
+├── tests/            # Test suites
+└── scripts/          # Build and utility scripts
 ```
 
 ## Development Workflow
@@ -124,8 +125,9 @@ bun run lint:format  # Prettier check (no write)
 
 ## Documentation
 
-All major features should be documented in the [`source-docs/`](source-docs/)
-directory. See existing documentation for style and structure guidelines.
+All user-facing features should be documented in the
+[`documents/`](documents/) directory. See existing documentation for style and
+structure guidelines.
 
 ## Testing
 
@@ -145,7 +147,7 @@ Formal test framework (Jest/Vitest) coming in future phases.
 
 ## Questions?
 
-- Check the [documentation](source-docs/)
+- Check the [documentation](documents/)
 - Open an issue for clarification
 - Join discussions in pull requests
 

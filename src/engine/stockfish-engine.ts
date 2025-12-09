@@ -5,7 +5,6 @@
  * Provides a clean abstraction over UCI protocol communication.
  *
  * @see src/shared/engine-types.ts for interface definitions
- * @see source-docs/ai-engine.md for specification
  */
 
 import {

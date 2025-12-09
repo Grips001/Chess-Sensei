@@ -17,5 +17,4 @@ All assets must meet:
 - High readability at various sizes
 - Consistent with neomorphism + glassmorphism design
 
-See [architecture.md](../../source-docs/architecture.md) for asset sourcing
-strategy.
+See [ATTRIBUTIONS.md](../../ATTRIBUTIONS.md) for licensing details.

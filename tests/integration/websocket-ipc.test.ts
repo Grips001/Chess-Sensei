@@ -6,7 +6,6 @@
  *
  * @see src/frontend/websocket-ipc-client.ts
  * @see src/backend/websocket-server.ts
- * @see source-docs/architecture.md - "WebSocket IPC Architecture"
  */
 
 import { describe, test, expect, mock } from 'bun:test';

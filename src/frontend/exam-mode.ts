@@ -6,10 +6,6 @@
  * - Disables all guidance (no best-move hints)
  * - Records complete game history
  * - Tracks all metrics for post-game analysis
- *
- * @see source-docs/game-modes.md - "Exam Mode"
- * @see source-docs/tracked-metrics.md - Complete metrics reference
- * @see source-docs/post-game-analysis.md - Analysis pipeline
  */
 
 import { ipc } from './websocket-ipc-client';

@@ -54,52 +54,38 @@ system**:
 
 ## Documentation
 
-### Design & Development Specifications
+Complete documentation is available in the [`documents/`](documents/) directory:
 
-Comprehensive design documentation is available in the
-[`source-docs/`](source-docs/) directory:
+### User Guides
 
-### Core Concept & Design
+- [**Quick Start Guide**](documents/quick-start.md) --- Get started in under 2
+  minutes
+- [**User Guide**](documents/user-guide.md) --- Complete guide to all features
+- [**Training Mode Guide**](documents/training-mode-guide.md) --- AI opponents
+  and move guidance
+- [**Exam Mode & Metrics**](documents/exam-mode-metrics.md) --- Test skills and
+  view performance scores
+- [**Post-Game Analysis**](documents/post-game-analysis.md) --- Review games
+  with move-by-move analysis
+- [**Progress Dashboard**](documents/progress-dashboard.md) --- Track
+  improvement with radar charts and achievements
+- [**Sandbox Mode**](documents/sandbox-mode.md) --- Board editor and position
+  analysis
+- [**Data Management**](documents/data-management.md) --- Export, import, and
+  backup your data
 
-- [**Overview**](source-docs/overview.md) --- Game concept, core features, and
-  training philosophy
-- [**UI/UX Design**](source-docs/ui-ux-design.md) --- Visual theme, layout, and
-  interaction patterns
-- [**Game Modes**](source-docs/game-modes.md) --- Training, Exam, and Sandbox
-  modes explained
+### Reference
 
-### Technical Architecture
-
-- [**Architecture**](source-docs/architecture.md) --- Technical stack, platform
-  goals, and system design
-- [**AI Engine**](source-docs/ai-engine.md) --- Stockfish WASM integration, bot
-  personalities, and difficulty scaling
-- [**Move Guidance**](source-docs/move-guidance.md) --- Best-move guidance
-  system and visual highlighting
-
-### Player Progress & Analytics
-
-- [**Player Progress**](source-docs/player-progress.md) --- Metrics tracking,
-  composite scores, and visual analytics
-- [**Tracked Metrics**](source-docs/tracked-metrics.md) --- Complete list of all
-  performance metrics
-- [**Post-Game Analysis**](source-docs/post-game-analysis.md) --- Review tools,
-  mistake analysis, and deep analytics
-
-### Data & Development
-
-- [**Data Storage**](source-docs/data-storage.md) --- Local storage,
-  import/export, and data management
-- [**Development**](source-docs/development.md) --- Best practices, GitHub
-  workflow, and contributing guidelines
-- [**Roadmap**](source-docs/roadmap.md) --- Development phases, milestones, and
-  future plans
+- [**FAQ**](documents/faq.md) --- Frequently asked questions
+- [**Troubleshooting**](documents/troubleshooting.md) --- Common problems and
+  solutions
 - [**Changelog**](CHANGELOG.md) --- Version history and release notes
 
-### End-User Documentation
+### Technical Documentation
 
-User guides and operational documentation will be available in the
-[`documents/`](documents/) directory as features are implemented.
+- [**Building Guide**](documents/building.md) --- Build from source
+- [**Engine Integration**](documents/engine-integration.md) --- Chess engine
+  technical details
 
 ## Project Status
 
@@ -194,8 +180,7 @@ User guides and operational documentation will be available in the
   - Comprehensive test suite (114 tests, 40 chess logic tests)
   - In-app user guide with keyboard shortcuts reference
 
-See [roadmap.md](source-docs/roadmap.md) and [TASKS.md](source-docs/TASKS.md)
-for detailed development plan and current progress.
+All nine development phases are complete. Chess-Sensei v1.0 release is next.
 
 ## Download
 
@@ -272,13 +257,7 @@ See [SETUP.md](SETUP.md) for complete setup documentation and
 
 ## Contributing
 
-Interested in contributing? Check out our guidelines:
-
-- [**CONTRIBUTING.md**](CONTRIBUTING.md) --- Contribution workflow and standards
-- [**source-docs/development.md**](source-docs/development.md) --- Development
-  best practices
-
-Key resources:
+Interested in contributing? See [**CONTRIBUTING.md**](CONTRIBUTING.md) for:
 
 - Project structure and conventions
 - Development workflow

@@ -1,14 +1,7 @@
 /**
  * Data Management UI Module
  *
- * Phase 8: Import/Export & Data Management
- *
- * Provides UI for:
- * - Task 8.3.1: Export flow UI
- * - Task 8.3.2: Import flow UI
- * - Task 8.5: Data Management UI
- *
- * @see source-docs/data-storage.md - "Export/Import UI Flow" section
+ * Provides UI for data export, import, and backup management.
  */
 
 import { os } from '@neutralinojs/lib';

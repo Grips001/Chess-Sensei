@@ -3,9 +3,6 @@
  *
  * Implements the comprehensive post-game analysis interface for Exam Mode games.
  * Provides move-by-move review, evaluation graphs, mistake analysis, and more.
- *
- * @see source-docs/post-game-analysis.md
- * @see source-docs/TASKS.md - Phase 5
  */
 
 import { ipc } from './websocket-ipc-client';

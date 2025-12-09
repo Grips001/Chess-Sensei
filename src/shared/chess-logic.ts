@@ -3,9 +3,6 @@
  *
  * Wrapper module for chess.js providing move validation, board state management,
  * FEN/PGN parsing, and game state detection.
- *
- * @see source-docs/data-storage.md for game data formats
- * @see source-docs/player-progress.md for move classification thresholds
  */
 
 import { Chess, type Move, type Square, type PieceSymbol, type Color } from 'chess.js';

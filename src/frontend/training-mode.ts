@@ -3,10 +3,6 @@
  *
  * Handles Training Mode game flow, bot opponent integration,
  * and move guidance system for the frontend.
- *
- * @see source-docs/game-modes.md - "Training Mode"
- * @see source-docs/ai-engine.md - "Bot Personalities"
- * @see source-docs/move-guidance.md - "Best-Move Guidance System"
  */
 
 import { ipc } from './websocket-ipc-client';

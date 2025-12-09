@@ -8,8 +8,6 @@
  * the actual Stockfish WASM engine. Run manually when testing AI changes.
  *
  * Run with: bun src/backend/ai-opponent-manual-test.ts
- *
- * @see source-docs/ai-engine.md - "Difficulty & Strength Scaling"
  */
 
 import { createEngine } from '../engine/stockfish-engine';

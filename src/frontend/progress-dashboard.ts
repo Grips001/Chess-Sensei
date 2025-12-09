@@ -4,10 +4,6 @@
  * Implements the comprehensive player progress tracking interface.
  * Displays composite scores, trend graphs, game history, and analytics
  * across all Exam Mode games played.
- *
- * @see source-docs/player-progress.md
- * @see source-docs/tracked-metrics.md
- * @see source-docs/TASKS.md - Phase 6
  */
 
 import { ipc } from './websocket-ipc-client';

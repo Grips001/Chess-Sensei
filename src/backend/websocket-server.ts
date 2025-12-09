@@ -8,8 +8,6 @@
  * - engine:*    - Real-time engine analysis updates (depth, eval, PV)
  * - progress:*  - Player progress and achievement updates
  * - sync:*      - Data synchronization events
- *
- * @see source-docs/architecture.md - "WebSocket IPC Architecture"
  */
 
 import { ServerWebSocket } from 'bun';

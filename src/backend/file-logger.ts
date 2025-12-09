@@ -7,8 +7,6 @@
  * Usage:
  *   import { logger } from './file-logger';
  *   logger.info('MyComponent', 'Something happened', { details: 'here' });
- *
- * @see source-docs/development.md
  */
 
 import { appendFile, mkdir, writeFile } from 'node:fs/promises';

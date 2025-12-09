@@ -3,8 +3,6 @@
  *
  * This file initializes the Neutralino.js window and sets up the chess UI.
  * Includes IPC communication with the Bun backend for engine operations.
- *
- * @see source-docs/architecture.md - "Frontend Layer"
  */
 
 import neutralino from '@neutralinojs/lib';

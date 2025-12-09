@@ -292,7 +292,7 @@ permission.
 - **Architecture:** WebSocket IPC (Bun backend + Neutralino.js 6.4.0 frontend,
   port 9339)
 
-See [Architecture Documentation](../source-docs/architecture.md) for details.
+See [Engine Integration](./engine-integration.md) for technical details.
 
 ### Why Neutralino instead of Electron?
 
@@ -429,12 +429,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What features are planned?
 
-See the full roadmap in [source-docs/roadmap.md](../source-docs/roadmap.md).
-
-**Upcoming phases:**
-
-- **Phase 8:** Import/Export & Data Management
-- **Phase 9:** Polish & Optimization
+All nine development phases are complete. Chess-Sensei v1.0 release is next.
 
 ### Can I request a feature?
 
@@ -466,8 +461,9 @@ Quick fixes:
 ## Still Have Questions?
 
 - **Documentation:** Check the [User Guide](user-guide.md)
-- **Technical Docs:** See [source-docs/](../source-docs/)
+- **Technical Docs:** See [Engine Integration](./engine-integration.md) or
+  [Building Guide](./building.md)
 - **Support:** Open an issue on GitHub
 - **Discussions:** Join GitHub Discussions for community help
 
-We're here to help! 💡
+We're here to help!

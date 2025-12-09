@@ -7,8 +7,6 @@
  * Usage:
  *   import { frontendLogger } from './frontend-logger';
  *   frontendLogger.info('MyComponent', 'Something happened', { details: 'here' });
- *
- * @see source-docs/development.md
  */
 
 import { ipc } from './websocket-ipc-client';

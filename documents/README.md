@@ -1,23 +1,25 @@
-# End-User Documentation
+# Chess-Sensei Documentation
 
-This directory contains end-user and operational documentation for Chess-Sensei.
+This directory contains all user and technical documentation for Chess-Sensei.
 
-## Purpose
+## Quick Navigation
 
-While `source-docs/` defines **how the application is designed and built**, this
-directory describes **how to use and operate the application**.
+| I want to...                | Go to                                           |
+| --------------------------- | ----------------------------------------------- |
+| Get started quickly         | [Quick Start Guide](quick-start.md)             |
+| Learn all features          | [User Guide](user-guide.md)                     |
+| Play against AI             | [Training Mode Guide](training-mode-guide.md)   |
+| Test my skills              | [Exam Mode & Metrics](exam-mode-metrics.md)     |
+| Review my games             | [Post-Game Analysis](post-game-analysis.md)     |
+| Track my progress           | [Progress Dashboard](progress-dashboard.md)     |
+| Analyze positions           | [Sandbox Mode](sandbox-mode.md)                 |
+| Backup/export my data       | [Data Management](data-management.md)           |
+| Fix a problem               | [Troubleshooting](troubleshooting.md)           |
+| Find answers                | [FAQ](faq.md)                                   |
+| Build from source           | [Building Guide](building.md)                   |
+| Understand the chess engine | [Engine Integration](engine-integration.md)     |
 
-## Content Categories
-
-Documentation here will include:
-
-- **User Guides** - How to use Chess-Sensei features
-- **Tutorials** - Step-by-step learning materials
-- **FAQ** - Frequently asked questions
-- **Troubleshooting** - Common issues and solutions
-- **Release Notes** - Version history and changes
-
-## Available Documentation
+## Documentation Index
 
 ### User Guides
 
@@ -34,6 +36,9 @@ Documentation here will include:
 - **[Sandbox Mode](sandbox-mode.md)** - Board editor and position analysis
 - **[Data Management](data-management.md)** - Export, import, and backup your
   data
+
+### Reference
+
 - **[FAQ](faq.md)** - Frequently asked questions and answers
 - **[Troubleshooting](troubleshooting.md)** - Common problems and solutions
 
@@ -43,18 +48,8 @@ Documentation here will include:
 - **[Engine Integration](engine-integration.md)** - Chess engine technical
   details
 
-## Quick Navigation
+## Related Resources
 
-**New Users:** Start with the [Quick Start Guide](quick-start.md)
-
-**Feature Details:** See the [User Guide](user-guide.md)
-
-**Having Issues?** Check [Troubleshooting](troubleshooting.md) or [FAQ](faq.md)
-
-**Building from Source?** See [Building Guide](building.md)
-
-## Related Documentation
-
-- [source-docs/](../source-docs/) - Design and development specifications
-- [README.md](../README.md) - Project overview
+- [README.md](../README.md) - Project overview and features
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
+- [CHANGELOG.md](../CHANGELOG.md) - Version history
