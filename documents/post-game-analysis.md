@@ -19,7 +19,7 @@ When an Exam Mode game ends, the game over modal displays:
 
 ### From Game History
 
-(Coming in Phase 6) Access previous games from the Player Progress Dashboard.
+Access previous games from the Player Progress Dashboard.
 
 ## Analysis Interface
 
@@ -170,7 +170,7 @@ Click "View Alternatives" on any mistake/blunder to see:
 
 ### Open in Sandbox
 
-Button to load position in Sandbox Mode (Phase 6) for practice.
+Button to load position in Sandbox Mode for practice.
 
 ## Export Options
 

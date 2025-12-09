@@ -198,6 +198,6 @@ After practicing in Training Mode, you'll be ready for:
 - **Exam Mode** (available now): Test your skills without guidance and receive
   detailed post-game analysis with 9 composite performance scores. See
   [Exam Mode & Metrics](exam-mode-metrics.md) for details.
-- **Sandbox Mode** (Phase 7): Set up custom positions and experiment freely
+- **Sandbox Mode**: Set up custom positions and experiment freely
 
 Happy training!
