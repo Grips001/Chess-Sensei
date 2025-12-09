@@ -271,7 +271,7 @@ export class DataStorage {
       // Atomic rename using native fs (Bun doesn't have rename yet)
       const fs = await import('fs/promises');
       await fs.rename(tempPath, filePath);
-    } catch (error) {
+    } catch (_error) {
       // Phase 9: Fallback to in-memory cache on write failure
       console.warn(`Disk write failed, caching in memory: ${filePath}`);
       this.memoryCache.set(filePath, data);
