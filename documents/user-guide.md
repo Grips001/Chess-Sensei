@@ -384,16 +384,6 @@ See [Training Mode Guide](training-mode-guide.md) for details.
 
 See [Exam Mode Metrics Guide](exam-mode-metrics.md) for details.
 
-### Upcoming Features
-
-#### Phase 8: Import/Export & Data Management
-
-- PGN file import and export
-- Game library management
-- Backup and restore functionality
-
-Stay tuned for updates!
-
 ## Need Help?
 
 - **Bug Reports:** Open an issue on our GitHub repository

@@ -386,7 +386,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Phase 8 (v0.8.0)** is complete and includes:
+**Version 0.9.0** is the current release and includes:
 
 - **Import/Export & Data Management** (Phase 8)
   - Export games as PGN or JSON (single or batch)
