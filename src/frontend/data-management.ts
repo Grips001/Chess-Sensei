@@ -7,6 +7,7 @@
 import { os } from '@neutralinojs/lib';
 import { ipc } from './websocket-ipc-client';
 import { frontendLogger } from './frontend-logger';
+import { IPC_METHODS } from '../shared/ipc-types';
 
 // ============================================
 // Types
@@ -45,6 +46,7 @@ interface ExportResult {
 export class DataManagementManager {
   private overlayElement: HTMLElement | null = null;
   private gamesList: GameEntry[] = [];
+  private loadError: string | null = null;
 
   constructor() {
     frontendLogger.info('DataManagement', 'Data management manager created');
@@ -91,8 +93,9 @@ export class DataManagementManager {
    * Load the list of saved games
    */
   private async loadGamesList(): Promise<void> {
+    this.loadError = null;
     try {
-      const response = (await ipc.call('getGamesList', {})) as {
+      const response = (await ipc.call(IPC_METHODS.GET_GAMES_LIST, {})) as {
         games: GameEntry[];
         success: boolean;
       };
@@ -102,9 +105,13 @@ export class DataManagementManager {
         frontendLogger.info('DataManagement', 'Games list loaded', {
           count: this.gamesList.length,
         });
+      } else {
+        this.loadError = 'Unable to load saved games.';
+        this.gamesList = [];
       }
     } catch (error) {
       frontendLogger.error('DataManagement', 'Failed to load games list', error);
+      this.loadError = 'Unable to connect to storage. Please try again.';
       this.gamesList = [];
     }
   }
@@ -149,8 +156,28 @@ export class DataManagementManager {
 
     const gamesCount = this.gamesList.length;
 
+    // Build error/info message
+    let statusMessage = '';
+    if (this.loadError) {
+      statusMessage = `
+        <div class="data-status-message error">
+          <span class="status-icon">⚠️</span>
+          <span>${this.loadError}</span>
+        </div>
+      `;
+    } else if (gamesCount === 0) {
+      statusMessage = `
+        <div class="data-status-message info">
+          <span class="status-icon">ℹ️</span>
+          <span>No saved games yet. Complete an Exam Mode game to see your data here.</span>
+        </div>
+      `;
+    }
+
     content.innerHTML = `
       <div class="data-mgmt-main">
+        ${statusMessage}
+
         <div class="data-stats">
           <div class="stat-card">
             <div class="stat-value">${gamesCount}</div>
@@ -330,7 +357,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Exporting game...', 'loading');
 
     try {
-      const response = (await ipc.call('exportGame', {
+      const response = (await ipc.call(IPC_METHODS.EXPORT_GAME, {
         gameId,
         format,
       })) as { result: ExportResult; success: boolean } | { success: false; error: string };
@@ -372,7 +399,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Exporting all games...', 'loading');
 
     try {
-      const response = (await ipc.call('exportAllGames', {
+      const response = (await ipc.call(IPC_METHODS.EXPORT_ALL_GAMES, {
         includeAnalysis,
       })) as { result: ExportResult; success: boolean } | { success: false; error: string };
 
@@ -408,7 +435,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Exporting profile...', 'loading');
 
     try {
-      const response = (await ipc.call('exportProfile', {})) as
+      const response = (await ipc.call(IPC_METHODS.EXPORT_PROFILE, {})) as
         | {
             result: ExportResult;
             success: boolean;
@@ -444,7 +471,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Creating backup...', 'loading');
 
     try {
-      const response = (await ipc.call('exportBackup', {})) as
+      const response = (await ipc.call(IPC_METHODS.EXPORT_BACKUP, {})) as
         | {
             result: ExportResult;
             success: boolean;
@@ -811,7 +838,7 @@ export class DataManagementManager {
     compression: boolean;
   }> {
     try {
-      const response = (await ipc.call('getBackupSettings', {})) as {
+      const response = (await ipc.call(IPC_METHODS.GET_BACKUP_SETTINGS, {})) as {
         settings: {
           enabled: boolean;
           frequency: string;
@@ -836,7 +863,7 @@ export class DataManagementManager {
     Array<{ filename: string; timestamp: string; type: string; gameCount: number; size: number }>
   > {
     try {
-      const response = (await ipc.call('listBackups', {})) as {
+      const response = (await ipc.call(IPC_METHODS.LIST_BACKUPS, {})) as {
         backups: Array<{
           filename: string;
           timestamp: string;
@@ -941,7 +968,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Saving settings...', 'loading');
 
     try {
-      const response = (await ipc.call('saveBackupSettings', {
+      const response = (await ipc.call(IPC_METHODS.SAVE_BACKUP_SETTINGS, {
         enabled: enabledCheckbox.checked,
         frequency,
         compression: false,
@@ -977,7 +1004,7 @@ export class DataManagementManager {
       await this.exportBackup();
 
       // Also create an automatic backup (saves to backups folder)
-      const response = (await ipc.call('createAutomaticBackup', { type: 'daily' })) as {
+      const response = (await ipc.call(IPC_METHODS.CREATE_AUTOMATIC_BACKUP, { type: 'daily' })) as {
         backup: { filename: string; gameCount: number; size: number } | null;
         success: boolean;
       };
@@ -1008,7 +1035,7 @@ export class DataManagementManager {
     this.showStatus(statusEl as HTMLElement, 'Verifying backup...', 'loading');
 
     try {
-      const response = (await ipc.call('verifyBackup', { filename })) as {
+      const response = (await ipc.call(IPC_METHODS.VERIFY_BACKUP, { filename })) as {
         valid: boolean;
         issues: string[];
         success: boolean;
@@ -1048,7 +1075,7 @@ export class DataManagementManager {
     if (!pathEl) return;
 
     try {
-      const response = (await ipc.call('getStoragePath', {})) as {
+      const response = (await ipc.call(IPC_METHODS.GET_STORAGE_PATH, {})) as {
         path: string;
         success: boolean;
       };
@@ -1117,7 +1144,7 @@ export class DataManagementManager {
    */
   private async openDataFolder(): Promise<void> {
     try {
-      const response = (await ipc.call('getExportsPath', {})) as {
+      const response = (await ipc.call(IPC_METHODS.GET_EXPORTS_PATH, {})) as {
         path: string;
         success: boolean;
       };
