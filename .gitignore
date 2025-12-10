@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-bun.lockb
 
 # Build outputs
 dist/
@@ -49,35 +48,14 @@ yarn-error.log*
 *.deb
 
 # ===========================================
-# Claude Code Customizations (local dev only)
-# ===========================================
-CLAUDE.md
-.claude/
-
-# ===========================================
-# Linting & Development Tool Configurations
-# ===========================================
-# ESLint
-eslint.config.mjs
-
-# Prettier
-.prettierrc.json
-.prettierignore
-
-# Markdownlint
-.markdownlint.json
-.markdownlintignore
-
-# Stylelint
-.stylelintrc.json
-.stylelintignore
-
-# Python scripts (dev utilities)
-*.py
-
-# ===========================================
-# Test & Coverage (when added)
+# Test & Coverage
 # ===========================================
 coverage/
 test-results/
 .nyc_output/
+
+# ===========================================
+# Claude Code (personal settings)
+# ===========================================
+.claude/settings.local.json
+CLAUDE.local.md

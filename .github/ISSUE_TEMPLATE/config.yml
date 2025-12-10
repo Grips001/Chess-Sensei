@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/Grips001/Chess-Sensei/tree/main/documents
+    about: Check our documentation before opening an issue
+  - name: Discussions
+    url: https://github.com/Grips001/Chess-Sensei/discussions
+    about: Use discussions for questions and general chat

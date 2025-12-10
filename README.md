@@ -184,13 +184,26 @@ See [SETUP.md](SETUP.md) for complete setup documentation and
 
 ## Contributing
 
-Interested in contributing? See [**CONTRIBUTING.md**](CONTRIBUTING.md) for:
+Interested in contributing? See [**CONTRIBUTING.md**](CONTRIBUTING.md) for the
+full guide.
 
-- Project structure and conventions
-- Development workflow
-- Coding standards
-- Testing requirements
-- Pull request process
+### Development Workflow
+
+We follow a structured workflow for feature development:
+
+1. **PRD** → 2. **Tech Spec** → 3. **Implementation** → 4. **PR** → 5. **Merge**
+
+Each step requires approval before proceeding. See
+[.github/process/](.github/process/) for templates and detailed process
+documentation.
+
+### Quick Links
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Full contributor guide
+- [.github/process/](https://github.com/Grips001/Chess-Sensei/tree/main/.github/process) -
+  Process documentation
+- [.github/specs/](https://github.com/Grips001/Chess-Sensei/tree/main/.github/specs) -
+  Feature specifications (PRDs, Tech Specs)
 
 ## License
 

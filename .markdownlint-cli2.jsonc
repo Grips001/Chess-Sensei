@@ -1,0 +1,12 @@
+{
+  "ignores": [
+    "node_modules/",
+    "dist/",
+    "app/",
+    ".neutralino/",
+    "test-results/",
+    "coverage/",
+    "localonly/",
+    "CHANGELOG.md"
+  ]
+}

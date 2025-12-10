@@ -1,0 +1,83 @@
+name: Task
+description: Internal task for development work
+title: "[Task] "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for internal development tasks, maintenance, or technical debt.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: What needs to be done?
+      placeholder: Describe the task in detail...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know when this task is complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Task Type
+      description: What type of task is this?
+      options:
+        - Refactoring
+        - Technical Debt
+        - Performance
+        - Security
+        - Documentation
+        - Testing
+        - DevOps
+        - Maintenance
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of Chess-Sensei does this affect?
+      options:
+        - Frontend
+        - Backend
+        - Engine
+        - Shared
+        - Build System
+        - CI/CD
+        - Documentation
+        - Tests
+        - Multiple/All
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Are there any blocking issues or dependencies?
+      placeholder: "Depends on #123, blocked by..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Implementation Notes
+      description: Any technical notes or considerations for implementation?
+    validations:
+      required: false

@@ -3,11 +3,22 @@
 Thank you for your interest in contributing to Chess-Sensei! This document
 provides guidelines and information for contributors.
 
+## Quick Links
+
+| Resource                                                    | Purpose                        |
+| ----------------------------------------------------------- | ------------------------------ |
+| [Branching Strategy](.github/process/BRANCHING_STRATEGY.md) | Git workflow and branch naming |
+| [Testing Strategy](.github/process/TESTING_STRATEGY.md)     | Testing requirements           |
+| [Release Process](.github/process/RELEASE_PROCESS.md)       | Versioning and releases        |
+| [Architecture](.github/process/ARCHITECTURE.md)             | System architecture            |
+| [PRD Template](.github/process/PRD_TEMPLATE.md)             | Feature proposal template      |
+| [Tech Spec Template](.github/process/TECH_SPEC_TEMPLATE.md) | Technical design template      |
+
 ## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) v1.0 or higher
+- [Bun](https://bun.sh) v1.3.4 or higher
 - Git
 - A code editor (VS Code recommended)
 
@@ -39,72 +50,164 @@ Chess-Sensei/
 ├── src/
 │   ├── frontend/     # Neutralino UI code
 │   ├── backend/      # Bun-powered services
-│   ├── engine/       # Chess engine + AI logic
-│   ├── shared/       # Shared types and utilities
-│   └── assets/       # Source assets (development only)
-├── public/           # Static files (copied to app/ during build)
-│   └── assets/       # Chess pieces, icons, sounds
-├── documents/        # User guides and technical documentation
+│   ├── engine/       # Stockfish WASM integration
+│   └── shared/       # Shared types and utilities
+├── public/           # Static assets (pieces, sounds, icons)
+├── documents/        # User documentation
 ├── tests/            # Test suites
-└── scripts/          # Build and utility scripts
+├── scripts/          # Build scripts
+└── .github/
+    ├── ISSUE_TEMPLATE/  # Issue templates
+    ├── workflows/       # CI/CD workflows
+    └── process/         # Engineering process docs
 ```
 
 ## Development Workflow
 
 ### Branch Strategy
 
-- `main` - Production-ready code
-- `develop` - Integration branch (if used)
-- `feature/*` - New features
-- `bugfix/*` - Bug fixes
-- `hotfix/*` - Emergency fixes
+We follow a trunk-based development model:
+
+- `main` - Production-ready code (protected)
+- `feature/CS-XXX-description` - New features
+- `fix/CS-XXX-description` - Bug fixes
+- `hotfix/vX.Y.Z-description` - Emergency fixes
+
+See [BRANCHING_STRATEGY.md](.github/process/BRANCHING_STRATEGY.md) for details.
+
+### Feature Development Sequence
+
+For significant features, follow this sequence. **Each step requires approval
+before proceeding:**
+
+```text
+1. PRD Creation
+   └── Create `.github/specs/prd-[feature].md` using PRD_TEMPLATE.md
+   └── Get PRD approved
+
+2. Tech Spec Creation
+   └── Create `.github/specs/tech-[feature].md` using TECH_SPEC_TEMPLATE.md
+   └── Get Tech Spec approved
+
+3. Implementation
+   └── Create feature branch: feature/CS-XXX-[name]
+   └── Implement according to Tech Spec
+   └── Run `bun run verify` before each commit
+
+4. Pull Request
+   └── Create PR using PR template
+   └── Pass CI checks
+   └── Get PR approved
+
+5. Merge
+   └── Squash and merge after approval
+```
+
+**Important:** Do not skip steps. Implementation should not begin without an
+approved Tech Spec for significant features.
+
+### Creating a Feature (Quick Reference)
+
+1. **Open an issue** using the appropriate template
+2. **For significant features:** Write PRD → Get approved → Write Tech Spec →
+   Get approved
+3. **Create a feature branch:**
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/CS-123-my-feature
+   ```
+
+4. **Develop** with regular commits following conventions
+5. **Run verification:**
+
+   ```bash
+   bun run verify  # typecheck + lint + test
+   ```
+
+6. **Submit PR** using the PR template
 
 ### Commit Convention
 
 We follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-- `feat:` - New feature
-- `fix:` - Bug fix
-- `docs:` - Documentation changes
-- `style:` - Code style changes (formatting, etc.)
-- `refactor:` - Code refactoring
-- `test:` - Test additions or changes
-- `chore:` - Build process or tooling changes
+| Type       | Description                         |
+| ---------- | ----------------------------------- |
+| `feat`     | New feature                         |
+| `fix`      | Bug fix                             |
+| `docs`     | Documentation only                  |
+| `style`    | Formatting (no code change)         |
+| `refactor` | Code change (no new feature or fix) |
+| `perf`     | Performance improvement             |
+| `test`     | Adding/updating tests               |
+| `chore`    | Build process, tooling              |
 
-**Example:**
+**Scopes:** `frontend`, `backend`, `engine`, `shared`, `build`, `ci`, `docs`
+
+**Examples:**
 
 ```text
-feat: add real-time best-move highlighting system
+feat(frontend): add puzzle mode selection screen
+fix(backend): resolve engine crash on invalid FEN
+docs: update README with new build instructions
 ```
 
 ### Pull Request Process
 
-1. Create a feature branch from `main`
-2. Make your changes
-3. Write/update tests as needed
-4. Ensure all tests pass
-5. Update documentation if needed
-6. Submit a pull request with clear description
-7. Wait for code review
+1. Fill out the PR template completely
+2. Ensure CI checks pass (lint, typecheck, test, build)
+3. Request review from code owners
+4. Address review feedback
+5. Squash and merge when approved
 
 ### Code Standards
 
 - TypeScript strict mode enabled
+- No `any` types without justification
 - ESLint for TypeScript/JavaScript linting
 - Stylelint for CSS linting
 - Prettier for code formatting
 - Markdownlint for documentation
-- Type safety required
 - Clear variable and function names
-- Comments for complex logic
-- No hardcoded values (use constants)
+- Comments for complex logic only
 
-### Linting Workflow
+## Testing
 
-Before submitting a PR, ensure your code passes all linters:
+### Running Tests
 
 ```bash
-# Run all linters (ESLint, Stylelint, Markdownlint, Prettier)
+# All tests
+bun run test
+
+# Watch mode
+bun run test:watch
+
+# With coverage
+bun run test:coverage
+```
+
+### Verification Commands
+
+```bash
+# Full verification (recommended before PR)
+bun run verify
+
+# Individual checks
+bun run typecheck   # TypeScript
+bun run lint        # All linters
+bun run test        # Tests
+```
+
+See [TESTING_STRATEGY.md](.github/process/TESTING_STRATEGY.md) for testing
+requirements.
+
+## Linting
+
+Before submitting a PR:
+
+```bash
+# Run all linters
 bun run lint
 
 # Auto-fix most issues
@@ -120,33 +223,51 @@ Individual linters:
 bun run lint:ts      # ESLint for TypeScript/JavaScript
 bun run lint:css     # Stylelint for CSS
 bun run lint:md      # Markdownlint for Markdown
-bun run lint:format  # Prettier check (no write)
+bun run lint:format  # Prettier check
 ```
+
+## Building
+
+Use platform-specific build commands:
+
+```bash
+bun run build:windows  # Windows (use this on Windows)
+bun run build:linux    # Linux
+bun run build:macos    # macOS
+```
+
+**Note:** Never use `bun run build:app` on Windows (pe-library incompatibility).
 
 ## Documentation
 
-All user-facing features should be documented in the [`documents/`](documents/)
-directory. See existing documentation for style and structure guidelines.
+- User-facing features: Document in [`documents/`](documents/)
+- Technical changes: Update inline comments and type definitions
+- Process changes: Update `.github/process/` docs
 
-## Testing
+## Proposing Features
 
-Test files exist in the `src/engine/` directory for engine validation:
+### Significant Features
 
-- `test-stockfish.ts` - Basic Stockfish WASM initialization
-- `test-engine-interface.ts` - Engine interface compliance
-- `test-engine-operations.ts` - UCI operations and analysis
+For significant features, follow the full workflow:
 
-Run tests with:
+1. Create a Feature Request issue
+2. Write a PRD: `.github/specs/prd-[feature].md`
+   ([template](.github/process/PRD_TEMPLATE.md))
+3. Get PRD approved
+4. Write a Tech Spec: `.github/specs/tech-[feature].md`
+   ([template](.github/process/TECH_SPEC_TEMPLATE.md))
+5. Get Tech Spec approved
+6. Begin implementation
 
-```bash
-bun run src/engine/test-engine-interface.ts
-```
+### Small Enhancements
 
-A comprehensive test suite with 114 tests is available via `bun run test`.
+For small enhancements (bug fixes, minor UI tweaks), a GitHub issue is
+sufficient. Skip the PRD/Tech Spec and go directly to implementation.
 
 ## Questions?
 
 - Check the [documentation](documents/)
+- Check the [FAQ](documents/faq.md)
 - Open an issue for clarification
 - Join discussions in pull requests
 

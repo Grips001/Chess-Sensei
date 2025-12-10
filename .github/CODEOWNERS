@@ -1,0 +1,25 @@
+# Code Owners for Chess-Sensei
+# These users will be automatically requested for review on PRs
+
+# Default owners for everything
+* @Grips001
+
+# Frontend components
+/src/frontend/ @Grips001
+
+# Backend services
+/src/backend/ @Grips001
+
+# Engine integration
+/src/engine/ @Grips001
+
+# Shared types and utilities
+/src/shared/ @Grips001
+
+# Build and CI configuration
+/.github/ @Grips001
+/scripts/ @Grips001
+
+# Documentation
+/documents/ @Grips001
+*.md @Grips001

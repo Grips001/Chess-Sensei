@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+app/
+.neutralino/
+
+# Test results
+test-results/
+coverage/
+
+# Logs
+*.log
+
+# Minified files
+*.min.js
+*.min.css
+
+# Lock files
+package-lock.json
+bun.lockb
+
+# Git
+.git/
