@@ -104,7 +104,7 @@ Chess-Sensei plays sounds for different move types:
 - 🎵 **Castling** - Special move sound
 - 🎵 **Promotion** - Achievement sound
 
-You can adjust or disable sounds in the settings (coming in a future update).
+Use your system volume or OS audio mixer to adjust Chess-Sensei's sound volume.
 
 ## Game Controls
 
@@ -262,8 +262,7 @@ Chess-Sensei supports convenient keyboard shortcuts:
 | **Ctrl+Z** (Cmd+Z on Mac) | Undo last move | Can be pressed multiple times |
 | **Ctrl+Y** (Cmd+Y on Mac) | Redo last move | Only works after undo         |
 
-**Tip:** More keyboard shortcuts (arrow keys for move navigation, etc.) are
-planned for future releases!
+**Tip:** In Analysis Mode, use arrow keys to navigate through moves.
 
 ## Tips and Tricks
 
@@ -306,34 +305,19 @@ Currently, you can play against yourself:
 (Sensei, Student, Club Player, Tactician, Blunder-Prone) and multiple difficulty
 levels. See [Training Mode Guide](training-mode-guide.md).
 
-## What's Next?
+## Version
 
-Chess-Sensei is under active development!
+**Chess-Sensei v1.0.0** - Stable Release
 
-### Current Release: Phase 9 (v0.9.0)
+This is the first stable release of Chess-Sensei with all features complete:
 
-**Polish & Optimization** is now complete:
+- **Training Mode** - Practice with AI guidance
+- **Exam Mode** - Test your skills with post-game analysis
+- **Sandbox Mode** - Board editor and position analysis
+- **Progress Dashboard** - Track your improvement over time
+- **Data Management** - Export/import games and automatic backups
 
-- **Enhanced UI/UX** - Soft haptic-feel animations, WCAG AA compliant colors
-- **Accessibility** - Keyboard navigation, screen reader support, color-blind
-  modes
-- **Responsive Design** - Tablet, mobile, and large screen layouts
-- **Performance** - Engine optimization with MultiPV caching
-- **Stability** - In-memory storage fallback, comprehensive test suite (114
-  tests)
-
-### Previous Release: Phase 8 (v0.8.0)
-
-**Import/Export & Data Management**:
-
-- **Export Data** - Export games (PGN/JSON), player profile, or full backups
-- **Import Data** - Import JSON/PGN files with duplicate detection
-- **Automatic Backups** - Configurable backup frequency
-  (daily/weekly/after-game)
-- **Backup Management** - View, verify, and restore from backups
-- **Data Management UI** - User-friendly export/import wizards
-
-See [Data Management Guide](data-management.md) for details.
+See [Data Management Guide](data-management.md) for backup details.
 
 **Sandbox Mode** continues to be available:
 

@@ -55,8 +55,8 @@ You can also adjust difficulty from Beginner (800 Elo) to Master (2400 Elo).
 
 ### Can I play against other people online?
 
-Online multiplayer is not currently planned. Chess-Sensei focuses on
-single-player training and analysis.
+Online multiplayer is not included. Chess-Sensei focuses on single-player
+training and analysis.
 
 However, you can:
 
@@ -65,12 +65,12 @@ However, you can:
 
 ### Does it have a timer/chess clock?
 
-Time controls are planned for a future update. Current games are untimed.
+Current games are untimed to allow focus on move quality over speed.
 
 ### Can I save my games?
 
-**Yes!** Game data is now saved automatically in **Phase 4** (v0.4.0). Your
-games are stored locally with complete move history and analysis results.
+**Yes!** Game data is saved automatically. Your games are stored locally with
+complete move history and analysis results.
 
 Games are saved to platform-specific locations:
 
@@ -80,22 +80,22 @@ Games are saved to platform-specific locations:
 
 ### Can I import/export PGN files?
 
-PGN generation is available as of **Phase 4** (v0.4.0). Games completed in Exam
-Mode automatically generate PGN notation.
+**Yes!** Full PGN import/export is available:
 
-Full PGN import/export with file management is planned for **Phase 8**.
+- Export single games as PGN or JSON
+- Export all games as batch JSON
+- Import games from PGN or JSON files
+
+See [Data Management](data-management.md) for details.
 
 ### Does it analyze my games?
 
-**Yes!** Post-game analysis is available as of **Phase 4** (v0.4.0):
+**Yes!** Comprehensive post-game analysis is available:
 
 - Move-by-move analysis with centipawn loss calculation
 - Move classification (Excellent/Good/Inaccuracy/Mistake/Blunder)
 - Critical moment detection (evaluation swings > 100cp)
 - 9 composite performance metrics
-
-The **analysis UI** is available as of **Phase 5** (v0.5.0) with:
-
 - Three-tab interface (Review/Summary/Analytics)
 - Interactive board replay with navigation
 - Evaluation graph with clickable points
@@ -103,19 +103,18 @@ The **analysis UI** is available as of **Phase 5** (v0.5.0) with:
 
 ### Can I solve chess puzzles?
 
-Puzzle mode is planned for a future release.
+Puzzle mode is not currently included. Chess-Sensei focuses on full game
+training and analysis.
 
 ### Are there training exercises?
 
-**Yes!** Training Mode (Phase 3) is now available with:
+**Yes!** Training Mode provides:
 
 - Real-time best-move guidance (top 3 moves highlighted)
-- AI opponents with adjustable difficulty
+- AI opponents with adjustable difficulty (Elo 800-2400)
+- 5 bot personalities with different play styles
 - Color-coded move suggestions (Blue/Green/Yellow)
 - Human-like thinking delays for natural gameplay
-
-Additional training features (opening trainer, puzzles) are planned for future
-phases.
 
 ## Gameplay Questions
 
@@ -186,9 +185,8 @@ Press **Ctrl+Y** or click **Redo** to replay undone moves.
 ### What happens if I close the app during a game?
 
 In **Exam Mode**, your completed games are automatically saved with full
-analysis.
-
-For in-progress games, auto-resume functionality is planned for a future update.
+analysis. In-progress games are not saved - be sure to finish your game before
+closing.
 
 ## Interface Questions
 
@@ -256,14 +254,13 @@ Click **Flip Board** again to return to normal.
 
 ### Can I turn off sounds?
 
-Sound controls are coming in a future update. Currently, sounds can only be
-adjusted via your system volume.
+Sound volume is currently controlled via your system volume.
 
-**Workaround:** Mute Chess-Sensei in your OS audio mixer.
+**Tip:** Use your OS audio mixer to adjust or mute Chess-Sensei independently.
 
 ### Can I adjust the volume?
 
-In-app volume control is planned. For now, use system volume or audio mixer.
+Use your system volume or OS audio mixer to control Chess-Sensei's volume.
 
 ### What sounds play for different moves?
 
@@ -386,50 +383,24 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Version 0.9.0** is the current release and includes:
+**Version 1.0.0** is the first stable release and includes:
 
-- **Import/Export & Data Management** (Phase 8)
-  - Export games as PGN or JSON (single or batch)
-  - Export player profile and full backups
-  - Import JSON/PGN files with duplicate detection
-  - Automatic backup system with configurable frequency
-  - Backup retention policy and verification
-  - Data management UI with export/import wizards
-- **Sandbox Mode** (Phase 7)
-  - Board editor with drag-and-drop piece placement
-  - Piece palette for placing/removing pieces
-  - Position validation (king placement, pawn ranks, piece counts)
-  - FEN import/export with copy-to-clipboard
-  - Quick position templates (Starting, Empty, K+Q vs K, etc.)
-  - Color-to-move toggle
-  - Engine analysis with best move highlighting
-  - Optional top-3 moves display
-- **Player Progress Dashboard** (Phase 6)
-  - Composite score radar chart (9 dimensions)
-  - Game history with filtering and sorting
-  - Analytics dashboard (accuracy trends, error distribution, CPL)
-  - Achievement system with unlockable badges
-  - Training suggestions based on performance
-  - Opponent-adjusted performance analysis
-- **Post-Game Analysis UI** (Phase 5)
-  - Three-tab interface (Review/Summary/Analytics)
-  - Interactive board replay with navigation
-  - Evaluation graph with clickable points
-  - Mistake deep-dive with alternative moves
-  - Export options (PGN, JSON, Markdown)
-- **Advanced Debug Logging** for development
-- Exam Mode - play without guidance to test skills
-- Post-game analysis pipeline with move classification
-- 9 composite score calculations (Precision, Tactics, Stability, etc.)
-- Local JSON data storage with player profiles
-- AI opponent with 5 bot personalities
-- Difficulty levels from 800 to 2400 Elo
-- Real-time best-move guidance (top 3 moves)
-- Training Mode with full game flow
+- **Training Mode** - Practice against AI with real-time move guidance
+- **Exam Mode** - Test skills without assistance, with post-game analysis
+- **Sandbox Mode** - Board editor, FEN import/export, position analysis
+- **Progress Dashboard** - Track improvement with radar charts and analytics
+- **Data Management** - Export/import games (PGN/JSON), automatic backups
+- **5 Bot Personalities** - Sensei, Student, Club Player, Tactician,
+  Blunder-Prone
+- **Post-Game Analysis** - Move classification, evaluation graph, critical
+  moments
+- **Achievement System** - Unlock badges based on performance
+- **Comprehensive UI** - WCAG AA accessible, responsive design
 
 ### What features are planned?
 
-All nine development phases are complete. Chess-Sensei v1.0 release is next.
+Chess-Sensei v1.0.0 is a complete, stable release. Future updates will focus on
+bug fixes and community-requested improvements.
 
 ### Can I request a feature?
 
@@ -441,7 +412,8 @@ Yes! Open a feature request on GitHub with:
 
 ### How often are updates released?
 
-Chess-Sensei is in active development. Update frequency varies by phase.
+Chess-Sensei v1.0.0 is stable. Updates are released for bug fixes and
+improvements as needed.
 
 Major releases are announced on GitHub.
 

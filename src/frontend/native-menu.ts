@@ -160,7 +160,7 @@ export function handleMenuAction(itemId: string, handlers: MenuActionHandlers): 
 async function showAboutDialog(): Promise<void> {
   try {
     const osInfo = await os.getEnv('OS');
-    const message = `Chess-Sensei v0.9.0
+    const message = `Chess-Sensei v1.0.0
 
 A modern chess training application with real-time AI-assisted move guidance.
 
@@ -181,7 +181,7 @@ Licensed under GPL-3.0`;
   } catch (error) {
     frontendLogger.error('Menu', 'Failed to show about dialog:', error);
     // eslint-disable-next-line no-alert
-    alert('Chess-Sensei v0.9.0\n\nA modern chess training application.');
+    alert('Chess-Sensei v1.0.0\n\nA modern chess training application.');
   }
 }
 

@@ -246,12 +246,13 @@ Comprehensive analysis report including:
 - `LOAD_ANALYSIS` IPC method
 - `GET_GAMES_LIST` IPC method
 
-## Version History
+## Features
 
-- **v0.5.0** - Initial implementation (Phase 5)
-  - Full analysis UI with three tabs
-  - Move-by-move review with interactive board
-  - Evaluation graph and position analysis
-  - Game summary and deep analytics
-  - Training recommendations
-  - Export options (PGN, JSON, Markdown)
+The Post-Game Analysis UI includes:
+
+- Full analysis UI with three tabs (Review, Summary, Analytics)
+- Move-by-move review with interactive board
+- Evaluation graph and position analysis
+- Game summary and deep analytics
+- Training recommendations
+- Export options (PGN, JSON, Markdown)

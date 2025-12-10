@@ -1,19 +1,27 @@
 # Engine
 
-Chess engine and AI logic using Stockfish WASM.
+Chess engine integration using Stockfish WASM.
 
 ## Structure
 
-This directory will contain:
-
-- Stockfish WASM integration
-- Engine interface abstraction
-- Bot personality implementations
-- Difficulty scaling logic
-- Move analysis and evaluation
+| File                  | Purpose                                      |
+| --------------------- | -------------------------------------------- |
+| `stockfish-engine.ts` | Stockfish WASM wrapper and UCI communication |
+| `stockfish/`          | Stockfish 17.1 WASM files                    |
 
 ## Technology
 
-- Stockfish compiled to WebAssembly
-- UCI protocol communication
-- TypeScript wrapper for engine interaction
+- **Engine:** Stockfish 17.1 NNUE Lite (~7MB)
+- **Format:** WebAssembly (single-threaded)
+- **Protocol:** UCI (Universal Chess Interface)
+- **Features:** Position analysis, best move calculation, MultiPV support
+
+## Engine Capabilities
+
+- Move analysis with centipawn evaluation
+- Best move calculation at configurable depth
+- Multi-PV analysis for alternative moves
+- Mate detection and distance calculation
+- Position evaluation with NNUE neural network
+
+See [STOCKFISH_SELECTION.md](STOCKFISH_SELECTION.md) for selection rationale.

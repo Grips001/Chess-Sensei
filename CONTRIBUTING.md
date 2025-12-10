@@ -142,7 +142,7 @@ Run tests with:
 bun run src/engine/test-engine-interface.ts
 ```
 
-Formal test framework (Jest/Vitest) coming in future phases.
+A comprehensive test suite with 114 tests is available via `bun run test`.
 
 ## Questions?
 

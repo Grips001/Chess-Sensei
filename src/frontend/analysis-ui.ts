@@ -244,6 +244,9 @@ export class AnalysisUIManager {
   public onClose?: () => void;
   public onOpenSandbox?: (fen: string) => void;
 
+  // Bound event handler reference for cleanup (prevents memory leak)
+  private boundKeyPressHandler: ((e: KeyboardEvent) => void) | null = null;
+
   constructor() {
     this.state = {
       isActive: false,
@@ -476,7 +479,16 @@ export class AnalysisUIManager {
    * Close analysis UI
    */
   closeAnalysis(): void {
+    // Stop auto-play and clear interval
     this.stopAutoPlay();
+
+    // Remove keyboard listener to prevent memory leak
+    if (this.boundKeyPressHandler) {
+      document.removeEventListener('keydown', this.boundKeyPressHandler);
+      this.boundKeyPressHandler = null;
+    }
+
+    // Reset state
     this.state.isActive = false;
     this.state.gameId = null;
     this.state.gameData = null;
@@ -719,7 +731,7 @@ export class AnalysisUIManager {
             <div class="overview-stats">
               <div class="overview-stat">
                 <span class="stat-label">Opponent</span>
-                <span class="stat-value">${this.capitalizeFirst(game.metadata.botPersonality)} (${game.metadata.botElo})</span>
+                <span class="stat-value">${this.capitalizeFirst(game.metadata.botPersonality)} (${game.metadata.botElo ?? '?'})</span>
               </div>
               <div class="overview-stat">
                 <span class="stat-label">Duration</span>
@@ -1380,9 +1392,10 @@ export class AnalysisUIManager {
   }
 
   /**
-   * Capitalize first letter
+   * Capitalize first letter, with fallback for undefined/empty values
    */
-  private capitalizeFirst(str: string): string {
+  private capitalizeFirst(str: string | undefined | null): string {
+    if (!str) return 'Unknown';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
@@ -1571,8 +1584,9 @@ export class AnalysisUIManager {
       });
     });
 
-    // Keyboard navigation
-    document.addEventListener('keydown', this.handleKeyPress.bind(this));
+    // Keyboard navigation - store bound reference for cleanup
+    this.boundKeyPressHandler = this.handleKeyPress.bind(this);
+    document.addEventListener('keydown', this.boundKeyPressHandler);
 
     // Close button
     document
@@ -2111,7 +2125,7 @@ export class AnalysisUIManager {
     report += `| Date | ${this.formatDate(game.timestamp)} |\n`;
     report += `| Mode | ${this.capitalizeFirst(game.mode)} Mode |\n`;
     report += `| Player Color | ${this.capitalizeFirst(game.metadata.playerColor)} |\n`;
-    report += `| Opponent | ${this.capitalizeFirst(game.metadata.botPersonality)} (${game.metadata.botElo} Elo) |\n`;
+    report += `| Opponent | ${this.capitalizeFirst(game.metadata.botPersonality)} (${game.metadata.botElo ?? '?'} Elo) |\n`;
     report += `| Result | ${this.getResultText(game.metadata.result, game.metadata.playerColor)} (${game.metadata.result}) |\n`;
     report += `| Termination | ${game.metadata.termination} |\n`;
     report += `| Duration | ${this.formatDuration(game.metadata.duration)} |\n`;

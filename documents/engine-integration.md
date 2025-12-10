@@ -1,7 +1,6 @@
 # Chess Engine Integration Guide
 
-This document describes the chess engine integration implemented in Phase 1 of
-Chess-Sensei development.
+This document describes the chess engine integration in Chess-Sensei.
 
 ## Overview
 
@@ -109,7 +108,7 @@ interface BestMovesResponse {
 
 The following methods are available via WebSocket IPC (port 9339):
 
-### Core Engine Methods (Phase 1)
+### Core Engine Methods
 
 | Method             | Description                   | Request              | Response               |
 | ------------------ | ----------------------------- | -------------------- | ---------------------- |
@@ -121,7 +120,7 @@ The following methods are available via WebSocket IPC (port 9339):
 | `setSkillLevel`    | Set engine difficulty (0-20)  | `{ level: number }`  | `SuccessResponse`      |
 | `getEngineStatus`  | Check engine state            | none                 | `EngineStatusResponse` |
 
-### AI Opponent Methods (Phase 3)
+### AI Opponent Methods
 
 | Method                 | Description                          | Request               | Response                    |
 | ---------------------- | ------------------------------------ | --------------------- | --------------------------- |
@@ -131,7 +130,7 @@ The following methods are available via WebSocket IPC (port 9339):
 | `getCurrentBotConfig`  | Get current bot configuration        | none                  | `BotConfigResponse`         |
 | `getDifficultyPresets` | Get difficulty preset options        | none                  | `DifficultyPresetsResponse` |
 
-### Analysis & Storage Methods (Phase 4)
+### Analysis & Storage Methods
 
 | Method              | Description                      | Request                   | Response                 |
 | ------------------- | -------------------------------- | ------------------------- | ------------------------ |
@@ -225,20 +224,20 @@ src/
 ├── shared/
 │   ├── engine-types.ts          # Engine interfaces
 │   ├── ipc-types.ts             # IPC interfaces (all methods)
-│   ├── bot-types.ts             # AI opponent types (Phase 3)
+│   ├── bot-types.ts             # AI opponent types
 │   ├── game-state.ts            # Game state management
 │   ├── chess-logic.ts           # Chess.js wrapper
 │   └── chess-logic-manual-test.ts  # Chess logic tests
 ├── backend/
 │   ├── index.ts                 # IPC registration (all methods)
-│   ├── ai-opponent.ts           # AI opponent logic (Phase 3)
-│   ├── analysis-pipeline.ts     # Post-game analysis (Phase 4)
-│   ├── metrics-calculator.ts    # Composite scores (Phase 4)
-│   └── data-storage.ts          # File persistence (Phase 4)
+│   ├── ai-opponent.ts           # AI opponent logic
+│   ├── analysis-pipeline.ts     # Post-game analysis
+│   ├── metrics-calculator.ts    # Composite scores
+│   └── data-storage.ts          # File persistence
 └── frontend/
-    ├── training-mode.ts         # Training Mode UI (Phase 3)
-    ├── move-guidance.ts         # Best-move guidance (Phase 3)
-    └── exam-mode.ts             # Exam Mode UI (Phase 4)
+    ├── training-mode.ts         # Training Mode UI
+    ├── move-guidance.ts         # Best-move guidance
+    └── exam-mode.ts             # Exam Mode UI
 ```
 
 ## Troubleshooting

@@ -918,7 +918,7 @@ export class ProgressDashboardManager {
     return `
       <div class="game-row" data-game-id="${game.gameId}">
         <div class="game-date">${dateStr}</div>
-        <div class="game-opponent">${this.capitalizeFirst(game.botPersonality)} (${game.botElo})</div>
+        <div class="game-opponent">${this.capitalizeFirst(game.botPersonality)} (${game.botElo ?? '?'})</div>
         <div class="game-result ${resultClass}">${resultText}</div>
         <div class="game-accuracy ${this.getScoreClass(Number(accuracy) || 0)}">${accuracy}%</div>
         <button class="view-game-btn" data-game-id="${game.gameId}">View</button>
@@ -1011,7 +1011,7 @@ export class ProgressDashboardManager {
     return `
       <div class="table-row" data-game-id="${game.gameId}">
         <span class="col-date">${dateStr}</span>
-        <span class="col-opponent">${this.capitalizeFirst(game.botPersonality)} (${game.botElo})</span>
+        <span class="col-opponent">${this.capitalizeFirst(game.botPersonality)} (${game.botElo ?? '?'})</span>
         <span class="col-color">${game.playerColor === 'white' ? '○' : '●'}</span>
         <span class="col-result ${resultClass}">${resultSymbol}</span>
         <span class="col-accuracy ${this.getScoreClass(Number(accuracy) || 0)}">${accuracy}%</span>
@@ -1602,9 +1602,10 @@ export class ProgressDashboardManager {
   }
 
   /**
-   * Capitalize first letter
+   * Capitalize first letter, with fallback for undefined/empty values
    */
-  private capitalizeFirst(str: string): string {
+  private capitalizeFirst(str: string | undefined | null): string {
+    if (!str) return 'Unknown';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 

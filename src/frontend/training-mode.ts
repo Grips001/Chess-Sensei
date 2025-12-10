@@ -299,8 +299,8 @@ export class TrainingUIManager {
       botGrid.addEventListener('click', (e) => {
         const card = (e.target as HTMLElement).closest('.bot-card');
         if (card) {
-          const personality = card.getAttribute('data-personality') as BotPersonality;
-          this.selectBot(personality);
+          const personality = card.getAttribute('data-personality') as BotPersonality | null;
+          if (personality) this.selectBot(personality);
         }
       });
     }
@@ -309,8 +309,8 @@ export class TrainingUIManager {
     const difficultyButtons = document.querySelectorAll('.difficulty-button');
     difficultyButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        const preset = button.getAttribute('data-preset') as DifficultyPreset;
-        this.selectDifficulty(preset);
+        const preset = button.getAttribute('data-preset') as DifficultyPreset | null;
+        if (preset) this.selectDifficulty(preset);
       });
     });
 
@@ -318,8 +318,8 @@ export class TrainingUIManager {
     const colorButtons = document.querySelectorAll('.color-button');
     colorButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        const color = button.getAttribute('data-color') as PlayerColor;
-        this.selectColor(color);
+        const color = button.getAttribute('data-color') as PlayerColor | null;
+        if (color) this.selectColor(color);
       });
     });
 

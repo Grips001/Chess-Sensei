@@ -11,10 +11,8 @@ import { Chess, type Move, type Square, type PieceSymbol, type Color } from 'che
 export { type Move, type Square, type PieceSymbol, type Color };
 export { WHITE, BLACK, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING } from 'chess.js';
 
-/**
- * Starting position FEN
- */
-export const STARTPOS_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+// Re-export STARTPOS_FEN from central location for backwards compatibility
+export { STARTPOS_FEN } from './chess-constants';
 
 /**
  * Piece on a square

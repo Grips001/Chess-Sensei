@@ -6,11 +6,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0] - 2025-12-10
 
-### Planned
+### Release
 
-- Polish & Optimization (Phase 9)
+This is the first stable release of Chess-Sensei.
+
+### Added
+
+- **Code Optimization**
+  - Centralized helper modules for error handling and responses
+  - Type guard utilities for runtime validation
+  - Constants modules for engine and bot parameters
+  - Improved async performance with Promise.all for batch operations
+
+- **Bug Fixes**
+  - Fixed `capitalizeFirst` crash when game data has undefined fields
+  - Added null safety guards for all `getAttribute` calls
+  - Defensive fallbacks for missing `botPersonality` and `botElo` values
+
+- **CSS Improvements**
+  - CSS custom properties for border-radius values
+  - Consolidated transition variables
+  - Cleaned up duplicate logging statements
+
+### Changed
+
+- Version updated to v1.0.0 across all configuration files
+- Documentation updated to reflect stable release status
+- Removed development phase references from all documentation
+
+## [0.9.0] - 2025-12-08
+
+### Added
+
+- **Polish & Optimization**
+  - Enhanced UI animations with soft haptic-feel transitions
+  - WCAG AA compliant color system for accessibility
+  - Loading states (progress bars, skeleton loaders, spinners)
+  - Toast notifications and inline alerts for error handling
+  - Engine performance optimization with MultiPV caching
+  - Keyboard navigation and screen reader support
+  - Responsive design for tablet, mobile, and large screens
+  - Comprehensive test suite (114 tests)
+
+### Fixed
+
+- In-memory storage fallback for data persistence issues
+- Various UI and stability improvements
 
 ## [0.8.0] - 2025-12-06
 
@@ -393,7 +436,8 @@ and this project adheres to
 
 ---
 
-[Unreleased]: https://github.com/Grips001/Chess-Sensei/compare/v0.8.0...HEAD
+[1.0.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.9.0...v1.0.0
+[0.9.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Grips001/Chess-Sensei/compare/v0.6.0...v0.6.1

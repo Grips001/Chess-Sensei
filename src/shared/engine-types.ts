@@ -103,10 +103,8 @@ export interface EngineOptions {
   elo?: number;
 }
 
-/**
- * Starting position FEN
- */
-export const STARTPOS_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+// Re-export STARTPOS_FEN from central location for backwards compatibility
+export { STARTPOS_FEN } from './chess-constants';
 
 /**
  * Move classification based on centipawn loss

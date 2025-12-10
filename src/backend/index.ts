@@ -884,7 +884,7 @@ const functionMap = {
         success: true,
       };
     } catch (error) {
-      console.error('Analysis error:', error);
+      logger.error('IPC:analyzeGame', 'Analysis error', error);
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
         code: 'ANALYSIS_ERROR',
@@ -970,7 +970,7 @@ const functionMap = {
         success: true,
       };
     } catch (error) {
-      console.error('Metrics calculation error:', error);
+      logger.error('IPC:calculateMetrics', 'Metrics calculation error', error);
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
         code: 'METRICS_ERROR',
@@ -1023,7 +1023,6 @@ const functionMap = {
       return { path, success: true };
     } catch (error) {
       logger.error('IPC:saveGame', 'Failed to save game', error);
-      console.error('Save game error:', error);
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
         code: 'SAVE_GAME_ERROR',
@@ -1053,7 +1052,6 @@ const functionMap = {
       return { path, success: true };
     } catch (error) {
       logger.error('IPC:saveAnalysis', 'Failed to save analysis', error);
-      console.error('Save analysis error:', error);
       return {
         error: error instanceof Error ? error.message : 'Unknown error',
         code: 'SAVE_ANALYSIS_ERROR',
@@ -1376,22 +1374,20 @@ const functionMap = {
         exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
       }
 
-      // Load all games
+      // Load all games in parallel for better performance
       const gamesList = await dataStorage.getGamesList();
-      const games: StoredGameData[] = [];
-      const analyses: StoredAnalysisData[] = [];
 
-      for (const entry of gamesList) {
-        const game = await dataStorage.loadGame(entry.gameId);
-        if (game) {
-          games.push(game);
-          if (payload.includeAnalysis) {
-            const analysis = await dataStorage.loadAnalysis(entry.gameId);
-            if (analysis) {
-              analyses.push(analysis);
-            }
-          }
-        }
+      // Load games in parallel
+      const gamePromises = gamesList.map((entry) => dataStorage!.loadGame(entry.gameId));
+      const loadedGames = await Promise.all(gamePromises);
+      const games = loadedGames.filter((g): g is StoredGameData => g !== null);
+
+      // Load analyses in parallel if requested
+      let analyses: StoredAnalysisData[] = [];
+      if (payload.includeAnalysis) {
+        const analysisPromises = games.map((game) => dataStorage!.loadAnalysis(game.gameId));
+        const loadedAnalyses = await Promise.all(analysisPromises);
+        analyses = loadedAnalyses.filter((a): a is StoredAnalysisData => a !== null);
       }
 
       const result = await exportImportManager.exportAllGames(
@@ -1480,21 +1476,18 @@ const functionMap = {
         exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
       }
 
-      // Load all games
+      // Load all games in parallel for better performance
       const gamesList = await dataStorage.getGamesList();
-      const games: StoredGameData[] = [];
-      const analyses: StoredAnalysisData[] = [];
 
-      for (const entry of gamesList) {
-        const game = await dataStorage.loadGame(entry.gameId);
-        if (game) {
-          games.push(game);
-          const analysis = await dataStorage.loadAnalysis(entry.gameId);
-          if (analysis) {
-            analyses.push(analysis);
-          }
-        }
-      }
+      // Load games in parallel
+      const gamePromises = gamesList.map((entry) => dataStorage!.loadGame(entry.gameId));
+      const loadedGames = await Promise.all(gamePromises);
+      const games = loadedGames.filter((g): g is StoredGameData => g !== null);
+
+      // Load analyses in parallel
+      const analysisPromises = games.map((game) => dataStorage!.loadAnalysis(game.gameId));
+      const loadedAnalyses = await Promise.all(analysisPromises);
+      const analyses = loadedAnalyses.filter((a): a is StoredAnalysisData => a !== null);
 
       // Load profile
       const profile = await dataStorage.loadPlayerProfile();
@@ -1714,9 +1707,9 @@ const functionMap = {
         result: ImportResult;
       };
 
-      // Save imported games and analyses
-      for (const game of batchResult.games) {
-        await dataStorage.saveGame({
+      // Save imported games in parallel for better performance
+      const saveGamePromises = batchResult.games.map((game) =>
+        dataStorage!.saveGame({
           gameId: game.gameId,
           timestamp: new Date(game.timestamp).getTime(),
           playerColor: game.metadata.playerColor,
@@ -1752,17 +1745,19 @@ const functionMap = {
             return moves;
           }),
           pgn: game.pgn,
-        });
-      }
+        })
+      );
+      await Promise.all(saveGamePromises);
 
-      for (const analysis of batchResult.analyses) {
+      // Save imported analyses in parallel
+      const saveAnalysisPromises = batchResult.analyses.map((analysis) => {
         // Calculate totalMoves from moveAnalysis if not present in summary
         const totalMoves =
           'totalMoves' in analysis.summary
             ? (analysis.summary as { totalMoves: number }).totalMoves
             : analysis.moveAnalysis.length;
 
-        await dataStorage.saveAnalysis({
+        return dataStorage!.saveAnalysis({
           gameId: analysis.gameId,
           analysisVersion: analysis.analysisVersion,
           analysisTimestamp: analysis.analysisTimestamp,
@@ -1776,7 +1771,8 @@ const functionMap = {
           tacticalOpportunities: analysis.tacticalOpportunities,
           gamePhases: analysis.gamePhases,
         });
-      }
+      });
+      await Promise.all(saveAnalysisPromises);
 
       logger.info('IPC:importBatchGames', 'Batch import complete', {
         imported: batchResult.result.imported,

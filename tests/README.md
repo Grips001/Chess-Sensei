@@ -67,17 +67,17 @@ describe('Example Module', () => {
 - Game flow tests (full user scenarios)
 - Build verification tests
 
-## Existing Tests (Legacy)
+## Test Files
 
-Note: Existing test files in `src/` use the `test-*.ts` naming pattern. These
-will be migrated to `*.test.ts` pattern in Phase 5.2:
+Test files use the `*.test.ts` naming pattern and are located in `tests/`:
 
-- `src/engine/test-stockfish.ts` → `src/engine/stockfish.test.ts`
-- `src/engine/test-engine-interface.ts` → `src/engine/engine-interface.test.ts`
-- `src/engine/test-engine-operations.ts` →
-  `src/engine/engine-operations.test.ts`
-- `src/shared/test-chess-logic.ts` → `src/shared/chess-logic.test.ts`
-- `src/backend/test-ai-opponent.ts` → `src/backend/ai-opponent.test.ts`
+- `tests/chess-logic.test.ts` - Chess logic validation (40 tests)
+- `tests/bot-types.test.ts` - Bot personality and difficulty tests
+- `tests/engine-types.test.ts` - Engine type validation
+- `tests/game-state.test.ts` - Game state management
+- `tests/ipc-types.test.ts` - IPC type validation
+
+Legacy test files in `src/` use `test-*.ts` pattern for manual testing.
 
 ## Architecture Notes
 
@@ -115,17 +115,17 @@ Stockfish runs as **WASM in-process**, not as a subprocess. Engine tests should:
 | Frontend UI             | 50%+            | Low      |
 | Integration             | 60%+            | Medium   |
 
-## Phase 5 Modernization
+## Test Suite Status
 
-This test infrastructure was established during Phase 5 (Comprehensive Testing)
-as part of post-migration modernization:
+The test suite includes 114 tests across 5 test files:
 
-1. **Phase 5.0:** ✅ Audit completed (TESTING_INFRASTRUCTURE_AUDIT.md)
-2. **Phase 5.1:** ✅ Infrastructure setup (this directory, scripts)
-3. **Phase 5.2:** Pending - Update existing tests
-4. **Phase 5.3:** Pending - Create Phase 4 feature tests
-5. **Phase 5.4:** Pending - Update Claude customizations
-6. **Phase 5.5:** Pending - Run comprehensive tests
+- ✅ Chess logic validation
+- ✅ Bot type and personality tests
+- ✅ Engine type validation
+- ✅ Game state management
+- ✅ IPC type contracts
+
+Run the full suite with `bun run test`.
 
 ## References
 

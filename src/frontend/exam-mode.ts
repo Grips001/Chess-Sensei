@@ -497,8 +497,8 @@ export class ExamUIManager {
       botGrid.addEventListener('click', (e) => {
         const card = (e.target as HTMLElement).closest('.bot-card');
         if (card) {
-          const personality = card.getAttribute('data-personality') as BotPersonality;
-          this.selectBot(personality);
+          const personality = card.getAttribute('data-personality') as BotPersonality | null;
+          if (personality) this.selectBot(personality);
         }
       });
     }
@@ -507,8 +507,8 @@ export class ExamUIManager {
     const difficultyButtons = document.querySelectorAll('#exam-setup-overlay .difficulty-button');
     difficultyButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        const preset = button.getAttribute('data-preset') as DifficultyPreset;
-        this.selectDifficulty(preset);
+        const preset = button.getAttribute('data-preset') as DifficultyPreset | null;
+        if (preset) this.selectDifficulty(preset);
       });
     });
 
@@ -516,8 +516,8 @@ export class ExamUIManager {
     const colorButtons = document.querySelectorAll('#exam-setup-overlay .color-button');
     colorButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        const color = button.getAttribute('data-color') as PlayerColor;
-        this.selectColor(color);
+        const color = button.getAttribute('data-color') as PlayerColor | null;
+        if (color) this.selectColor(color);
       });
     });
 

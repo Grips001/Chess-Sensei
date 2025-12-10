@@ -6,6 +6,10 @@
  */
 
 import type { BotPersonality, DifficultyPreset, AIPlayMode } from './bot-types';
+import { STARTPOS_FEN } from './chess-constants';
+
+// Re-export STARTPOS_FEN for backwards compatibility
+export { STARTPOS_FEN };
 
 /**
  * Available game modes
@@ -83,11 +87,6 @@ export interface GameState {
   /** Move history (UCI format) */
   moveHistory: string[];
 }
-
-/**
- * Starting position FEN
- */
-export const STARTPOS_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 /**
  * Initial game state

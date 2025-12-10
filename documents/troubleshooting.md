@@ -250,8 +250,8 @@ return to normal orientation.
    - Close other applications
    - Chess-Sensei is lightweight but needs basic resources
 
-2. **Disable animations (future feature):**
-   - Animation settings coming in a future update
+2. **Reduce system load:**
+   - Close background applications to free up resources
 
 3. **Update graphics drivers:**
    - Outdated drivers can cause rendering lag
@@ -297,7 +297,7 @@ return to normal orientation.
 
 2. **Check Chess-Sensei volume:**
    - Default volume is 50%
-   - Volume controls coming in future update
+   - Use OS audio mixer to adjust per-application volume
 
 3. **Verify sound files:**
    - Sound files should be in `public/assets/sounds/` directory (source)
@@ -312,11 +312,8 @@ return to normal orientation.
 
 **Problem:** Volume is not comfortable.
 
-**Current Limitation:** Volume is fixed at 50% in the current version.
-
-**Workaround:** Adjust system volume or application volume in your OS mixer.
-
-**Future Enhancement:** In-app volume slider planned for a future update.
+**Solution:** Adjust system volume or application volume in your OS mixer.
+Chess-Sensei plays sounds at 50% of the system volume level.
 
 ### Wrong Sound Plays
 
@@ -386,23 +383,12 @@ Have an idea for improvement?
 - **Documentation:** Check the [User Guide](user-guide.md) for detailed info
 - **FAQ:** See [Frequently Asked Questions](faq.md)
 
-## Known Issues
+## Known Limitations
 
-Current known limitations (will be addressed in future updates):
+Current design decisions:
 
-1. **No volume control:** Fixed at 50% (settings panel planned for future)
-2. **No time controls:** Untimed games only (chess clock planned for future
-   release)
-
-**Resolved:**
-
-- **Phase 3:** Pawn promotion now supports all piece choices (Queen, Rook,
-  Bishop, Knight)
-- **Phase 4:** Game data is now saved automatically for Exam Mode games
-- **Phase 5:** Post-game analysis UI with review, summary, and analytics tabs
-- **Phase 6:** Progress dashboard with radar charts and achievement system
-- **Phase 7:** Sandbox Mode with board editor and FEN support
-- **Phase 8:** Data management with export/import and automatic backups
+1. **Volume control:** Fixed at 50% - use OS audio mixer for per-app control
+2. **Untimed games:** Games are untimed to focus on move quality over speed
 
 ## Still Having Problems?
 

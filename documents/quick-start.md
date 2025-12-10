@@ -135,8 +135,8 @@ best-move guidance.
 
 ### How do I save my game?
 
-**Exam Mode games are saved automatically!** As of Phase 4 (v0.4.0), completed
-Exam Mode games are stored locally with full analysis data.
+**Exam Mode games are saved automatically!** Completed Exam Mode games are
+stored locally with full analysis data.
 
 See [FAQ](faq.md#can-i-save-my-games) for storage location details.
 
