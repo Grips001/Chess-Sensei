@@ -1,10 +1,8 @@
 # Tech Spec: Right Panel Layout Redesign
 
-> **Status:** Approved
-> **Author:** Grips001
-> **Created:** 2025-12-22
-> **Last Updated:** 2025-12-22
-> **PRD:** [prd-right-panel-layout-redesign.md](prd-right-panel-layout-redesign.md)
+> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> Updated:** 2025-12-22 **PRD:**
+> [prd-right-panel-layout-redesign.md](prd-right-panel-layout-redesign.md)
 > **Related Issues:** N/A
 
 ---
@@ -13,9 +11,11 @@
 
 ### Summary
 
-Redesign the right panel layout by extracting control buttons into a dedicated glassmorphic toolbar and reorganizing
-the remaining panel content into collapsible, clearly-labeled sections. This reduces visual crowding,
-improves information hierarchy, and maintains the board-centric layout while preserving the app's signature aesthetic.
+Redesign the right panel layout by extracting control buttons into a dedicated
+glassmorphic toolbar and reorganizing the remaining panel content into
+collapsible, clearly-labeled sections. This reduces visual crowding, improves
+information hierarchy, and maintains the board-centric layout while preserving
+the app's signature aesthetic.
 
 ### Goals
 
@@ -37,10 +37,13 @@ improves information hierarchy, and maintains the board-centric layout while pre
 
 ### Current Architecture
 
-The right panel is a fixed 350px wide container located in `index.html` (lines 27-99) with five vertically-stacked sections:
+The right panel is a fixed 350px wide container located in `index.html` (lines
+27-99) with five vertically-stacked sections:
 
-1. **Game Status** - Turn indicator, check/checkmate alerts, bot thinking indicator
-2. **Best Moves (Guidance Panel)** - Training Mode only, shows top 3 engine recommendations
+1. **Game Status** - Turn indicator, check/checkmate alerts, bot thinking
+   indicator
+2. **Best Moves (Guidance Panel)** - Training Mode only, shows top 3 engine
+   recommendations
 3. **Game Controls** - 5 control buttons in 2-column grid
 4. **Move History** - Scrollable list of game moves
 5. **Captured Pieces** - Shows material advantage
@@ -55,18 +58,25 @@ The right panel is a fixed 350px wide container located in `index.html` (lines 2
 
 **Current Styling:**
 
-- Glassmorphic aesthetic: `rgba(255, 255, 255, 0.7)` with `backdrop-filter: blur(20px)`
+- Glassmorphic aesthetic: `rgba(255, 255, 255, 0.7)` with
+  `backdrop-filter: blur(20px)`
 - Neomorphic soft shadows
 - 16px vertical gaps between sections
-- Each section: `rgba(255, 255, 255, 0.5)` background, 16px padding, 8px border radius
+- Each section: `rgba(255, 255, 255, 0.5)` background, 16px padding, 8px border
+  radius
 
 ### Key Concepts
 
-- **Glassmorphism**: Semi-transparent, blurred background aesthetic used throughout app
-- **Collapsible Section**: Panel section with header that can be clicked to expand/collapse content
-- **Toolbar**: Horizontal bar containing action buttons, positioned independently of main panel
-- **Panel Section**: Logical grouping of related UI elements with header and content area
-- **Board-Centric Layout**: Design principle where chessboard remains visually dominant
+- **Glassmorphism**: Semi-transparent, blurred background aesthetic used
+  throughout app
+- **Collapsible Section**: Panel section with header that can be clicked to
+  expand/collapse content
+- **Toolbar**: Horizontal bar containing action buttons, positioned
+  independently of main panel
+- **Panel Section**: Logical grouping of related UI elements with header and
+  content area
+- **Board-Centric Layout**: Design principle where chessboard remains visually
+  dominant
 
 ## Detailed Design
 
@@ -173,10 +183,7 @@ export class ControlToolbar {
     const appContainer = document.querySelector('.app-container');
 
     if (this.position === 'top') {
-      appContainer?.insertBefore(
-        this.toolbarElement,
-        appContainer.firstChild
-      );
+      appContainer?.insertBefore(this.toolbarElement, appContainer.firstChild);
     } else {
       appContainer?.appendChild(this.toolbarElement);
     }
@@ -240,7 +247,8 @@ export class CollapsibleSection {
     this.isExpanded = defaultExpanded;
     this.sectionElement = this.createSection(title, contentId);
     this.headerElement = this.sectionElement.querySelector('.section-header')!;
-    this.contentElement = this.sectionElement.querySelector('.section-content')!;
+    this.contentElement =
+      this.sectionElement.querySelector('.section-content')!;
     this.attachEventListeners();
   }
 
@@ -560,8 +568,12 @@ function hideGuidancePanel(): void {
 ```typescript
 // BEFORE (scattered button state updates):
 function updateUndoRedoButtons(): void {
-  const undoButton = document.getElementById('undo-button') as HTMLButtonElement;
-  const redoButton = document.getElementById('redo-button') as HTMLButtonElement;
+  const undoButton = document.getElementById(
+    'undo-button'
+  ) as HTMLButtonElement;
+  const redoButton = document.getElementById(
+    'redo-button'
+  ) as HTMLButtonElement;
 
   if (undoButton) {
     undoButton.disabled = !canUndo();
@@ -731,7 +743,10 @@ function updateUndoRedoButtons(): void {
 
 .section-content {
   overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    padding 0.3s ease;
 }
 
 .section-content.expanded {
@@ -835,7 +850,8 @@ function updateUndoRedoButtons(): void {
 
 ### Data Model
 
-**No changes to existing data structures.** The refactor is purely presentational and does not modify:
+**No changes to existing data structures.** The refactor is purely
+presentational and does not modify:
 
 - Game state management
 - Move history tracking
@@ -867,10 +883,14 @@ No new IPC methods required. This is a pure frontend layout refactor.
 **Affected Files:**
 
 - [index.html](index.html) - Simplified panel structure
-- [src/frontend/index.ts](src/frontend/index.ts) - Panel initialization, button binding
-- [src/frontend/components/control-toolbar.ts](src/frontend/components/control-toolbar.ts) - NEW: Toolbar component
-- [src/frontend/components/collapsible-section.ts](src/frontend/components/collapsible-section.ts) - NEW: Section component
-- [src/frontend/styles/index.css](src/frontend/styles/index.css) - New toolbar and section styles
+- [src/frontend/index.ts](src/frontend/index.ts) - Panel initialization, button
+  binding
+- [src/frontend/components/control-toolbar.ts](src/frontend/components/control-toolbar.ts) -
+  NEW: Toolbar component
+- [src/frontend/components/collapsible-section.ts](src/frontend/components/collapsible-section.ts) -
+  NEW: Section component
+- [src/frontend/styles/index.css](src/frontend/styles/index.css) - New toolbar
+  and section styles
 
 **Visual Changes:**
 
@@ -1213,14 +1233,16 @@ describe('CollapsibleSection Performance', () => {
 
 ### Feature Flags
 
-Not required. Layout changes can be deployed directly. If rollback needed, can be done via git revert.
+Not required. Layout changes can be deployed directly. If rollback needed, can
+be done via git revert.
 
 ### Rollback Plan
 
 If issues arise post-deployment:
 
 1. **Quick Revert**: Git revert to previous commit
-2. **Partial Disable**: Add flag to skip new layout initialization, fall back to old structure
+2. **Partial Disable**: Add flag to skip new layout initialization, fall back to
+   old structure
 3. **CSS Fallback**: Hide toolbar and show inline buttons with CSS
 
 **Emergency Rollback Code:**
@@ -1255,7 +1277,8 @@ function init() {
 - Reduces information density
 - Requires clicking to switch context
 
-**Why rejected:** PRD explicitly requires seeing multiple information types simultaneously
+**Why rejected:** PRD explicitly requires seeing multiple information types
+simultaneously
 
 ### Option 2: Floating/Draggable Toolbar
 
@@ -1272,7 +1295,8 @@ function init() {
 - Can obstruct board
 - State management complexity
 
-**Why rejected:** Adds unnecessary complexity, fixed position simpler and predictable
+**Why rejected:** Adds unnecessary complexity, fixed position simpler and
+predictable
 
 ### Option 3: Horizontal Accordion Panels
 
@@ -1305,7 +1329,8 @@ function init() {
 - Doesn't solve core problem of buttons competing for space
 - Buttons would still be part of scrollable panel
 
-**Why rejected:** PRD explicitly requires detaching control buttons to dedicated toolbar
+**Why rejected:** PRD explicitly requires detaching control buttons to dedicated
+toolbar
 
 ## Dependencies
 
@@ -1315,30 +1340,42 @@ None. Implementation uses only existing technologies.
 
 ### Internal Dependencies
 
-- **Right Panel System** ([index.html:27-99](index.html#L27-L99)): Existing panel structure
-- **Game Controls** ([src/frontend/index.ts:763-880](src/frontend/index.ts#L763-L880)): Button event handlers
-- **CSS Glassmorphic System** ([src/frontend/styles/index.css](src/frontend/styles/index.css)): Visual styling
-- **Guidance Panel Logic** ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)): Best Moves display
+- **Right Panel System** ([index.html:27-99](index.html#L27-L99)): Existing
+  panel structure
+- **Game Controls**
+  ([src/frontend/index.ts:763-880](src/frontend/index.ts#L763-L880)): Button
+  event handlers
+- **CSS Glassmorphic System**
+  ([src/frontend/styles/index.css](src/frontend/styles/index.css)): Visual
+  styling
+- **Guidance Panel Logic**
+  ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)): Best Moves
+  display
 
 ## Open Questions
 
 1. ~~Should toolbar be positioned at top or bottom of screen?~~
-   - **Answer**: Top position (more conventional for controls, doesn't obstruct captured pieces)
+   - **Answer**: Top position (more conventional for controls, doesn't obstruct
+     captured pieces)
 
 2. ~~What should default expanded/collapsed states be for each section?~~
-   - **Answer**: Best Moves (expanded), Move History (expanded), Game Status (collapsed), Captured (collapsed)
+   - **Answer**: Best Moves (expanded), Move History (expanded), Game Status
+     (collapsed), Captured (collapsed)
 
 3. ~~Should we animate section content height or use max-height?~~
    - **Answer**: Use max-height with large value for simpler CSS animation
 
 4. ~~Should section states sync across browser tabs?~~
-   - **Answer**: No, localStorage is per-tab which is fine for independent sessions
+   - **Answer**: No, localStorage is per-tab which is fine for independent
+     sessions
 
 5. ~~Should we add "Expand All" / "Collapse All" button?~~
-   - **Answer**: No, not in initial implementation. Can add later if user feedback indicates need
+   - **Answer**: No, not in initial implementation. Can add later if user
+     feedback indicates need
 
 6. ~~What icon to use for collapse indicator (▼ vs ▾ vs chevron)?~~
-   - **Answer**: Unicode triangles (▼/▶) for simplicity, can upgrade to icons later
+   - **Answer**: Unicode triangles (▼/▶) for simplicity, can upgrade to icons
+     later
 
 ## Risks
 

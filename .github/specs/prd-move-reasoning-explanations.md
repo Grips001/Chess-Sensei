@@ -1,56 +1,62 @@
 # PRD: Move Reasoning Explanations
 
-> **Status:** Approved
-> **Author:** Grips001
-> **Created:** 2025-12-22
-> **Last Updated:** 2025-12-22
-> **Related Issues:** N/A
+> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> Updated:** 2025-12-22 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Add interactive explanation bubbles to board move highlights in Training Mode that reveal the strategic and tactical
-reasoning behind each recommended move.
-This transforms Training Mode from a simple move suggestion tool into an active teaching system that helps
-players understand chess principles.
+Add interactive explanation bubbles to board move highlights in Training Mode
+that reveal the strategic and tactical reasoning behind each recommended move.
+This transforms Training Mode from a simple move suggestion tool into an active
+teaching system that helps players understand chess principles.
 
 ## Problem Statement
 
 ### Current State
 
-Training Mode displays the top 3 recommended moves as highlighted squares on the board with corresponding notation
-in the Best Moves panel.
-While players can see *what* moves are recommended, they receive no information about *why* those moves are strong
-or how they're ranked.
+Training Mode displays the top 3 recommended moves as highlighted squares on the
+board with corresponding notation in the Best Moves panel. While players can see
+_what_ moves are recommended, they receive no information about _why_ those
+moves are strong or how they're ranked.
 
 ### User Pain Points
 
-- Players see move recommendations but don't understand the reasoning behind them
+- Players see move recommendations but don't understand the reasoning behind
+  them
 - No context for why Move #1 is better than Move #2 or Move #3
-- Missing educational opportunity to teach chess concepts (tactics, positional play, threats)
+- Missing educational opportunity to teach chess concepts (tactics, positional
+  play, threats)
 - Players may follow recommendations without learning underlying principles
 - Difficult to internalize chess improvement without understanding the "why"
 
 ### Impact
 
-This affects **all players using Training Mode**, particularly intermediate players trying to improve their strategic
-understanding. Without explanations, Training Mode becomes a "follow the computer" exercise rather than a learning tool.
+This affects **all players using Training Mode**, particularly intermediate
+players trying to improve their strategic understanding. Without explanations,
+Training Mode becomes a "follow the computer" exercise rather than a learning
+tool.
 
 ## Goals
 
 ### Primary Goals
 
-1. Provide on-demand explanations for each of the top 3 recommended moves in Training Mode
+1. Provide on-demand explanations for each of the top 3 recommended moves in
+   Training Mode
 2. Explain why each move is ranked at its position (#1, #2, or #3)
 3. Include tactical and positional concepts relevant to each move
-4. Create an intuitive, non-intrusive UI that enhances rather than clutters the board
-5. Turn Training Mode into an active teaching tool rather than passive suggestion system
+4. Create an intuitive, non-intrusive UI that enhances rather than clutters the
+   board
+5. Turn Training Mode into an active teaching tool rather than passive
+   suggestion system
 
 ### Non-Goals
 
-1. Generating explanations in real-time (may use pre-analyzed patterns or canned explanations initially)
-2. Providing deep engine analysis with specific evaluation scores (beyond basic concepts)
+1. Generating explanations in real-time (may use pre-analyzed patterns or canned
+   explanations initially)
+2. Providing deep engine analysis with specific evaluation scores (beyond basic
+   concepts)
 3. Explaining every possible move (only top 3 recommendations)
 4. Adding explanations to other modes (Exam, Play) at this stage
 
@@ -188,8 +194,10 @@ So that I can connect concepts to specific positions easily
 ### Constraints
 
 - Explanation generation must be fast enough for real-time use
-- May need to use pattern-matching or template-based explanations initially rather than AI-generated content
-- Bubble icon placement algorithm must account for board rotation, different screen sizes
+- May need to use pattern-matching or template-based explanations initially
+  rather than AI-generated content
+- Bubble icon placement algorithm must account for board rotation, different
+  screen sizes
 - Explanations must be stored/generated in a maintainable way
 
 ### Risks
@@ -207,25 +215,31 @@ So that I can connect concepts to specific positions easily
 ### Option 1: Explanations in Right Panel Only
 
 - **Pros:** Simpler to implement, no board clutter
-- **Cons:** Disconnected from visual board context, less intuitive, loses spatial association
-- **Why rejected:** Reduces learning effectiveness by separating explanation from visual context
+- **Cons:** Disconnected from visual board context, less intuitive, loses
+  spatial association
+- **Why rejected:** Reduces learning effectiveness by separating explanation
+  from visual context
 
 ### Option 2: Always-Visible Explanation Text
 
 - **Pros:** No interaction required, immediate information
-- **Cons:** Significantly clutters interface, overwhelming for users who don't want it
+- **Cons:** Significantly clutters interface, overwhelming for users who don't
+  want it
 - **Why rejected:** Too intrusive, removes user control
 
 ### Option 3: Hover-Based Tooltips
 
 - **Pros:** Lightweight, familiar interaction pattern
-- **Cons:** Doesn't work on touch screens, limited space for detailed explanations, requires precision hovering
-- **Why rejected:** Insufficient space for meaningful explanations, accessibility concerns
+- **Cons:** Doesn't work on touch screens, limited space for detailed
+  explanations, requires precision hovering
+- **Why rejected:** Insufficient space for meaningful explanations,
+  accessibility concerns
 
 ### Option 4: Audio Explanations
 
 - **Pros:** Keeps visual interface clean
-- **Cons:** Requires audio production, less accessible, can't be skimmed/re-read easily
+- **Cons:** Requires audio production, less accessible, can't be skimmed/re-read
+  easily
 - **Why rejected:** Too complex, less flexible for users
 
 ## Implementation Plan
@@ -239,8 +253,10 @@ So that I can connect concepts to specific positions easily
    - Implement basic template-based explanation system for common opening moves
 
 2. **Phase 2: Explanation Library**
-   - Expand explanation templates for tactical patterns (forks, pins, skewers, etc.)
-   - Add positional concept explanations (development, king safety, pawn structure)
+   - Expand explanation templates for tactical patterns (forks, pins, skewers,
+     etc.)
+   - Add positional concept explanations (development, king safety, pawn
+     structure)
    - Create system for mapping engine evaluation to explanation templates
 
 3. **Phase 3: Polish & Edge Cases**
@@ -251,18 +267,24 @@ So that I can connect concepts to specific positions easily
 
 ### Dependencies
 
-- Completion of move notation system (if implementing prd-move-notation-english-descriptions.md first)
+- Completion of move notation system (if implementing
+  prd-move-notation-english-descriptions.md first)
 - Access to engine evaluation data beyond just move ranking
 - UI component library for modals/popovers
 
 ## Open Questions
 
-1. Should explanations include numerical evaluations (e.g., "+0.5 advantage") or remain conceptual only?
-2. How do we handle positions where engine reasoning is too complex for human-readable explanation?
-3. Should we allow users to disable/hide bubble icons if they find them distracting?
-4. Do we need different explanation complexity levels for different skill ratings?
+1. Should explanations include numerical evaluations (e.g., "+0.5 advantage") or
+   remain conceptual only?
+2. How do we handle positions where engine reasoning is too complex for
+   human-readable explanation?
+3. Should we allow users to disable/hide bubble icons if they find them
+   distracting?
+4. Do we need different explanation complexity levels for different skill
+   ratings?
 5. Should we track which explanations users view most to improve content?
-6. Can we leverage existing chess instruction content or do we need to write all explanations custom?
+6. Can we leverage existing chess instruction content or do we need to write all
+   explanations custom?
 7. Should explanations include diagram snippets or just text?
 
 ---

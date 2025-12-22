@@ -1,10 +1,8 @@
 # Tech Spec: Move Notation with English Descriptions
 
-> **Status:** Approved
-> **Author:** Grips001
-> **Created:** 2025-12-22
-> **Last Updated:** 2025-12-22
-> **PRD:** [prd-move-notation-english-descriptions.md](prd-move-notation-english-descriptions.md)
+> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> Updated:** 2025-12-22 **PRD:**
+> [prd-move-notation-english-descriptions.md](prd-move-notation-english-descriptions.md)
 > **Related Issues:** N/A
 
 ---
@@ -13,19 +11,25 @@
 
 ### Summary
 
-Add English descriptions alongside chess notation in the Best Moves panel by creating a notation-to-English parser utility
-and updating the rendering logic to display dual-format move text (e.g., "Nf3 — Knight moves to f3").
+Add English descriptions alongside chess notation in the Best Moves panel by
+creating a notation-to-English parser utility and updating the rendering logic
+to display dual-format move text (e.g., "Nf3 — Knight moves to f3").
 
 ### Goals
 
-1. Create a robust SAN-to-English notation parser that handles all standard algebraic notation patterns
-2. Integrate English descriptions into the existing Best Moves panel rendering flow with minimal performance impact
-3. Maintain visual hierarchy (notation primary, description secondary) through CSS styling
-4. Ensure the solution is maintainable and extensible for future notation features
+1. Create a robust SAN-to-English notation parser that handles all standard
+   algebraic notation patterns
+2. Integrate English descriptions into the existing Best Moves panel rendering
+   flow with minimal performance impact
+3. Maintain visual hierarchy (notation primary, description secondary) through
+   CSS styling
+4. Ensure the solution is maintainable and extensible for future notation
+   features
 
 ### Non-Goals
 
-1. Adding English descriptions to move history or game review features (separate future work)
+1. Adding English descriptions to move history or game review features (separate
+   future work)
 2. Implementing user toggles between notation formats (not in scope)
 3. Internationalization/localization to non-English languages
 4. Changing the underlying move data structures or IPC protocol
@@ -36,21 +40,26 @@ and updating the rendering logic to display dual-format move text (e.g., "Nf3 �
 
 The Best Moves panel system consists of:
 
-1. **Backend Engine Integration** ([src/backend/index.ts:612-638](src/backend/index.ts#L612-L638)):
-   - `getGuidanceMoves()` IPC method receives position and returns top 3 moves from engine
+1. **Backend Engine Integration**
+   ([src/backend/index.ts:612-638](src/backend/index.ts#L612-L638)):
+   - `getGuidanceMoves()` IPC method receives position and returns top 3 moves
+     from engine
    - Returns moves in UCI format (e.g., "e2e4", "g1f3") with evaluation scores
 
-2. **Frontend Move Guidance Manager** ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)):
+2. **Frontend Move Guidance Manager**
+   ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)):
    - Manages guidance state and move data
    - Converts UCI moves to internal `GuidanceMove` format
    - Handles board highlighting and interactions
 
-3. **Frontend Rendering** ([src/frontend/index.ts:1299-1359](src/frontend/index.ts#L1299-L1359)):
+3. **Frontend Rendering**
+   ([src/frontend/index.ts:1299-1359](src/frontend/index.ts#L1299-L1359)):
    - `renderGuidanceMoves()` function displays moves in the panel
    - Converts UCI to SAN using `ChessGame.uciToSan()`
    - Creates HTML with rank badge, notation, and evaluation score
 
-4. **Chess Logic Utilities** ([src/shared/chess-logic.ts:417-425](src/shared/chess-logic.ts#L417-L425)):
+4. **Chess Logic Utilities**
+   ([src/shared/chess-logic.ts:417-425](src/shared/chess-logic.ts#L417-L425)):
    - `uciToSan()` method converts UCI format to Standard Algebraic Notation
    - Uses chess.js library for move validation and conversion
 
@@ -72,9 +81,11 @@ The Best Moves panel system consists of:
 
 ### Key Concepts
 
-- **SAN (Standard Algebraic Notation)**: Chess notation like "Nf3", "Qxd5+", "O-O"
+- **SAN (Standard Algebraic Notation)**: Chess notation like "Nf3", "Qxd5+",
+  "O-O"
 - **UCI (Universal Chess Interface)**: Engine format like "e2e4", "g1f3"
-- **GuidanceMove**: Internal data structure containing move details (UCI, SAN, squares, score, color)
+- **GuidanceMove**: Internal data structure containing move details (UCI, SAN,
+  squares, score, color)
 - **Glassmorphic Design**: Semi-transparent, blurred panels with rounded corners
 
 ## Detailed Design
@@ -111,7 +122,8 @@ The Best Moves panel system consists of:
 
 **File:** `src/shared/notation-parser.ts` (NEW)
 
-**Purpose:** Convert Standard Algebraic Notation to human-readable English descriptions
+**Purpose:** Convert Standard Algebraic Notation to human-readable English
+descriptions
 
 **New Functions:**
 
@@ -256,7 +268,8 @@ const entryHTML = `
 
 **Rationale for Changes:**
 
-- Wrap notation and description in a container (`.guidance-move-content`) for better layout control
+- Wrap notation and description in a container (`.guidance-move-content`) for
+  better layout control
 - Keep notation as primary visual element with strong color
 - Add description with secondary styling (lighter color, smaller font)
 - Maintain existing data attributes for hover interactions
@@ -343,19 +356,20 @@ const entryHTML = `
 
 ### Data Model
 
-No changes to existing data structures. The `GuidanceMove` interface remains unchanged:
+No changes to existing data structures. The `GuidanceMove` interface remains
+unchanged:
 
 ```typescript
 // src/frontend/move-guidance.ts (existing)
 interface GuidanceMove {
-  uci: string;              // "e2e4"
-  san?: string;             // "e4" (set during rendering)
-  from: string;             // "e2"
-  to: string;               // "e4"
-  score: number;            // 35 (centipawns)
-  formattedScore: string;   // "+0.35"
+  uci: string; // "e2e4"
+  san?: string; // "e4" (set during rendering)
+  from: string; // "e2"
+  to: string; // "e4"
+  score: number; // 35 (centipawns)
+  formattedScore: string; // "+0.35"
   color: 'blue' | 'green' | 'yellow';
-  pv?: string[];            // Principal variation
+  pv?: string[]; // Principal variation
 }
 ```
 
@@ -398,7 +412,8 @@ No new IPC methods required. Existing `getGuidanceMoves` remains unchanged.
 **Affected Files:**
 
 - [src/frontend/index.ts](src/frontend/index.ts) - Rendering logic
-- [src/frontend/styles/index.css](src/frontend/styles/index.css) - Visual styling
+- [src/frontend/styles/index.css](src/frontend/styles/index.css) - Visual
+  styling
 - [index.html](index.html) - No structural changes needed
 
 **Visual Changes:**
@@ -429,8 +444,9 @@ No new IPC methods required. Existing `getGuidanceMoves` remains unchanged.
 
 ### State Management
 
-No state management changes required. The notation parser is a pure function with no side effects.
-English descriptions are generated on-demand during rendering.
+No state management changes required. The notation parser is a pure function
+with no side effects. English descriptions are generated on-demand during
+rendering.
 
 ### Error Handling
 
@@ -597,7 +613,9 @@ describe('parseSanToEnglish', () => {
     });
 
     test('converts promotion', () => {
-      expect(parseSanToEnglish('e8=Q')).toBe('Pawn moves to e8, promotes to Queen');
+      expect(parseSanToEnglish('e8=Q')).toBe(
+        'Pawn moves to e8, promotes to Queen'
+      );
     });
   });
 
@@ -686,7 +704,8 @@ describe('Training Mode - Best Moves Display', () => {
 
 - **CPU**: Negligible. String parsing is lightweight (~0.1ms per move).
 - **Memory**: Minimal increase (~50 bytes per move for description string).
-- **Rendering**: No measurable impact. HTML generation already occurs on every move update.
+- **Rendering**: No measurable impact. HTML generation already occurs on every
+  move update.
 - **Startup Time**: No impact. Parser is loaded as part of frontend bundle.
 
 ### Benchmarks
@@ -722,10 +741,14 @@ describe('Parser Performance', () => {
 
 ## Security Considerations
 
-- [x] No user data exposed - parser operates on engine-generated SAN notation only
-- [x] Input validation added - parser handles malformed input gracefully with fallbacks
-- [x] No new attack vectors - pure string parsing function with no external dependencies
-- [x] No XSS risk - output is text content, not HTML (properly escaped in template)
+- [x] No user data exposed - parser operates on engine-generated SAN notation
+      only
+- [x] Input validation added - parser handles malformed input gracefully with
+      fallbacks
+- [x] No new attack vectors - pure string parsing function with no external
+      dependencies
+- [x] No XSS risk - output is text content, not HTML (properly escaped in
+      template)
 
 **XSS Prevention:**
 
@@ -743,15 +766,18 @@ descriptionElement.textContent = ` — ${englishDescription}`;
 
 ### Feature Flags
 
-Not required. Feature is low-risk and improves user experience unconditionally. Can be deployed directly to production.
+Not required. Feature is low-risk and improves user experience unconditionally.
+Can be deployed directly to production.
 
 ### Rollback Plan
 
 If issues arise post-deployment:
 
-1. **Quick Fix**: Modify `renderGuidanceMoves()` to skip parser call and show notation only
+1. **Quick Fix**: Modify `renderGuidanceMoves()` to skip parser call and show
+   notation only
 2. **Revert Commit**: Use git to revert to previous version
-3. **CSS Fallback**: Remove `.guidance-move-description` styles to hide descriptions
+3. **CSS Fallback**: Remove `.guidance-move-description` styles to hide
+   descriptions
 
 **Rollback Code:**
 
@@ -765,7 +791,8 @@ If issues arise post-deployment:
 
 ### Option 1: Generate Descriptions on Backend
 
-**Approach:** Add English description to `BestMove` interface and generate on backend.
+**Approach:** Add English description to `BestMove` interface and generate on
+backend.
 
 **Pros:**
 
@@ -779,12 +806,13 @@ If issues arise post-deployment:
 - Harder to iterate on description format
 - Violates separation of concerns
 
-**Why rejected:** Frontend is the appropriate layer for UI formatting. Backend should remain focused
-on chess logic and engine communication.
+**Why rejected:** Frontend is the appropriate layer for UI formatting. Backend
+should remain focused on chess logic and engine communication.
 
 ### Option 2: Use chess.js Move Object Directly
 
-**Approach:** Parse chess.js's internal move object for piece/square info instead of parsing SAN strings.
+**Approach:** Parse chess.js's internal move object for piece/square info
+instead of parsing SAN strings.
 
 **Pros:**
 
@@ -798,7 +826,8 @@ on chess logic and engine communication.
 - Would need to maintain chess.js instance state
 - More complex than string parsing
 
-**Why rejected:** Current architecture already converts to SAN for display. Adding a parallel data path is unnecessary complexity.
+**Why rejected:** Current architecture already converts to SAN for display.
+Adding a parallel data path is unnecessary complexity.
 
 ### Option 3: Tooltip-Based Descriptions
 
@@ -816,8 +845,8 @@ on chess logic and engine communication.
 - Doesn't work on touch screens
 - Requires mouse precision
 
-**Why rejected:** PRD explicitly calls for always-visible descriptions to facilitate organic notation
-learning through repeated exposure.
+**Why rejected:** PRD explicitly calls for always-visible descriptions to
+facilitate organic notation learning through repeated exposure.
 
 ## Dependencies
 
@@ -831,25 +860,38 @@ None. Implementation uses only existing dependencies:
 
 ### Internal Dependencies
 
-- **Chess Logic Module** ([src/shared/chess-logic.ts](src/shared/chess-logic.ts)): Provides `uciToSan()` for notation conversion
-- **Frontend Rendering** ([src/frontend/index.ts](src/frontend/index.ts)): Existing `renderGuidanceMoves()` function
-- **CSS System** ([src/frontend/styles/index.css](src/frontend/styles/index.css)): Existing glassmorphic design system
-- **Move Guidance Manager** ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)):
+- **Chess Logic Module**
+  ([src/shared/chess-logic.ts](src/shared/chess-logic.ts)): Provides
+  `uciToSan()` for notation conversion
+- **Frontend Rendering** ([src/frontend/index.ts](src/frontend/index.ts)):
+  Existing `renderGuidanceMoves()` function
+- **CSS System**
+  ([src/frontend/styles/index.css](src/frontend/styles/index.css)): Existing
+  glassmorphic design system
+- **Move Guidance Manager**
+  ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)):
 - Provides `GuidanceMove` data structure
 
 ## Open Questions
 
-1. ~~Should we add a user preference to hide descriptions if they find them distracting?~~
-   - **Answer**: No, not in initial implementation. Can add later if user feedback indicates demand.
+1. ~~Should we add a user preference to hide descriptions if they find them
+   distracting?~~
+   - **Answer**: No, not in initial implementation. Can add later if user
+     feedback indicates demand.
 
-2. ~~What should the exact text format be for ambiguous moves? "Knight from b-file" vs "Knight on b-file" vs "b-knight"?~~
-   - **Answer**: Use "Knight from b-file" for clarity and consistency with "moves to" phrasing.
+2. ~~What should the exact text format be for ambiguous moves? "Knight from
+   b-file" vs "Knight on b-file" vs "b-knight"?~~
+   - **Answer**: Use "Knight from b-file" for clarity and consistency with
+     "moves to" phrasing.
 
 3. ~~Should we cache parsed descriptions to avoid re-parsing identical moves?~~
-   - **Answer**: Not necessary. Parsing is fast enough (<0.1ms) that caching adds complexity without meaningful benefit.
+   - **Answer**: Not necessary. Parsing is fast enough (<0.1ms) that caching
+     adds complexity without meaningful benefit.
 
-4. ~~Should descriptions be added to the move history panel in this implementation?~~
-   - **Answer**: No, PRD explicitly marks that as future work. Focus on Best Moves panel only.
+4. ~~Should descriptions be added to the move history panel in this
+   implementation?~~
+   - **Answer**: No, PRD explicitly marks that as future work. Focus on Best
+     Moves panel only.
 
 ## Risks
 

@@ -1,51 +1,57 @@
 # PRD: Move Notation with English Descriptions
 
-> **Status:** Approved
-> **Author:** Grips001
-> **Created:** 2025-12-22
-> **Last Updated:** 2025-12-22
-> **Related Issues:** N/A
+> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> Updated:** 2025-12-22 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Add human-readable English descriptions alongside chess notation in the Best Moves panel to help newer players understand
-moves while organically learning standard chess notation.
-This feature improves accessibility and learning outcomes without removing the educational value of notation itself.
+Add human-readable English descriptions alongside chess notation in the Best
+Moves panel to help newer players understand moves while organically learning
+standard chess notation. This feature improves accessibility and learning
+outcomes without removing the educational value of notation itself.
 
 ## Problem Statement
 
 ### Current State
 
-The Best Moves panel in Training Mode displays moves exclusively in algebraic chess notation (e.g., "Nf3", "Qxd5", "O-O").
-While this is standard in chess, it creates a barrier for newer players who are still learning to read notation.
+The Best Moves panel in Training Mode displays moves exclusively in algebraic
+chess notation (e.g., "Nf3", "Qxd5", "O-O"). While this is standard in chess, it
+creates a barrier for newer players who are still learning to read notation.
 
 ### User Pain Points
 
-- Newer players cannot quickly understand what piece is moving or where it's going
-- Learning notation requires external reference or memorization before the app becomes useful
-- Players may struggle to match notation to board highlights, reducing the effectiveness of move recommendations
+- Newer players cannot quickly understand what piece is moving or where it's
+  going
+- Learning notation requires external reference or memorization before the app
+  becomes useful
+- Players may struggle to match notation to board highlights, reducing the
+  effectiveness of move recommendations
 - The learning curve discourages engagement with Training Mode features
 
 ### Impact
 
-This affects **beginner and novice players** who want to improve but lack fluency in chess notation.
-It creates unnecessary friction in what should be an educational, supportive experience.
+This affects **beginner and novice players** who want to improve but lack
+fluency in chess notation. It creates unnecessary friction in what should be an
+educational, supportive experience.
 
 ## Goals
 
 ### Primary Goals
 
-1. Display English descriptions alongside chess notation for all moves in the Best Moves panel
+1. Display English descriptions alongside chess notation for all moves in the
+   Best Moves panel
 2. Maintain the visibility and educational value of standard chess notation
 3. Help players learn notation organically by seeing both formats simultaneously
-4. Ensure the solution works seamlessly with existing move highlighting and board interaction
+4. Ensure the solution works seamlessly with existing move highlighting and
+   board interaction
 
 ### Non-Goals
 
 1. Replacing or hiding standard chess notation
-2. Adding English descriptions to move history or game review features (at this stage)
+2. Adding English descriptions to move history or game review features (at this
+   stage)
 3. Allowing users to toggle between notation formats
 4. Translating to non-English languages
 
@@ -181,20 +187,24 @@ Best Moves:
 ### Option 1: Toggle Button (Notation Only vs English Only)
 
 - **Pros:** Gives users full control, cleaner interface
-- **Cons:** Requires extra UI element, loses learning benefit of seeing both simultaneously
-- **Why rejected:** Defeats the purpose of helping users learn notation through exposure
+- **Cons:** Requires extra UI element, loses learning benefit of seeing both
+  simultaneously
+- **Why rejected:** Defeats the purpose of helping users learn notation through
+  exposure
 
 ### Option 2: Tooltip on Hover
 
 - **Pros:** Keeps interface clean
-- **Cons:** Requires user action, not discoverable, doesn't work on touch screens
+- **Cons:** Requires user action, not discoverable, doesn't work on touch
+  screens
 - **Why rejected:** Reduces accessibility and learning effectiveness
 
 ### Option 3: English Only with Notation in Parentheses
 
 - **Pros:** Emphasizes readability
 - **Cons:** De-emphasizes notation, doesn't align with chess conventions
-- **Why rejected:** Standard notation should remain primary for learning purposes
+- **Why rejected:** Standard notation should remain primary for learning
+  purposes
 
 ## Implementation Plan
 
@@ -217,10 +227,14 @@ Best Moves:
 
 ## Open Questions
 
-1. Should we apply this pattern to other areas (move history, game review) in future iterations?
-2. Do we need to handle non-standard notation variants (descriptive notation, ICCF numeric)?
-3. Should the description styling be different for different move rankings (#1, #2, #3)?
-4. What is the maximum acceptable panel width before we need to truncate or wrap?
+1. Should we apply this pattern to other areas (move history, game review) in
+   future iterations?
+2. Do we need to handle non-standard notation variants (descriptive notation,
+   ICCF numeric)?
+3. Should the description styling be different for different move rankings (#1,
+   #2, #3)?
+4. What is the maximum acceptable panel width before we need to truncate or
+   wrap?
 
 ---
 

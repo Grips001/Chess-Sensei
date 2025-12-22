@@ -1,26 +1,26 @@
 # PRD: Right Panel Layout Redesign
 
-> **Status:** Approved
-> **Author:** Grips001
-> **Created:** 2025-12-22
-> **Last Updated:** 2025-12-22
-> **Related Issues:** N/A
+> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> Updated:** 2025-12-22 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Redesign the right panel layout in Training Mode and Exam Mode to reduce visual crowding and improve information hierarchy
-while preserving the app's signature glassmorphic aesthetic. This involves detaching control buttons to a dedicated
-toolbar, organizing panel content into collapsible sections, and maintaining the board-centric visual focus.
+Redesign the right panel layout in Training Mode and Exam Mode to reduce visual
+crowding and improve information hierarchy while preserving the app's signature
+glassmorphic aesthetic. This involves detaching control buttons to a dedicated
+toolbar, organizing panel content into collapsible sections, and maintaining the
+board-centric visual focus.
 
 ## Problem Statement
 
 ### Current State
 
-The right panel in Training Mode and Exam Mode serves as a catch-all container for multiple unrelated UI elements:
-control buttons, best moves recommendations, move history, position information, and settings.
-This creates visual density issues, especially on smaller screens or when not running fullscreen.
+The right panel in Training Mode and Exam Mode serves as a catch-all container
+for multiple unrelated UI elements: control buttons, best moves recommendations,
+move history, position information, and settings. This creates visual density
+issues, especially on smaller screens or when not running fullscreen.
 
 ### User Pain Points
 
@@ -34,14 +34,17 @@ This creates visual density issues, especially on smaller screens or when not ru
 
 ### Impact
 
-This affects **all users of Training and Exam modes**, particularly those on smaller screens (laptops, non-fullscreen usage).
-The poor organization reduces usability and creates unnecessary cognitive load when trying to focus on chess improvement.
+This affects **all users of Training and Exam modes**, particularly those on
+smaller screens (laptops, non-fullscreen usage). The poor organization reduces
+usability and creates unnecessary cognitive load when trying to focus on chess
+improvement.
 
 ## Goals
 
 ### Primary Goals
 
-1. Detach control buttons from right panel into a dedicated toolbar with consistent visibility
+1. Detach control buttons from right panel into a dedicated toolbar with
+   consistent visibility
 2. Organize right panel content into clearly defined, logically grouped sections
 3. Reduce visual crowding without sacrificing functionality
 4. Maintain and enhance the glassmorphic aesthetic throughout the redesign
@@ -201,9 +204,11 @@ So that I can maximize space for information I care about
 ### Constraints
 
 - Must not increase total panel width (board must remain dominant)
-- Must preserve existing glassmorphic visual language (translucency, blur, shadows, rounded corners)
+- Must preserve existing glassmorphic visual language (translucency, blur,
+  shadows, rounded corners)
 - Must work within Neutralino framework limitations
-- Cannot use libraries incompatible with current tech stack (Bun, TypeScript, Neutralino)
+- Cannot use libraries incompatible with current tech stack (Bun, TypeScript,
+  Neutralino)
 
 ### Risks
 
@@ -220,14 +225,18 @@ So that I can maximize space for information I care about
 ### Option 1: Tabbed Panel Interface
 
 - **Pros:** Maximum space efficiency, familiar pattern
-- **Cons:** Hides information, requires clicking to switch contexts, less scannable
-- **Why rejected:** Reduces ability to see multiple information types simultaneously, which is valuable in Training Mode
+- **Cons:** Hides information, requires clicking to switch contexts, less
+  scannable
+- **Why rejected:** Reduces ability to see multiple information types
+  simultaneously, which is valuable in Training Mode
 
 ### Option 2: Floating Panel System (Moveable Windows)
 
 - **Pros:** Ultimate flexibility, user can arrange as desired
-- **Cons:** Complex to implement, overwhelming, breaks board-centric aesthetic, can obstruct board
-- **Why rejected:** Too complex, violates design principle of board-centric focus
+- **Cons:** Complex to implement, overwhelming, breaks board-centric aesthetic,
+  can obstruct board
+- **Why rejected:** Too complex, violates design principle of board-centric
+  focus
 
 ### Option 3: Single Vertical Stack with Fixed Sizing
 
@@ -278,12 +287,15 @@ So that I can maximize space for information I care about
 
 1. Should the toolbar be positioned at the top or bottom of the screen?
 2. What should the default state (expanded/collapsed) be for each section?
-3. Should section states persist between sessions (remember user's collapsed/expanded preferences)?
-4. Do we need different layouts for Training Mode vs Exam Mode, or can they share the same structure?
+3. Should section states persist between sessions (remember user's
+   collapsed/expanded preferences)?
+4. Do we need different layouts for Training Mode vs Exam Mode, or can they
+   share the same structure?
 5. Should there be a "collapse all" / "expand all" shortcut?
 6. What is the maximum acceptable panel height before we require scrolling?
 7. Should we add icons to section headers for faster scanning?
-8. Can we get inspiration from Chess.com's layout without copying their flat design aesthetic?
+8. Can we get inspiration from Chess.com's layout without copying their flat
+   design aesthetic?
 
 ---
 

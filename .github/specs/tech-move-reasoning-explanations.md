@@ -1,10 +1,8 @@
 # Tech Spec: Move Reasoning Explanations
 
-> **Status:** Approved
-> **Author:** Grips001
-> **Created:** 2025-12-22
-> **Last Updated:** 2025-12-22
-> **PRD:** [prd-move-reasoning-explanations.md](prd-move-reasoning-explanations.md)
+> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> Updated:** 2025-12-22 **PRD:**
+> [prd-move-reasoning-explanations.md](prd-move-reasoning-explanations.md)
 > **Related Issues:** N/A
 
 ---
@@ -13,22 +11,28 @@
 
 ### Summary
 
-Add interactive explanation bubbles to board move highlights in Training Mode by creating a bubble icon overlay system,
-an explanation modal component, and a template-based explanation generation system that maps move characteristics
-to human-readable tactical and positional concepts.
+Add interactive explanation bubbles to board move highlights in Training Mode by
+creating a bubble icon overlay system, an explanation modal component, and a
+template-based explanation generation system that maps move characteristics to
+human-readable tactical and positional concepts.
 
 ### Goals
 
-1. Create a non-intrusive bubble icon overlay system positioned near highlighted squares
-2. Build a reusable modal component for displaying move explanations with glassmorphic styling
-3. Implement a template-based explanation generator that maps engine evaluation data to chess concepts
-4. Integrate explanation system with existing guidance highlighting without disrupting board interactions
+1. Create a non-intrusive bubble icon overlay system positioned near highlighted
+   squares
+2. Build a reusable modal component for displaying move explanations with
+   glassmorphic styling
+3. Implement a template-based explanation generator that maps engine evaluation
+   data to chess concepts
+4. Integrate explanation system with existing guidance highlighting without
+   disrupting board interactions
 5. Ensure performance targets (<100ms explanation retrieval, 60fps animations)
 
 ### Non-Goals
 
 1. AI-generated real-time explanations (use template-based system initially)
-2. Deep engine analysis with full variation trees (focus on conceptual understanding)
+2. Deep engine analysis with full variation trees (focus on conceptual
+   understanding)
 3. Explanation system for Exam Mode or Play Mode (Training Mode only)
 4. Historical move explanations or game review annotations (future work)
 5. Multi-language support for explanations (English only initially)
@@ -39,17 +43,21 @@ to human-readable tactical and positional concepts.
 
 The existing guidance system consists of:
 
-1. **Move Guidance Manager** ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)):
+1. **Move Guidance Manager**
+   ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)):
    - Manages top 3 engine recommendations
-   - Converts engine `BestMove` to `GuidanceMove` with color assignments (blue/green/yellow)
+   - Converts engine `BestMove` to `GuidanceMove` with color assignments
+     (blue/green/yellow)
    - Provides callbacks for UI updates
 
-2. **Board Highlighting System** ([src/frontend/index.ts:1367-1488](src/frontend/index.ts#L1367-L1488)):
+2. **Board Highlighting System**
+   ([src/frontend/index.ts:1367-1488](src/frontend/index.ts#L1367-L1488)):
    - Three-layer nested ring design using CSS pseudo-elements
    - Supports multi-color highlights on the same square
    - Pure CSS approach (no SVG overlays)
 
-3. **Backend Engine Integration** ([src/backend/index.ts:612-638](src/backend/index.ts#L612-L638)):
+3. **Backend Engine Integration**
+   ([src/backend/index.ts:612-638](src/backend/index.ts#L612-L638)):
    - `getGuidanceMoves()` IPC method returns top 3 moves with scores
    - Engine provides centipawn evaluations and principal variations
 
@@ -60,15 +68,19 @@ The existing guidance system consists of:
 - Smooth CSS transitions on highlight appearance
 - No user interaction beyond hover effects
 
-**Gap:** No way for users to understand *why* moves are recommended.
+**Gap:** No way for users to understand _why_ moves are recommended.
 
 ### Key Concepts
 
-- **Bubble Icon**: Small circular icon positioned near highlighted squares that users can click
+- **Bubble Icon**: Small circular icon positioned near highlighted squares that
+  users can click
 - **Explanation Modal**: Glassmorphic popup showing move reasoning
-- **Template-Based Explanations**: Pre-written explanation patterns matched to move characteristics
-- **Tactical Motifs**: Chess patterns (fork, pin, skewer, discovered attack, etc.)
-- **Positional Concepts**: Strategic ideas (development, king safety, central control, pawn structure)
+- **Template-Based Explanations**: Pre-written explanation patterns matched to
+  move characteristics
+- **Tactical Motifs**: Chess patterns (fork, pin, skewer, discovered attack,
+  etc.)
+- **Positional Concepts**: Strategic ideas (development, king safety, central
+  control, pawn structure)
 - **Principal Variation (PV)**: Sequence of best moves calculated by engine
 
 ## Detailed Design
@@ -163,11 +175,7 @@ export class BoardAnnotations {
   /**
    * Create a single bubble icon
    */
-  private createBubble(
-    square: string,
-    move: GuidanceMove,
-    rank: number
-  ): void {
+  private createBubble(square: string, move: GuidanceMove, rank: number): void {
     const bubble = document.createElement('div');
     bubble.className = `guidance-bubble bubble-${move.color}`;
     bubble.dataset.square = square;
@@ -495,7 +503,7 @@ function buildStrengthsList(
   }
 
   if (chars.attacksKing) {
-    strengths.push('Puts pressure on the opponent\'s king');
+    strengths.push("Puts pressure on the opponent's king");
   }
 
   if (chars.createsThreat) {
@@ -503,7 +511,7 @@ function buildStrengthsList(
   }
 
   if (chars.respondsToThreat) {
-    strengths.push('Responds to opponent\'s threat');
+    strengths.push("Responds to opponent's threat");
   }
 
   if (chars.improvesKingSafety) {
@@ -531,9 +539,8 @@ function buildRankingExplanation(
   allMoves: GuidanceMove[],
   chars: MoveCharacteristics
 ): string {
-  const scoreDiff = allMoves.length > rank
-    ? (move.score - allMoves[rank].score) / 100
-    : 0;
+  const scoreDiff =
+    allMoves.length > rank ? (move.score - allMoves[rank].score) / 100 : 0;
 
   switch (rank) {
     case 1:
@@ -663,12 +670,7 @@ function handleBubbleClick(square: string, move: GuidanceMove): void {
   const moves = guidanceManager.getMoves();
   const rank = moves.findIndex((m) => m.to === square) + 1;
 
-  const explanation = generateExplanation(
-    gameState.fen,
-    move,
-    rank,
-    moves
-  );
+  const explanation = generateExplanation(gameState.fen, move, rank, moves);
 
   explanationModal?.show(explanation);
 }
@@ -924,22 +926,28 @@ interface MoveCharacteristics {
 }
 ```
 
-**No changes to existing data structures.** The `GuidanceMove` interface remains unchanged.
+**No changes to existing data structures.** The `GuidanceMove` interface remains
+unchanged.
 
 ### API Changes
 
 #### IPC Methods
 
-No new IPC methods required. All explanation generation happens on the frontend using existing move data.
+No new IPC methods required. All explanation generation happens on the frontend
+using existing move data.
 
 ### UI Changes
 
 **Affected Files:**
 
-- [src/frontend/index.ts](src/frontend/index.ts) - Add bubble rendering and click handling
-- [src/frontend/board-annotations.ts](src/frontend/board-annotations.ts) - NEW: Bubble overlay management
-- [src/frontend/components/explanation-modal.ts](src/frontend/components/explanation-modal.ts) - NEW: Modal component
-- [src/frontend/styles/index.css](src/frontend/styles/index.css) - Add bubble and modal styles
+- [src/frontend/index.ts](src/frontend/index.ts) - Add bubble rendering and
+  click handling
+- [src/frontend/board-annotations.ts](src/frontend/board-annotations.ts) - NEW:
+  Bubble overlay management
+- [src/frontend/components/explanation-modal.ts](src/frontend/components/explanation-modal.ts) -
+  NEW: Modal component
+- [src/frontend/styles/index.css](src/frontend/styles/index.css) - Add bubble
+  and modal styles
 
 **Visual Changes:**
 
@@ -1093,7 +1101,8 @@ function getFallbackExplanation(
 **Scope:**
 
 - Create explanation generator utility
-- Implement basic characteristic detection (development, center control, castling)
+- Implement basic characteristic detection (development, center control,
+  castling)
 - Build strength and ranking explanation templates
 - Add concept identification
 - Write unit tests for common patterns
@@ -1183,7 +1192,8 @@ import { describe, test, expect } from 'bun:test';
 import { generateExplanation } from '@/shared/explanation-generator';
 
 describe('generateExplanation', () => {
-  const startingFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const startingFen =
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   test('generates development explanation for Nf3', () => {
     const move = {
@@ -1199,12 +1209,15 @@ describe('generateExplanation', () => {
     const explanation = generateExplanation(startingFen, move, 1, [move]);
 
     expect(explanation.notation).toBe('Nf3');
-    expect(explanation.strengths).toContain('Develops a piece toward the center');
+    expect(explanation.strengths).toContain(
+      'Develops a piece toward the center'
+    );
     expect(explanation.concepts).toContain('Development');
   });
 
   test('generates castling explanation', () => {
-    const fen = 'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
+    const fen =
+      'r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4';
     const move = {
       uci: 'e1g1',
       san: 'O-O',
@@ -1295,8 +1308,12 @@ import { generateExplanation } from '@/shared/explanation-generator';
 
 describe('Explanation Performance', () => {
   test('generates 100 explanations under 10 seconds', () => {
-    const testPositions = [/* various FENs */];
-    const testMoves = [/* various moves */];
+    const testPositions = [
+      /* various FENs */
+    ];
+    const testMoves = [
+      /* various moves */
+    ];
 
     const start = performance.now();
 
@@ -1323,7 +1340,8 @@ describe('Explanation Performance', () => {
 - [x] No user data exposed - operates on engine-generated moves only
 - [x] Input validation added - graceful handling of invalid positions/moves
 - [x] No new attack vectors - pure frontend logic, no network requests
-- [x] XSS prevention - modal content properly escaped (using textContent where applicable)
+- [x] XSS prevention - modal content properly escaped (using textContent where
+      applicable)
 - [x] No eval() or dangerous DOM manipulation
 
 **XSS Prevention in Modal:**
@@ -1345,15 +1363,16 @@ content.strengths.forEach((strength) => {
 
 ### Feature Flags
 
-Not required initially. Feature can be deployed directly to Training Mode.
-If needed later, can add a setting to disable bubbles.
+Not required initially. Feature can be deployed directly to Training Mode. If
+needed later, can add a setting to disable bubbles.
 
 ### Rollback Plan
 
 If issues arise post-deployment:
 
 1. **Quick Disable**: Add flag to skip bubble rendering
-2. **CSS Hiding**: Add `.guidance-bubble { display: none; }` to hide without code changes
+2. **CSS Hiding**: Add `.guidance-bubble { display: none; }` to hide without
+   code changes
 3. **Full Revert**: Git revert to previous version
 
 **Emergency Rollback Code:**
@@ -1371,7 +1390,8 @@ if (ENABLE_EXPLANATIONS && gameState.mode === 'training') {
 
 ### Option 1: Explanations in Right Panel Only
 
-**Approach:** Add explanation text directly in Best Moves panel instead of bubbles
+**Approach:** Add explanation text directly in Best Moves panel instead of
+bubbles
 
 **Pros:**
 
@@ -1386,7 +1406,8 @@ if (ENABLE_EXPLANATIONS && gameState.mode === 'training') {
 - Less intuitive
 - Not interactive/discoverable
 
-**Why rejected:** PRD explicitly requires bubble icons for spatial association with board highlights
+**Why rejected:** PRD explicitly requires bubble icons for spatial association
+with board highlights
 
 ### Option 2: Always-Visible Explanation Text
 
@@ -1424,7 +1445,8 @@ if (ENABLE_EXPLANATIONS && gameState.mode === 'training') {
 - Inconsistent quality
 - Privacy concerns
 
-**Why rejected:** PRD allows template-based system initially; can add AI later as enhancement
+**Why rejected:** PRD allows template-based system initially; can add AI later
+as enhancement
 
 ### Option 4: Inline Annotations (Like Chess.com)
 
@@ -1442,7 +1464,8 @@ if (ENABLE_EXPLANATIONS && gameState.mode === 'training') {
 - Clutters board visually
 - Accessibility issues
 
-**Why rejected:** Need more space for educational content than inline text allows
+**Why rejected:** Need more space for educational content than inline text
+allows
 
 ## Dependencies
 
@@ -1456,27 +1479,40 @@ Using existing dependencies only:
 
 ### Internal Dependencies
 
-- **Move Guidance Manager** ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)): Provides `GuidanceMove` data
-- **Board Highlighting System** ([src/frontend/index.ts:1367-1488](src/frontend/index.ts#L1367-L1488)): Highlight rendering
-- **Notation Parser** ([src/shared/notation-parser.ts](src/shared/notation-parser.ts)): For move descriptions
-- **CSS Glassmorphic System** ([src/frontend/styles/index.css](src/frontend/styles/index.css)): Modal styling
+- **Move Guidance Manager**
+  ([src/frontend/move-guidance.ts](src/frontend/move-guidance.ts)): Provides
+  `GuidanceMove` data
+- **Board Highlighting System**
+  ([src/frontend/index.ts:1367-1488](src/frontend/index.ts#L1367-L1488)):
+  Highlight rendering
+- **Notation Parser**
+  ([src/shared/notation-parser.ts](src/shared/notation-parser.ts)): For move
+  descriptions
+- **CSS Glassmorphic System**
+  ([src/frontend/styles/index.css](src/frontend/styles/index.css)): Modal
+  styling
 
 ## Open Questions
 
 1. ~~Should bubble icons use Unicode character (ℹ) or custom SVG icon?~~
-   - **Answer**: Start with Unicode, can switch to SVG later for better visual control
+   - **Answer**: Start with Unicode, can switch to SVG later for better visual
+     control
 
 2. ~~Should bubbles appear on source square, destination square, or both?~~
-   - **Answer**: Destination square only (reduces clutter, more relevant for understanding impact)
+   - **Answer**: Destination square only (reduces clutter, more relevant for
+     understanding impact)
 
 3. ~~How should we handle board rotation (black's perspective)?~~
-   - **Answer**: Bubble positioning algorithm should account for board orientation from DOM
+   - **Answer**: Bubble positioning algorithm should account for board
+     orientation from DOM
 
 4. ~~Should we cache generated explanations to avoid re-computation?~~
-   - **Answer**: Yes, cache by FEN + UCI combination with LRU eviction (max 50 entries)
+   - **Answer**: Yes, cache by FEN + UCI combination with LRU eviction (max 50
+     entries)
 
 5. ~~What keyboard navigation should we support beyond ESC to close?~~
-   - **Answer**: Tab through bubbles, Enter to open, ESC to close (Phase 5 enhancement)
+   - **Answer**: Tab through bubbles, Enter to open, ESC to close (Phase 5
+     enhancement)
 
 6. ~~Should we show explanations for user's moves after they make them?~~
    - **Answer**: No, only for guidance recommendations (keep scope focused)
