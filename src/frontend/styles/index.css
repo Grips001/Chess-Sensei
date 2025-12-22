@@ -7793,6 +7793,216 @@ body {
   }
 }
 
+/* ========================================
+   Bubble Icon Overlay System
+   Move Reasoning Explanations Feature
+   ======================================== */
+
+/* Bubble icon overlay */
+.guidance-bubble {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10; /* Above highlights, below pieces */
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
+}
+
+/* Color variants matching highlight colors */
+.guidance-bubble.bubble-blue {
+  background: rgb(70 130 220 / 90%);
+  border: 2px solid rgb(70 130 220 / 100%);
+  color: white;
+}
+
+.guidance-bubble.bubble-green {
+  background: rgb(80 180 100 / 90%);
+  border: 2px solid rgb(80 180 100 / 100%);
+  color: white;
+}
+
+.guidance-bubble.bubble-yellow {
+  background: rgb(220 180 50 / 90%);
+  border: 2px solid rgb(220 180 50 / 100%);
+  color: white;
+}
+
+/* Hover effect */
+.guidance-bubble:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+}
+
+/* Keyboard highlight */
+.guidance-bubble.bubble-highlighted {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+/* Icon inside bubble */
+.bubble-icon {
+  user-select: none;
+}
+
+/* ========================================
+   Explanation Modal Component
+   Move Reasoning Explanations Feature
+   ======================================== */
+
+/* Modal overlay */
+.explanation-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.explanation-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Modal container */
+.explanation-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  z-index: 1001;
+  opacity: 0;
+  transition: all 0.2s ease;
+  pointer-events: none;
+
+  /* Glassmorphic styling */
+  background: rgb(255 255 255 / 95%);
+  backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 20%),
+    inset 0 1px 0 rgb(255 255 255 / 80%);
+  padding: 1.5rem;
+}
+
+.explanation-modal.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+/* Modal header */
+.explanation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(0 0 0 / 10%);
+}
+
+.explanation-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.explanation-close {
+  background: none;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  color: rgb(0 0 0 / 50%);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.explanation-close:hover {
+  background: rgb(0 0 0 / 10%);
+  color: rgb(0 0 0 / 80%);
+}
+
+/* Modal body */
+.explanation-body {
+  color: var(--color-text-primary);
+}
+
+.explanation-section {
+  margin-bottom: 1.25rem;
+}
+
+.explanation-section:last-child {
+  margin-bottom: 0;
+}
+
+.explanation-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--color-text-primary);
+}
+
+.explanation-section ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.explanation-section li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.explanation-section p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.explanation-concepts {
+  font-weight: 500;
+  color: rgb(0 0 0 / 70%);
+}
+
+/* Scrollbar styling for modal */
+.explanation-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.explanation-modal::-webkit-scrollbar-track {
+  background: rgb(0 0 0 / 5%);
+  border-radius: 4px;
+}
+
+.explanation-modal::-webkit-scrollbar-thumb {
+  background: rgb(0 0 0 / 20%);
+  border-radius: 4px;
+}
+
+.explanation-modal::-webkit-scrollbar-thumb:hover {
+  background: rgb(0 0 0 / 30%);
+}
+
 /* Reduced motion preference - accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
