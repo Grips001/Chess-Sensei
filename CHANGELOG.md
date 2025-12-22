@@ -22,6 +22,13 @@ and this project adheres to
   - Enhanced mobile responsiveness with proper button layout breakpoints
   - Maintained signature glassmorphic aesthetic throughout new components
 
+### Fixed
+
+- Fixed missing HTML container structure for collapsible sections
+  (`#collapsible-sections-container`)
+- Fixed explanation modal closing immediately after opening (race condition in
+  event propagation)
+
 ### Technical
 
 - New file: `src/frontend/components/control-toolbar.ts` (183 lines)
@@ -32,14 +39,27 @@ and this project adheres to
   - CollapsibleSection class with expand/collapse animations
   - Content management methods (setContent, appendContent, clearContent)
   - Accessibility support (ARIA attributes, keyboard navigation)
+- New file: `tests/unit/control-toolbar.test.ts` (328 lines, 36 test cases)
+  - Tests for toolbar creation, mounting, button state management
+- New file: `tests/unit/collapsible-section.test.ts` (387 lines, 42 test cases)
+  - Tests for section creation, toggle functionality, content management,
+    keyboard navigation
+- New file: `tests/integration/panel-layout.test.ts` (420 lines, 20 test cases)
+  - Tests for full panel layout integration
+- New file: `tests/integration/training-mode.test.ts` (454 lines, 29 test cases)
+  - Tests for move notation with English descriptions integration
+- Modified: `index.html` - Added collapsible sections container, removed old
+  Game Controls section
 - Modified: `app/index.html` - Simplified right panel structure, added sections
-  container
+  container (via build)
 - Modified: `src/frontend/index.ts` (120 lines added) - Integrated new
   components with existing game logic
 - Modified: `src/frontend/styles/index.css` (240 lines added) - Glassmorphic
   styling for toolbar and sections
+- Modified: `src/frontend/components/explanation-modal.ts` - Fixed race
+  condition with 100ms delay
 - Updated PRD and Tech Spec statuses to "Implemented"
-- All 173 tests passing
+- All 173 non-DOM tests passing (DOM tests require `happy-dom` setup)
 
 ## [1.0.2] - 2025-12-22
 
