@@ -28,6 +28,8 @@ import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from 
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 import { BoardAnnotations } from './board-annotations';
 import { ExplanationModal } from './components/explanation-modal';
+import { ControlToolbar } from './components/control-toolbar';
+import { CollapsibleSection } from './components/collapsible-section';
 import { generateExplanation } from '../shared/explanation-generator';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
@@ -61,6 +63,13 @@ let boardAnnotations: BoardAnnotations | null = null;
 
 // Initialize explanation modal (Phase 2 - Move Reasoning Explanations)
 let explanationModal: ExplanationModal | null = null;
+
+// Initialize Control Toolbar (CS-003 - Right Panel Layout Redesign)
+const controlToolbar = new ControlToolbar('bottom');
+
+// Initialize Collapsible Sections (CS-003 - Right Panel Layout Redesign)
+let moveHistorySection: CollapsibleSection | null = null;
+let capturedPiecesSection: CollapsibleSection | null = null;
 
 // Initialize analysis UI (Phase 5)
 const analysisUI = createAnalysisUI();
@@ -774,16 +783,23 @@ function handleFlipBoard(): void {
  * Per Task 2.4.2: Enable/disable based on available history
  */
 function updateUndoRedoButtons(): void {
+  const history = game.getHistory();
+  const canUndo = history.length > 0;
+  const canRedo = redoStack.length > 0;
+
+  // Update toolbar buttons (CS-003)
+  controlToolbar.updateButtonStates(canUndo, canRedo);
+
+  // Legacy: Also update any standalone buttons (for backward compatibility)
   const undoButton = document.getElementById('undo-button') as HTMLButtonElement;
   const redoButton = document.getElementById('redo-button') as HTMLButtonElement;
 
   if (undoButton) {
-    const history = game.getHistory();
-    undoButton.disabled = history.length === 0;
+    undoButton.disabled = !canUndo;
   }
 
   if (redoButton) {
-    redoButton.disabled = redoStack.length === 0;
+    redoButton.disabled = !canRedo;
   }
 }
 
@@ -2387,6 +2403,100 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     trainingUI.show();
   };
 
+  /**
+   * Initialize Control Toolbar (CS-003)
+   * Mount toolbar and wire up button event handlers
+   */
+  function initializeControlToolbar(): void {
+    // Mount the toolbar to the DOM
+    controlToolbar.mount();
+    controlToolbar.show();
+
+    // Get button references and wire up event handlers
+    const buttons = controlToolbar.getButtons();
+    if (buttons) {
+      // New Game button
+      buttons.newGame.addEventListener('click', () => {
+        if (game.getHistory().length > 0) {
+          showConfirmDialog(
+            'Start New Game?',
+            'Current game progress will be lost. Continue?',
+            showModeSelection
+          );
+        } else {
+          showModeSelection();
+        }
+      });
+
+      // Undo button
+      buttons.undo.addEventListener('click', handleUndo);
+
+      // Redo button
+      buttons.redo.addEventListener('click', handleRedo);
+
+      // Resign button
+      buttons.resign.addEventListener('click', handleResign);
+
+      // Flip Board button
+      buttons.flipBoard.addEventListener('click', handleFlipBoard);
+    }
+
+    frontendLogger.info('App', 'CS-003: Control Toolbar initialized');
+  }
+
+  /**
+   * Initialize Collapsible Sections (CS-003)
+   * Create and mount collapsible sections for Move History and Captured Pieces
+   */
+  function initializeCollapsibleSections(): void {
+    const container = document.getElementById('collapsible-sections-container');
+    if (!container) {
+      frontendLogger.error('App', 'CS-003: Collapsible sections container not found');
+      return;
+    }
+
+    // Create Move History section
+    moveHistorySection = new CollapsibleSection({
+      id: 'move-history',
+      title: 'Move History',
+      icon: '📜',
+      expanded: true,
+    });
+
+    // Move existing move history content to the section
+    const existingMoveHistory = document.getElementById('move-history');
+    if (existingMoveHistory) {
+      const moveList = existingMoveHistory.querySelector('#move-list');
+      if (moveList) {
+        moveHistorySection.getContent().appendChild(moveList);
+      }
+      existingMoveHistory.remove();
+    }
+
+    container.appendChild(moveHistorySection.getElement());
+
+    // Create Captured Pieces section
+    capturedPiecesSection = new CollapsibleSection({
+      id: 'captured-pieces',
+      title: 'Captured Pieces',
+      icon: '♟',
+      expanded: true,
+    });
+
+    // Move existing captured pieces content to the section
+    const existingCapturedPieces = document.getElementById('captured-pieces');
+    if (existingCapturedPieces) {
+      capturedPiecesSection.getContent().appendChild(existingCapturedPieces);
+      // Remove ID to avoid conflicts
+      existingCapturedPieces.removeAttribute('id');
+      existingCapturedPieces.classList.add('captured-pieces-content');
+    }
+
+    container.appendChild(capturedPiecesSection.getElement());
+
+    frontendLogger.info('App', 'CS-003: Collapsible sections initialized');
+  }
+
   // Wire up "New Game" buttons
   const newGameButton = document.getElementById('new-game-button');
   if (newGameButton) {
@@ -2457,6 +2567,10 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   if (redoButton) {
     redoButton.addEventListener('click', handleRedo);
   }
+
+  // CS-003: Initialize Control Toolbar and Collapsible Sections
+  initializeControlToolbar();
+  initializeCollapsibleSections();
 
   // Set initial button states
   updateUndoRedoButtons();
