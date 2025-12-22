@@ -27,6 +27,7 @@ import { createExamMode, type ExamConfig } from './exam-mode';
 import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from './sandbox-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 import { BoardAnnotations } from './board-annotations';
+import { ExplanationModal, type ExplanationContent } from './components/explanation-modal';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
 import { createDataManagement } from './data-management';
@@ -56,6 +57,9 @@ const guidanceManager = createMoveGuidance();
 
 // Initialize board annotations for bubble icons (Phase 1 - Move Reasoning Explanations)
 let boardAnnotations: BoardAnnotations | null = null;
+
+// Initialize explanation modal (Phase 2 - Move Reasoning Explanations)
+let explanationModal: ExplanationModal | null = null;
 
 // Initialize analysis UI (Phase 5)
 const analysisUI = createAnalysisUI();
@@ -1372,18 +1376,33 @@ function handleGuidanceHover(index: number): void {
 
 /**
  * Handle bubble icon click - show explanation modal
- * Move Reasoning Explanations Feature - Phase 1
+ * Move Reasoning Explanations Feature - Phase 2
  */
 function handleBubbleClick(square: string, move: GuidanceMove): void {
-  // Placeholder for Phase 2: Modal component
-  // Will open explanation modal here
-  console.log('Bubble clicked for move:', move.san || move.uci, 'on square:', square);
+  // Initialize modal on first use
+  if (!explanationModal) {
+    explanationModal = new ExplanationModal();
+  }
 
-  // TODO: Phase 2 - Create and show explanation modal
-  // const moves = guidanceManager.getMoves();
-  // const rank = moves.findIndex((m) => m.to === square) + 1;
-  // const explanation = generateExplanation(game.getFen(), move, rank, moves);
-  // explanationModal?.show(explanation);
+  // Get move rank
+  const moves = guidanceManager.getMoves();
+  const rank = moves.findIndex((m) => m.to === square) + 1;
+
+  // TODO: Phase 3 - Use generateExplanation() for real analysis
+  // For now, show a placeholder explanation
+  const explanation: ExplanationContent = {
+    notation: move.san || move.uci,
+    description: parseSanToEnglish(move.san || move.uci),
+    strengths: [
+      'This is a strong move recommended by the engine',
+      'Further analysis will be available in Phase 3',
+    ],
+    ranking: rank === 1 ? 'Best move in this position' : `Ranked #${rank} by evaluation`,
+    rank,
+    concepts: ['Placeholder - Full analysis coming in Phase 3'],
+  };
+
+  explanationModal.show(explanation);
 }
 
 /**
