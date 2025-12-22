@@ -22,6 +22,11 @@ interface MoveCharacteristics {
   improvesKingSafety: boolean;
   createsThreat: boolean;
   scoreAdvantage: number; // In pawns
+  // Tactical patterns (Phase 4)
+  isPinning: boolean;
+  isForking: boolean;
+  isSkewer: boolean;
+  isDiscoveredAttack: boolean;
 }
 
 /**
@@ -62,6 +67,9 @@ function analyzeMoveCharacteristics(fen: string, move: GuidanceMove): MoveCharac
       return getDefaultCharacteristics(move);
     }
 
+    // Store position before move for tactical analysis
+    const chessBefore = new Chess(fen);
+
     return {
       isDevelopment: isMinorPieceDevelopment(moveObj, fen),
       isCapture: moveObj.captured !== undefined,
@@ -71,6 +79,11 @@ function analyzeMoveCharacteristics(fen: string, move: GuidanceMove): MoveCharac
       improvesKingSafety: improvesKingSafety(moveObj),
       createsThreat: createsThreat(chess, moveObj),
       scoreAdvantage: move.score / 100, // Convert centipawns to pawns
+      // Tactical patterns (Phase 4)
+      isPinning: detectsPin(chess, moveObj, chessBefore),
+      isForking: detectsFork(chess, moveObj),
+      isSkewer: detectsSkewer(chess, moveObj, chessBefore),
+      isDiscoveredAttack: detectsDiscoveredAttack(chess, moveObj, chessBefore),
     };
   } catch (error) {
     console.error('Error analyzing move characteristics:', error);
@@ -99,6 +112,23 @@ function buildStrengthsList(chars: MoveCharacteristics, _move: GuidanceMove): st
 
   if (chars.isCapture) {
     strengths.push('Captures material, gaining an advantage');
+  }
+
+  // Tactical patterns (Phase 4)
+  if (chars.isPinning) {
+    strengths.push('Pins an opponent piece, restricting their options');
+  }
+
+  if (chars.isForking) {
+    strengths.push('Attacks multiple pieces simultaneously (fork)');
+  }
+
+  if (chars.isSkewer) {
+    strengths.push('Forces a valuable piece to move, exposing another (skewer)');
+  }
+
+  if (chars.isDiscoveredAttack) {
+    strengths.push('Creates a discovered attack by unveiling another piece');
   }
 
   if (chars.attacksKing) {
@@ -166,6 +196,11 @@ function identifyConcepts(chars: MoveCharacteristics): string[] {
   if (chars.isDevelopment) concepts.push('Development');
   if (chars.controlsCenter) concepts.push('Central Control');
   if (chars.isCastling) concepts.push('King Safety');
+  // Tactical patterns (Phase 4)
+  if (chars.isPinning) concepts.push('Pin');
+  if (chars.isForking) concepts.push('Fork');
+  if (chars.isSkewer) concepts.push('Skewer');
+  if (chars.isDiscoveredAttack) concepts.push('Discovered Attack');
   if (chars.attacksKing) concepts.push('King Attack');
   if (chars.isCapture) concepts.push('Material Gain');
   if (chars.createsThreat) concepts.push('Tactical Pressure');
@@ -275,6 +310,217 @@ function getSquareAttacks(chess: Chess, square: string): string[] {
 }
 
 /**
+ * Detect if move creates a pin
+ * A pin occurs when a piece cannot move without exposing a more valuable piece behind it
+ */
+function detectsPin(chess: Chess, moveObj: Move, _chessBefore: Chess): boolean {
+  // After the move, check if we're now attacking an opponent piece that's pinned
+  const board = chess.board();
+  const ourColor = moveObj.color;
+
+  // Get all opponent pieces that the moved piece now attacks
+  const attackedSquares = getSquareAttacks(chess, moveObj.to);
+
+  for (const attackedSquare of attackedSquares) {
+    // Get the piece on the attacked square
+    const file = attackedSquare[0].charCodeAt(0) - 'a'.charCodeAt(0);
+    const rank = 8 - parseInt(attackedSquare[1]);
+    const attackedPiece = board[rank][file];
+
+    if (!attackedPiece || attackedPiece.color === ourColor) {
+      continue;
+    }
+
+    // Check if there's a more valuable piece behind it in the same line
+    // This is a simplified pin detection - it checks if moving the attacked piece
+    // would expose a more valuable piece to the same attacker
+    const pieceValues: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
+    const attackedValue = pieceValues[attackedPiece.type];
+
+    // Check line direction from our piece to attacked piece
+    const direction = getDirection(moveObj.to, attackedSquare);
+    if (!direction) continue;
+
+    // Check if there's another piece behind it
+    const behindSquare = getSquareInDirection(attackedSquare, direction);
+    if (!behindSquare) continue;
+
+    const behindFile = behindSquare[0].charCodeAt(0) - 'a'.charCodeAt(0);
+    const behindRank = 8 - parseInt(behindSquare[1]);
+    const behindPiece = board[behindRank][behindFile];
+
+    if (behindPiece && behindPiece.color !== ourColor) {
+      const behindValue = pieceValues[behindPiece.type];
+      // Pin detected if behind piece is more valuable
+      if (behindValue > attackedValue) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Detect if move creates a fork
+ * A fork attacks 2+ valuable pieces simultaneously
+ */
+function detectsFork(chess: Chess, moveObj: Move): boolean {
+  const board = chess.board();
+  const ourColor = moveObj.color;
+
+  // Get all squares the moved piece attacks
+  const attackedSquares = getSquareAttacks(chess, moveObj.to);
+
+  let valuablePiecesAttacked = 0;
+
+  for (const square of attackedSquares) {
+    const file = square[0].charCodeAt(0) - 'a'.charCodeAt(0);
+    const rank = 8 - parseInt(square[1]);
+    const piece = board[rank][file];
+
+    // Count opponent pieces that are not pawns
+    if (piece && piece.color !== ourColor && piece.type !== 'p') {
+      valuablePiecesAttacked++;
+    }
+  }
+
+  // Fork if attacking 2 or more valuable pieces
+  return valuablePiecesAttacked >= 2;
+}
+
+/**
+ * Detect if move creates a skewer
+ * A skewer forces a valuable piece to move, exposing another behind it
+ */
+function detectsSkewer(chess: Chess, moveObj: Move, _chessBefore: Chess): boolean {
+  // Similar to pin, but the front piece is MORE valuable than the back piece
+  const board = chess.board();
+  const ourColor = moveObj.color;
+
+  const attackedSquares = getSquareAttacks(chess, moveObj.to);
+
+  for (const attackedSquare of attackedSquares) {
+    const file = attackedSquare[0].charCodeAt(0) - 'a'.charCodeAt(0);
+    const rank = 8 - parseInt(attackedSquare[1]);
+    const attackedPiece = board[rank][file];
+
+    if (!attackedPiece || attackedPiece.color === ourColor) {
+      continue;
+    }
+
+    const pieceValues: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
+    const attackedValue = pieceValues[attackedPiece.type];
+
+    // Check line direction from our piece to attacked piece
+    const direction = getDirection(moveObj.to, attackedSquare);
+    if (!direction) continue;
+
+    // Check if there's another piece behind it
+    const behindSquare = getSquareInDirection(attackedSquare, direction);
+    if (!behindSquare) continue;
+
+    const behindFile = behindSquare[0].charCodeAt(0) - 'a'.charCodeAt(0);
+    const behindRank = 8 - parseInt(behindSquare[1]);
+    const behindPiece = board[behindRank][behindFile];
+
+    if (behindPiece && behindPiece.color !== ourColor) {
+      const behindValue = pieceValues[behindPiece.type];
+      // Skewer detected if front piece is more valuable
+      if (attackedValue > behindValue) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Detect if move creates a discovered attack
+ * Moving a piece unveils an attack from another piece behind it
+ */
+function detectsDiscoveredAttack(chess: Chess, _moveObj: Move, chessBefore: Chess): boolean {
+  // Compare what pieces were attacking before vs after the move
+  const board = chess.board();
+
+  // Check all squares for new attacks that appeared after the move
+  for (let rank = 0; rank < 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+      const square = String.fromCharCode('a'.charCodeAt(0) + file) + (8 - rank);
+      const piece = board[rank][file];
+
+      if (!piece) continue;
+
+      // Get attacks before and after
+      const attacksBefore = getSquareAttacks(chessBefore, square);
+      const attacksAfter = getSquareAttacks(chess, square);
+
+      // Check if this piece is now attacking new squares (discovered attack)
+      for (const attackedSquare of attacksAfter) {
+        if (!attacksBefore.includes(attackedSquare)) {
+          // New attack discovered - check if it's attacking an opponent piece
+          const targetFile = attackedSquare[0].charCodeAt(0) - 'a'.charCodeAt(0);
+          const targetRank = 8 - parseInt(attackedSquare[1]);
+          const targetPiece = board[targetRank][targetFile];
+
+          if (targetPiece && targetPiece.color !== piece.color) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Get direction vector between two squares
+ * Returns null if squares are not in a straight line
+ */
+function getDirection(from: string, to: string): { df: number; dr: number } | null {
+  const fromFile = from[0].charCodeAt(0) - 'a'.charCodeAt(0);
+  const fromRank = 8 - parseInt(from[1]);
+  const toFile = to[0].charCodeAt(0) - 'a'.charCodeAt(0);
+  const toRank = 8 - parseInt(to[1]);
+
+  const df = toFile - fromFile;
+  const dr = toRank - fromRank;
+
+  // Check if in straight line (same file, rank, or diagonal)
+  if (df === 0 || dr === 0 || Math.abs(df) === Math.abs(dr)) {
+    return {
+      df: df === 0 ? 0 : df > 0 ? 1 : -1,
+      dr: dr === 0 ? 0 : dr > 0 ? 1 : -1,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Get the next square in a direction
+ */
+function getSquareInDirection(
+  square: string,
+  direction: { df: number; dr: number }
+): string | null {
+  const file = square[0].charCodeAt(0) - 'a'.charCodeAt(0);
+  const rank = 8 - parseInt(square[1]);
+
+  const newFile = file + direction.df;
+  const newRank = rank + direction.dr;
+
+  // Check bounds
+  if (newFile < 0 || newFile > 7 || newRank < 0 || newRank > 7) {
+    return null;
+  }
+
+  return String.fromCharCode('a'.charCodeAt(0) + newFile) + (8 - newRank);
+}
+
+/**
  * Get default characteristics when analysis fails
  */
 function getDefaultCharacteristics(move: GuidanceMove): MoveCharacteristics {
@@ -287,6 +533,11 @@ function getDefaultCharacteristics(move: GuidanceMove): MoveCharacteristics {
     improvesKingSafety: false,
     createsThreat: false,
     scoreAdvantage: move.score / 100,
+    // Tactical patterns (Phase 4)
+    isPinning: false,
+    isForking: false,
+    isSkewer: false,
+    isDiscoveredAttack: false,
   };
 }
 

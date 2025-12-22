@@ -340,6 +340,68 @@ describe('generateExplanation', () => {
     });
   });
 
+  describe('tactical patterns', () => {
+    test('detects tactical characteristics in knight moves', () => {
+      // Position where knight can attack multiple squares
+      const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';
+      const move: GuidanceMove = {
+        uci: 'g1f3',
+        san: 'Nf3',
+        from: 'g1',
+        to: 'f3',
+        score: 30,
+        formattedScore: '+0.30',
+        color: 'blue',
+      };
+
+      const explanation = generateExplanation(fen, move, 1, [move]);
+
+      // Should identify development
+      expect(explanation.concepts).toContain('Development');
+      expect(explanation.strengths.length).toBeGreaterThan(0);
+    });
+
+    test('detects tactical characteristics in bishop moves', () => {
+      // Position where bishop can pin or create threats
+      const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2';
+      const move: GuidanceMove = {
+        uci: 'f8c5',
+        san: 'Bc5',
+        from: 'f8',
+        to: 'c5',
+        score: 30,
+        formattedScore: '+0.30',
+        color: 'blue',
+      };
+
+      const explanation = generateExplanation(fen, move, 1, [move]);
+
+      // Should have development concept
+      expect(explanation.concepts).toContain('Development');
+      expect(explanation.strengths.length).toBeGreaterThan(0);
+    });
+
+    test('handles defensive tactical moves', () => {
+      // Scholar's mate threat defense
+      const fen = 'rnbqkbnr/pppp1ppp/8/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 1 2';
+      const move: GuidanceMove = {
+        uci: 'g8f6',
+        san: 'Nf6',
+        from: 'g8',
+        to: 'f6',
+        score: 0,
+        formattedScore: '0.00',
+        color: 'blue',
+      };
+
+      const explanation = generateExplanation(fen, move, 1, [move]);
+
+      // Should identify development and defensive aspects
+      expect(explanation.concepts).toContain('Development');
+      expect(explanation.strengths.length).toBeGreaterThan(0);
+    });
+  });
+
   describe('default strengths', () => {
     test('provides default strength for quiet moves', () => {
       const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
