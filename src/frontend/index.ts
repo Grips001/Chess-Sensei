@@ -27,7 +27,8 @@ import { createExamMode, type ExamConfig } from './exam-mode';
 import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from './sandbox-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
 import { BoardAnnotations } from './board-annotations';
-import { ExplanationModal, type ExplanationContent } from './components/explanation-modal';
+import { ExplanationModal } from './components/explanation-modal';
+import { generateExplanation } from '../shared/explanation-generator';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
 import { createDataManagement } from './data-management';
@@ -1376,7 +1377,7 @@ function handleGuidanceHover(index: number): void {
 
 /**
  * Handle bubble icon click - show explanation modal
- * Move Reasoning Explanations Feature - Phase 2
+ * Move Reasoning Explanations Feature - Phase 3
  */
 function handleBubbleClick(square: string, move: GuidanceMove): void {
   // Initialize modal on first use
@@ -1388,19 +1389,8 @@ function handleBubbleClick(square: string, move: GuidanceMove): void {
   const moves = guidanceManager.getMoves();
   const rank = moves.findIndex((m) => m.to === square) + 1;
 
-  // TODO: Phase 3 - Use generateExplanation() for real analysis
-  // For now, show a placeholder explanation
-  const explanation: ExplanationContent = {
-    notation: move.san || move.uci,
-    description: parseSanToEnglish(move.san || move.uci),
-    strengths: [
-      'This is a strong move recommended by the engine',
-      'Further analysis will be available in Phase 3',
-    ],
-    ranking: rank === 1 ? 'Best move in this position' : `Ranked #${rank} by evaluation`,
-    rank,
-    concepts: ['Placeholder - Full analysis coming in Phase 3'],
-  };
+  // Generate real explanation using chess analysis
+  const explanation = generateExplanation(game.getFen(), move, rank, moves);
 
   explanationModal.show(explanation);
 }
