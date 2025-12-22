@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-12-22
+
+### Added
+
+- **Move Notation with English Descriptions**
+  - Added dual-format move display in Best Moves panel showing both Standard
+    Algebraic Notation (SAN) and human-readable English descriptions
+  - Created notation parser utility (`src/shared/notation-parser.ts`) to convert
+    SAN to English (e.g., "Nf3" → "Knight moves to f3")
+  - Comprehensive test suite with 39 test cases covering all chess move types
+  - Handles castling, captures, promotions, checks, checkmate, and ambiguous
+    notation (Nbd2, R1a3, Qh4xe1)
+  - Visual hierarchy maintained with notation as primary element and description
+    as secondary
+
+### Technical
+
+- New file: `src/shared/notation-parser.ts` (194 lines)
+- New file: `tests/unit/notation-parser.test.ts` (201 lines)
+- Modified: `src/frontend/index.ts` - Updated guidance move rendering
+- Modified: `src/frontend/styles/index.css` - Added dual-format styling
+- All 153 tests passing (39 new parser tests)
+
 ## [1.0.0] - 2025-12-10
 
 ### Release
