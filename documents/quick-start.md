@@ -41,7 +41,7 @@ Get up and running with Chess-Sensei in under 2 minutes!
 
 ## Essential Controls
 
-Located in the right panel:
+Located in the Control Toolbar at the bottom of the screen:
 
 - **New Game** - Start fresh
 - **Undo** (Ctrl+Z) - Take back last move
@@ -62,20 +62,19 @@ Located in the right panel:
 │                     │  │  • Turn Indicator      │
 │                     │  │  • Check/Mate Alerts   │
 │                     │  └────────────────────    │
-│                     │  ┌─ GAME CONTROLS        │
-│                     │  │  • New Game            │
-│                     │  │  • Undo / Redo         │
-│                     │  │  • Resign / Flip       │
-│                     │  └────────────────────    │
-│                     │  ┌─ MOVE HISTORY         │
+│                     │  ┌─ MOVE HISTORY ▼       │
 │                     │  │  1. e4    e5           │
 │                     │  │  2. Nf3   Nc6          │
 │                     │  └────────────────────    │
-│                     │  ┌─ CAPTURED PIECES       │
+│                     │  ┌─ CAPTURED PIECES ▼     │
 │                     │  │  White: ♟♟♞ (+3)      │
 │                     │  │  Black: ♙♖ (+4)       │
 │                     │  └────────────────────    │
 └─────────────────────┴───────────────────────────┘
+          ┌───────────────────────────────┐
+          │  🎮 CONTROL TOOLBAR           │
+          │  New│Undo│Redo│Resign│Flip    │
+          └───────────────────────────────┘
 ```
 
 ## Tips for Beginners

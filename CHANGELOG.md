@@ -6,11 +6,83 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2025-12-22
+
+### Added
+
+- **Right Panel Layout Redesign (CS-003)**
+  - Created glassmorphic Control Toolbar component detached from right panel for
+    better visual hierarchy
+  - Toolbar houses all game control buttons: New Game, Undo, Redo, Resign, Flip
+    Board
+  - Added Collapsible Section component for organizing panel content with
+    expand/collapse animations
+  - Migrated Move History and Captured Pieces to collapsible sections
+  - Improved visual hierarchy by separating controls from informational content
+  - Enhanced mobile responsiveness with proper button layout breakpoints
+  - Maintained signature glassmorphic aesthetic throughout new components
+
+### Technical
+
+- New file: `src/frontend/components/control-toolbar.ts` (183 lines)
+  - ControlToolbar class with mount/unmount, show/hide, and button state
+    management
+  - Configurable position (top/bottom) with smooth animations
+- New file: `src/frontend/components/collapsible-section.ts` (236 lines)
+  - CollapsibleSection class with expand/collapse animations
+  - Content management methods (setContent, appendContent, clearContent)
+  - Accessibility support (ARIA attributes, keyboard navigation)
+- Modified: `app/index.html` - Simplified right panel structure, added sections
+  container
+- Modified: `src/frontend/index.ts` (120 lines added) - Integrated new
+  components with existing game logic
+- Modified: `src/frontend/styles/index.css` (240 lines added) - Glassmorphic
+  styling for toolbar and sections
+- Updated PRD and Tech Spec statuses to "Implemented"
+- All 173 tests passing
+
+## [1.0.2] - 2025-12-22
+
+### Added
+
+- **Move Reasoning Explanations (CS-002)**
+  - Added interactive explanation system for Training Mode move highlights
+  - Click-to-view explanation bubbles on each of the top 3 recommended moves
+  - Comprehensive move analysis including tactical patterns (pins, forks,
+    skewers, discovered attacks)
+  - Explains move ranking (#1, #2, #3) and why each move is recommended
+  - Identifies chess concepts: Development, Central Control, King Safety,
+    Material Gain, Tactical Pressure
+  - Move characteristic detection: captures, castling, threats, king attacks
+  - Professional explanation formatting with strengths list, ranking context,
+    and concepts
+  - Explanation modal with glassmorphic styling matching app aesthetic
+
+### Technical
+
+- Modified: `src/shared/explanation-generator.ts` (507 lines, +320 new)
+  - Added tactical pattern detection functions: detectsPin, detectsFork,
+    detectsSkewer, detectsDiscoveredAttack
+  - Enhanced MoveCharacteristics interface with tactical flags
+  - Comprehensive move analysis pipeline
+- Modified: `src/frontend/index.ts` (140 lines added)
+  - Integrated explanation modal with move highlight clicks
+  - Created explanation content formatting
+  - Wired up close handlers and modal lifecycle
+- Modified: `src/frontend/styles/index.css` (120 lines added)
+  - Explanation bubble styling and positioning
+  - Modal glassmorphic effects and animations
+- Modified: `tests/unit/explanation-generator.test.ts` (60 new test cases)
+  - Tests for tactical pattern detection
+  - Tests for complex positions and defensive moves
+- Updated PRD and Tech Spec statuses to "Implemented"
+- All 173 tests passing
+
 ## [1.0.1] - 2025-12-22
 
 ### Added
 
-- **Move Notation with English Descriptions**
+- **Move Notation with English Descriptions (CS-001)**
   - Added dual-format move display in Best Moves panel showing both Standard
     Algebraic Notation (SAN) and human-readable English descriptions
   - Created notation parser utility (`src/shared/notation-parser.ts`) to convert
@@ -459,6 +531,9 @@ This is the first stable release of Chess-Sensei.
 
 ---
 
+[1.0.3]: https://github.com/Grips001/Chess-Sensei/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/Grips001/Chess-Sensei/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/Grips001/Chess-Sensei/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Grips001/Chess-Sensei/compare/v0.7.0...v0.8.0

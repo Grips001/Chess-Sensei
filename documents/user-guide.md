@@ -29,9 +29,10 @@ When you first open Chess-Sensei, you'll see:
 
 - **Chessboard** - The main playing area with pieces in starting position
 - **Game Status Panel** - Shows whose turn it is
-- **Game Controls** - Buttons for game management
-- **Move History** - Records all moves played
-- **Captured Pieces** - Shows pieces captured by each player
+- **Control Toolbar** - Glassmorphic toolbar at bottom with game control buttons
+- **Move History** - Collapsible section recording all moves played
+- **Captured Pieces** - Collapsible section showing pieces captured by each
+  player
 
 ## Playing Chess
 
@@ -108,7 +109,8 @@ Use your system volume or OS audio mixer to adjust Chess-Sensei's sound volume.
 
 ## Game Controls
 
-The **Game Controls** panel provides buttons to manage your game:
+The **Control Toolbar** is a glassmorphic floating toolbar at the bottom of the
+screen that provides buttons to manage your game:
 
 ### New Game
 
@@ -307,7 +309,7 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 ## Version
 
-**Chess-Sensei v1.0.0** - Stable Release
+**Chess-Sensei v1.0.3** - Stable Release
 
 This is the first stable release of Chess-Sensei with all features complete:
 
