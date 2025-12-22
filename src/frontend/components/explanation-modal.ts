@@ -148,11 +148,13 @@ export class ExplanationModal {
     const closeButton = this.modalElement?.querySelector('.explanation-close');
     closeButton?.addEventListener('click', () => this.close());
 
-    // Click outside to close
-    this.overlayElement?.addEventListener('click', () => this.close());
-
     // Prevent modal click from closing
     this.modalElement?.addEventListener('click', (e) => e.stopPropagation());
+
+    // Click outside to close - delay to prevent immediate closure from bubble click
+    setTimeout(() => {
+      this.overlayElement?.addEventListener('click', () => this.close());
+    }, 100);
 
     // Escape key to close
     document.addEventListener('keydown', this.handleKeydown);
