@@ -1,6 +1,6 @@
 # PRD: Move Notation with English Descriptions
 
-> **Status:** Approved **Author:** Grips001 **Created:** 2025-12-22 **Last
+> **Status:** Implemented **Author:** Grips001 **Created:** 2025-12-22 **Last
 > Updated:** 2025-12-22 **Related Issues:** N/A
 
 ---
