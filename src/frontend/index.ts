@@ -26,6 +26,7 @@ import { createTrainingMode, type TrainingConfig } from './training-mode';
 import { createExamMode, type ExamConfig } from './exam-mode';
 import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from './sandbox-mode';
 import { createMoveGuidance, type GuidanceMove } from './move-guidance';
+import { BoardAnnotations } from './board-annotations';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
 import { createDataManagement } from './data-management';
@@ -52,6 +53,9 @@ const { manager: sandboxManager, ui: sandboxUI } = createSandboxMode();
 
 // Initialize move guidance
 const guidanceManager = createMoveGuidance();
+
+// Initialize board annotations for bubble icons (Phase 1 - Move Reasoning Explanations)
+let boardAnnotations: BoardAnnotations | null = null;
 
 // Initialize analysis UI (Phase 5)
 const analysisUI = createAnalysisUI();
@@ -1367,6 +1371,22 @@ function handleGuidanceHover(index: number): void {
 }
 
 /**
+ * Handle bubble icon click - show explanation modal
+ * Move Reasoning Explanations Feature - Phase 1
+ */
+function handleBubbleClick(square: string, move: GuidanceMove): void {
+  // Placeholder for Phase 2: Modal component
+  // Will open explanation modal here
+  console.log('Bubble clicked for move:', move.san || move.uci, 'on square:', square);
+
+  // TODO: Phase 2 - Create and show explanation modal
+  // const moves = guidanceManager.getMoves();
+  // const rank = moves.findIndex((m) => m.to === square) + 1;
+  // const explanation = generateExplanation(game.getFen(), move, rank, moves);
+  // explanationModal?.show(explanation);
+}
+
+/**
  * Update guidance highlights on the board
  * Per Task 3.3.2: Implement color-coded highlighting
  * Per Task 3.3.3: Implement three-way visual sync
@@ -1460,6 +1480,23 @@ function updateGuidanceHighlights(): void {
       }
     }
   });
+
+  // Render bubble icons for Training Mode (Move Reasoning Explanations Feature - Phase 1)
+  if (trainingManager.isActive() && moves.length > 0) {
+    if (!boardAnnotations) {
+      const boardElement = document.getElementById('chess-board');
+      if (boardElement) {
+        boardAnnotations = new BoardAnnotations(boardElement, handleBubbleClick);
+      }
+    }
+
+    if (boardAnnotations) {
+      boardAnnotations.renderBubbles(moves);
+    }
+  } else {
+    // Clear bubbles when guidance is not active or in other modes
+    boardAnnotations?.clearBubbles();
+  }
 }
 
 /**

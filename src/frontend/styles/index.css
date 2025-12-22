@@ -7793,6 +7793,65 @@ body {
   }
 }
 
+/* ========================================
+   Bubble Icon Overlay System
+   Move Reasoning Explanations Feature
+   ======================================== */
+
+/* Bubble icon overlay */
+.guidance-bubble {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10; /* Above highlights, below pieces */
+  transition: all 0.2s ease;
+  pointer-events: auto;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
+}
+
+/* Color variants matching highlight colors */
+.guidance-bubble.bubble-blue {
+  background: rgb(70 130 220 / 90%);
+  border: 2px solid rgb(70 130 220 / 100%);
+  color: white;
+}
+
+.guidance-bubble.bubble-green {
+  background: rgb(80 180 100 / 90%);
+  border: 2px solid rgb(80 180 100 / 100%);
+  color: white;
+}
+
+.guidance-bubble.bubble-yellow {
+  background: rgb(220 180 50 / 90%);
+  border: 2px solid rgb(220 180 50 / 100%);
+  color: white;
+}
+
+/* Hover effect */
+.guidance-bubble:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+}
+
+/* Keyboard highlight */
+.guidance-bubble.bubble-highlighted {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+/* Icon inside bubble */
+.bubble-icon {
+  user-select: none;
+}
+
 /* Reduced motion preference - accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
