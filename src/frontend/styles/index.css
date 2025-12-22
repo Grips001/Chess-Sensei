@@ -1491,6 +1491,214 @@ body {
     inset -1px -1px 4px rgb(255 255 255 / 30%);
 }
 
+/* ========================================
+   Control Toolbar (CS-003)
+   Glassmorphic toolbar for game controls
+   ======================================== */
+
+.control-toolbar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  width: calc(100% - 32px);
+  max-width: 800px;
+  opacity: 0;
+  transition:
+    opacity var(--duration-normal) var(--ease-out-soft),
+    transform var(--duration-normal) var(--ease-out-soft);
+  pointer-events: none;
+}
+
+.control-toolbar.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.control-toolbar-top {
+  top: 16px;
+}
+
+.control-toolbar-bottom {
+  bottom: 16px;
+}
+
+.toolbar-container {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+
+  /* Glassmorphism */
+  background: rgb(255 255 255 / 75%);
+  backdrop-filter: blur(20px);
+
+  /* Neomorphic shadow */
+  box-shadow:
+    4px 4px 16px rgb(0 0 0 / 12%),
+    -2px -2px 10px rgb(255 255 255 / 70%);
+}
+
+.toolbar-button {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background: rgb(var(--color-porcelain-rgb) / 85%);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out-soft),
+    box-shadow var(--duration-fast) var(--ease-out-soft),
+    background var(--duration-fast) var(--ease-out-soft);
+
+  /* Neomorphic depth */
+  box-shadow:
+    2px 2px 6px rgb(0 0 0 / 10%),
+    -1px -1px 4px rgb(255 255 255 / 80%);
+}
+
+.toolbar-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: rgb(var(--color-porcelain-rgb) / 95%);
+  box-shadow:
+    3px 3px 10px rgb(0 0 0 / 15%),
+    -2px -2px 6px rgb(255 255 255 / 90%);
+}
+
+.toolbar-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  transition: transform var(--duration-instant) var(--ease-out-soft);
+  box-shadow:
+    inset 2px 2px 6px rgb(0 0 0 / 15%),
+    inset -1px -1px 4px rgb(255 255 255 / 50%);
+}
+
+.toolbar-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbar-button-primary {
+  background: linear-gradient(135deg, rgb(100 150 255 / 85%), rgb(80 130 235 / 90%));
+  color: white;
+  box-shadow:
+    3px 3px 10px rgb(100 150 255 / 30%),
+    -2px -2px 6px rgb(255 255 255 / 50%);
+}
+
+.toolbar-button-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgb(100 150 255 / 95%), rgb(80 130 235 / 100%));
+  box-shadow:
+    4px 4px 16px rgb(100 150 255 / 50%),
+    -2px -2px 8px rgb(255 255 255 / 60%),
+    0 0 20px rgb(100 150 255 / 25%);
+}
+
+.toolbar-button-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    inset 2px 2px 6px rgb(0 0 0 / 20%),
+    inset -1px -1px 4px rgb(255 255 255 / 30%);
+}
+
+/* ========================================
+   Collapsible Sections (CS-003)
+   Expandable/collapsible panel sections
+   ======================================== */
+
+.collapsible-section {
+  background: rgb(255 255 255 / 50%);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+
+  /* Soft neomorphic depth */
+  box-shadow:
+    2px 2px 6px rgb(0 0 0 / 8%),
+    -1px -1px 4px rgb(255 255 255 / 60%);
+  transition: box-shadow var(--duration-fast) var(--ease-out-soft);
+}
+
+.collapsible-section.expanded {
+  box-shadow:
+    2px 2px 8px rgb(0 0 0 / 10%),
+    -1px -1px 6px rgb(255 255 255 / 70%);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background var(--duration-fast) var(--ease-out-soft),
+    transform var(--duration-fast) var(--ease-out-soft);
+}
+
+.section-header:hover {
+  background: rgb(255 255 255 / 30%);
+}
+
+.section-header:active {
+  transform: scale(0.99);
+}
+
+.section-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.section-title {
+  flex: 1;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.section-chevron {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  transition: transform var(--duration-normal) var(--ease-out-soft);
+  flex-shrink: 0;
+}
+
+.collapsible-section.expanded .section-chevron {
+  transform: rotate(180deg);
+}
+
+.collapsible-section.collapsed .section-chevron {
+  transform: rotate(-90deg);
+}
+
+.section-content {
+  padding: 0 16px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--duration-normal) var(--ease-out-soft);
+}
+
+.collapsible-section.expanded .section-content {
+  padding: 0 16px 16px;
+}
+
+.collapsible-section.no-transition,
+.collapsible-section.no-transition .section-content,
+.collapsible-section.no-transition .section-chevron {
+  transition: none;
+}
+
+/* Collapsible sections container spacing */
+#collapsible-sections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* Confirmation dialog */
 .confirm-dialog-overlay {
   position: fixed;
@@ -7726,6 +7934,38 @@ body {
 
   .game-result-buttons {
     flex-direction: column;
+  }
+
+  /* Control Toolbar - Mobile responsive */
+  .control-toolbar {
+    width: calc(100% - 16px);
+    max-width: none;
+  }
+
+  .toolbar-container {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .toolbar-button {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 100px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  /* Collapsible sections - Mobile spacing */
+  #collapsible-sections-container {
+    gap: 10px;
+  }
+
+  .section-header {
+    padding: 12px 14px;
+  }
+
+  .section-title {
+    font-size: 15px;
   }
 }
 
