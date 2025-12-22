@@ -20,6 +20,7 @@ import {
 } from '../shared/ipc-types';
 import type { ExamGameRecord } from './exam-mode';
 import { ChessGame, type Piece, type PieceSymbol, type Square } from '../shared/chess-logic';
+import { parseSanToEnglish } from '../shared/notation-parser';
 import { SoundManager } from './sound-manager';
 import { createTrainingMode, type TrainingConfig } from './training-mode';
 import { createExamMode, type ExamConfig } from './exam-mode';
@@ -1314,6 +1315,10 @@ function renderGuidanceMoves(moves: GuidanceMove[]): void {
     .map((move, index) => {
       // Convert UCI to SAN for display
       const san = ChessGame.uciToSan(game.getFen(), move.uci) || move.uci;
+
+      // Generate English description
+      const englishDescription = parseSanToEnglish(san);
+
       const colorClass = `move-${move.color}`;
       const rankClass = `rank-${index + 1}`;
 
@@ -1323,7 +1328,10 @@ function renderGuidanceMoves(moves: GuidanceMove[]): void {
              data-from="${move.from}"
              data-to="${move.to}">
           <div class="guidance-move-rank ${rankClass}">${index + 1}</div>
-          <div class="guidance-move-notation ${colorClass}">${san}</div>
+          <div class="guidance-move-content">
+            <span class="guidance-move-notation ${colorClass}">${san}</span>
+            <span class="guidance-move-description"> — ${englishDescription}</span>
+          </div>
           <div class="guidance-move-eval">${move.formattedScore}</div>
         </div>
       `;
