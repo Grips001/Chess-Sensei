@@ -59,7 +59,9 @@ and this project adheres to
 - Modified: `src/frontend/components/explanation-modal.ts` - Fixed race
   condition with 100ms delay
 - Updated PRD and Tech Spec statuses to "Implemented"
-- All 173 non-DOM tests passing (DOM tests require `happy-dom` setup)
+- All 173 non-DOM tests passing
+- DOM testing infrastructure added with `happy-dom` package
+- New DOM tests have minor implementation mismatches requiring adjustment
 
 ## [1.0.2] - 2025-12-22
 
