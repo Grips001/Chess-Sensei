@@ -59,40 +59,35 @@
             <div class="guidance-empty hidden" id="guidance-empty">No moves available</div>
           </div>
         </div>
-        <div class="panel-section">
-          <h3>Game Controls</h3>
-          <div class="game-controls">
-            <button class="control-button" id="new-game-control">New Game</button>
-            <button class="control-button" id="undo-button" disabled>Undo</button>
-            <button class="control-button" id="redo-button" disabled>Redo</button>
-            <button class="control-button" id="resign-button">Resign</button>
-            <button class="control-button" id="flip-board-button">Flip Board</button>
-          </div>
-        </div>
-        <div class="panel-section">
-          <h3>Move History</h3>
-          <div id="move-history">
-            <div id="move-list">
-              <!-- Move history will be rendered here -->
+        <!-- CS-003: Collapsible Sections Container -->
+        <div id="collapsible-sections-container">
+          <!-- Move History Section (dynamically created by CollapsibleSection component) -->
+          <div class="panel-section">
+            <h3>Move History</h3>
+            <div id="move-history">
+              <div id="move-list">
+                <!-- Move history will be rendered here -->
+              </div>
             </div>
           </div>
-        </div>
-        <div class="panel-section">
-          <h3>Captured Pieces</h3>
-          <div id="captured-pieces">
-            <div class="captured-section">
-              <div class="captured-label">White captured:</div>
-              <div id="captured-by-white" class="captured-list">
-                <!-- Captured black pieces will be rendered here -->
+          <!-- Captured Pieces Section (dynamically created by CollapsibleSection component) -->
+          <div class="panel-section">
+            <h3>Captured Pieces</h3>
+            <div id="captured-pieces">
+              <div class="captured-section">
+                <div class="captured-label">White captured:</div>
+                <div id="captured-by-white" class="captured-list">
+                  <!-- Captured black pieces will be rendered here -->
+                </div>
+                <div class="material-advantage" id="white-advantage"></div>
               </div>
-              <div class="material-advantage" id="white-advantage"></div>
-            </div>
-            <div class="captured-section">
-              <div class="captured-label">Black captured:</div>
-              <div id="captured-by-black" class="captured-list">
-                <!-- Captured white pieces will be rendered here -->
+              <div class="captured-section">
+                <div class="captured-label">Black captured:</div>
+                <div id="captured-by-black" class="captured-list">
+                  <!-- Captured white pieces will be rendered here -->
+                </div>
+                <div class="material-advantage" id="black-advantage"></div>
               </div>
-              <div class="material-advantage" id="black-advantage"></div>
             </div>
           </div>
         </div>
