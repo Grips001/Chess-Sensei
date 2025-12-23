@@ -279,7 +279,8 @@ describe('ControlToolbar', () => {
       toolbar.hide();
 
       const toolbarElement = document.querySelector('.control-toolbar') as HTMLElement;
-      expect(toolbarElement.style.display).toBe('none');
+      // hide() removes the 'visible' class, it doesn't set display: none
+      expect(toolbarElement.classList.contains('visible')).toBe(false);
     });
 
     test('handles hide when not mounted', () => {

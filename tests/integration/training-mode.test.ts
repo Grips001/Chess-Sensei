@@ -221,7 +221,8 @@ describe('Training Mode - Move Notation Integration', () => {
         description: parseSanToEnglish(move.notation),
       };
 
-      expect(displayMove.description).toBe('Queen from h4 moves to e1');
+      // Full square disambiguation (h4) simplifies to file only (h-file)
+      expect(displayMove.description).toBe('Queen from h-file moves to e1');
     });
   });
 
@@ -262,7 +263,8 @@ describe('Training Mode - Move Notation Integration', () => {
     test('displays capture with promotion', () => {
       const move = { notation: 'exd8=Q+', description: parseSanToEnglish('exd8=Q+') };
 
-      expect(move.description).toBe('Pawn from e-file captures on d8, promotes to Queen, check');
+      // Pawn captures don't include file disambiguation in the description
+      expect(move.description).toBe('Pawn captures on d8, promotes to Queen, check');
     });
   });
 

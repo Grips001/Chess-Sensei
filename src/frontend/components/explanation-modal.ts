@@ -29,6 +29,7 @@ export interface ExplanationContent {
 export class ExplanationModal {
   private modalElement: HTMLElement | null = null;
   private overlayElement: HTMLElement | null = null;
+  private canClose = false; // Flag to prevent immediate closing
 
   /**
    * Show explanation modal with content
@@ -36,8 +37,14 @@ export class ExplanationModal {
   show(content: ExplanationContent): void {
     this.close(); // Close any existing modal
 
+    this.canClose = false; // Block closing initially
     this.createModal(content);
     this.attachEventListeners();
+
+    // Allow closing after a delay to prevent click event interference
+    setTimeout(() => {
+      this.canClose = true;
+    }, 300);
   }
 
   /**
@@ -144,31 +151,27 @@ export class ExplanationModal {
    * Attach event listeners for closing
    */
   private attachEventListeners(): void {
-    // Close button
+    // Close button - always works immediately
     const closeButton = this.modalElement?.querySelector('.explanation-close');
-    closeButton?.addEventListener('click', () => this.close());
+    closeButton?.addEventListener('click', () => {
+      this.canClose = true; // Allow close button to work immediately
+      this.close();
+    });
 
     // Prevent modal click from closing
     this.modalElement?.addEventListener('click', (e) => e.stopPropagation());
 
-    // Click outside to close - use capture phase and check if target is the overlay
-    // Wait for next frame to ensure bubble click is fully processed
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.overlayElement?.addEventListener(
-          'click',
-          (e) => {
-            // Only close if the actual overlay was clicked, not bubbled from child
-            if (e.target === this.overlayElement) {
-              this.close();
-            }
-          },
-          true
-        ); // Use capture phase
-      });
+    // Click outside to close - only if canClose flag is set
+    this.overlayElement?.addEventListener('click', (e) => {
+      // Only close if:
+      // 1. canClose flag is true (initial delay passed)
+      // 2. The actual overlay was clicked, not bubbled from child
+      if (this.canClose && e.target === this.overlayElement) {
+        this.close();
+      }
     });
 
-    // Escape key to close
+    // Escape key to close - only if canClose flag is set
     document.addEventListener('keydown', this.handleKeydown);
   }
 
@@ -176,7 +179,7 @@ export class ExplanationModal {
    * Handle keyboard events
    */
   private handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape') {
+    if (e.key === 'Escape' && this.canClose) {
       this.close();
     }
   };
@@ -185,10 +188,18 @@ export class ExplanationModal {
    * Close and cleanup modal
    */
   close(): void {
+    // Don't do anything if already closed
+    if (!this.modalElement) {
+      return;
+    }
+
     document.removeEventListener('keydown', this.handleKeydown);
 
     this.modalElement?.classList.remove('visible');
     this.overlayElement?.classList.remove('visible');
+
+    // Reset canClose flag
+    this.canClose = false;
 
     setTimeout(() => {
       this.modalElement?.remove();

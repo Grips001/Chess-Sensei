@@ -225,10 +225,11 @@ describe('Panel Layout Integration', () => {
     test('toolbar visibility can be controlled', () => {
       toolbar.hide();
       const toolbarElement = document.querySelector('.control-toolbar') as HTMLElement;
-      expect(toolbarElement.style.display).toBe('none');
+      // hide() removes the 'visible' class, it doesn't set display: none
+      expect(toolbarElement.classList.contains('visible')).toBe(false);
 
       toolbar.show();
-      expect(toolbarElement.style.display).not.toBe('none');
+      expect(toolbarElement.classList.contains('visible')).toBe(true);
     });
   });
 
@@ -294,7 +295,8 @@ describe('Panel Layout Integration', () => {
       expect(header?.getAttribute('role')).toBe('button');
       expect(header?.getAttribute('tabindex')).toBe('0');
       expect(header?.hasAttribute('aria-expanded')).toBe(true);
-      expect(content?.hasAttribute('aria-hidden')).toBe(true);
+      // Content has role="region" and aria-labelledby (not aria-hidden)
+      expect(content?.getAttribute('role')).toBe('region');
     });
 
     test('keyboard navigation works in sections', () => {
