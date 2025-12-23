@@ -151,10 +151,22 @@ export class ExplanationModal {
     // Prevent modal click from closing
     this.modalElement?.addEventListener('click', (e) => e.stopPropagation());
 
-    // Click outside to close - delay to prevent immediate closure from bubble click
-    setTimeout(() => {
-      this.overlayElement?.addEventListener('click', () => this.close());
-    }, 100);
+    // Click outside to close - use capture phase and check if target is the overlay
+    // Wait for next frame to ensure bubble click is fully processed
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.overlayElement?.addEventListener(
+          'click',
+          (e) => {
+            // Only close if the actual overlay was clicked, not bubbled from child
+            if (e.target === this.overlayElement) {
+              this.close();
+            }
+          },
+          true
+        ); // Use capture phase
+      });
+    });
 
     // Escape key to close
     document.addEventListener('keydown', this.handleKeydown);

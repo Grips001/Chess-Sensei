@@ -1507,6 +1507,7 @@ function updateGuidanceHighlights(): void {
   });
 
   // Render bubble icons for Training Mode (Move Reasoning Explanations Feature - Phase 1)
+  // Skip bubble rendering if explanation modal is currently open to prevent interference
   if (trainingManager.isActive() && moves.length > 0) {
     if (!boardAnnotations) {
       const boardElement = document.getElementById('chess-board');
@@ -1515,12 +1516,14 @@ function updateGuidanceHighlights(): void {
       }
     }
 
-    if (boardAnnotations) {
+    if (boardAnnotations && !explanationModal?.isOpen()) {
       boardAnnotations.renderBubbles(moves);
     }
   } else {
-    // Clear bubbles when guidance is not active or in other modes
-    boardAnnotations?.clearBubbles();
+    // Clear bubbles when guidance is not active or in other modes (but not if modal is open)
+    if (!explanationModal?.isOpen()) {
+      boardAnnotations?.clearBubbles();
+    }
   }
 }
 
