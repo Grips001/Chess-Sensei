@@ -1657,7 +1657,7 @@ export class ProgressDashboardManager {
 
     // Phase 4 Modernization: Add print button to dashboard header
     const dashboardHeader = document.querySelector('.dashboard-header');
-    if (dashboardHeader) {
+    if (dashboardHeader && !dashboardHeader.querySelector('.dashboard-print-btn')) {
       const printBtn = document.createElement('button');
       printBtn.className = 'dashboard-print-btn';
       printBtn.innerHTML = '🖨️ Print Dashboard';
