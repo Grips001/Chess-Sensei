@@ -1,18 +1,17 @@
 # PRD: Pure Neutralino Architecture Migration
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-06
-> **Last Updated:** 2026-01-06
-> **Related Issues:** CS-005
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-06
+> **Last Updated:** 2026-01-06 **Related Issues:** CS-005
 
 ---
 
 ## Executive Summary
 
-Migrate Chess-Sensei from a dual-process architecture (Neutralino frontend + Bun backend) to a single-process Pure
-Neutralino App architecture. This eliminates the 111MB Bun runtime executable, reducing total distribution size from
-121MB to ~10MB (92% reduction) while maintaining all existing functionality and improving application simplicity.
+Migrate Chess-Sensei from a dual-process architecture (Neutralino frontend + Bun
+backend) to a single-process Pure Neutralino App architecture. This eliminates
+the 111MB Bun runtime executable, reducing total distribution size from 121MB to
+~10MB (92% reduction) while maintaining all existing functionality and improving
+application simplicity.
 
 ## Problem Statement
 
@@ -21,49 +20,67 @@ Neutralino App architecture. This eliminates the 111MB Bun runtime executable, r
 Chess-Sensei v1.0.4 uses a dual-process architecture:
 
 - **Frontend**: Neutralino.js application (606KB bundle)
-- **Backend**: Bun runtime executable (111MB) handling file I/O, chess engine, and AI opponent
+- **Backend**: Bun runtime executable (111MB) handling file I/O, chess engine,
+  and AI opponent
 - **Communication**: WebSocket-based IPC between processes
 
-The application distribution is **121MB**, with the Bun runtime accounting for **92%** of the total size.
-This creates several issues:
+The application distribution is **121MB**, with the Bun runtime accounting for
+**92%** of the total size. This creates several issues:
 
-1. **Excessive download size**: 111MB runtime for a chess training app is disproportionate
-2. **Slow distribution**: Large executable takes longer to download and distribute
-3. **Architectural mismatch**: Neutralino.js is designed for single-process frontend-only apps
-4. **Unnecessary complexity**: WebSocket IPC layer adds complexity without benefit
-5. **Misconception of Bun's role**: Bun was used as production runtime instead of development tool
+1. **Excessive download size**: 111MB runtime for a chess training app is
+   disproportionate
+2. **Slow distribution**: Large executable takes longer to download and
+   distribute
+3. **Architectural mismatch**: Neutralino.js is designed for single-process
+   frontend-only apps
+4. **Unnecessary complexity**: WebSocket IPC layer adds complexity without
+   benefit
+5. **Misconception of Bun's role**: Bun was used as production runtime instead
+   of development tool
 
 ### User Pain Points
 
-- **Slow downloads**: Users with limited bandwidth experience long download times (111MB)
-- **Storage concerns**: 121MB is excessive for a chess app on systems with limited storage
+- **Slow downloads**: Users with limited bandwidth experience long download
+  times (111MB)
+- **Storage concerns**: 121MB is excessive for a chess app on systems with
+  limited storage
 - **Deployment friction**: Larger distributions are harder to share and deploy
-- **Update overhead**: Every update includes the full 111MB runtime even for minor changes
-- **Perception issues**: Large executable size may deter downloads due to security concerns
+- **Update overhead**: Every update includes the full 111MB runtime even for
+  minor changes
+- **Perception issues**: Large executable size may deter downloads due to
+  security concerns
 
 ### Impact
 
 **Affected Users**: All Chess-Sensei users across Windows, Linux, and macOS
 
-**Severity**: HIGH - Size is 10x larger than necessary, negatively impacting distribution and adoption
+**Severity**: HIGH - Size is 10x larger than necessary, negatively impacting
+distribution and adoption
 
 ## Goals
 
 ### Primary Goals
 
-1. **Reduce distribution size by 92%**: From 121MB to ~10MB by eliminating Bun runtime
-2. **Maintain 100% feature parity**: All training modes, analysis, dashboard functionality preserved
-3. **Improve architectural simplicity**: Single-process design following Neutralino best practices
+1. **Reduce distribution size by 92%**: From 121MB to ~10MB by eliminating Bun
+   runtime
+2. **Maintain 100% feature parity**: All training modes, analysis, dashboard
+   functionality preserved
+3. **Improve architectural simplicity**: Single-process design following
+   Neutralino best practices
 4. **Preserve development experience**: Keep Bun as development/build tool
-5. **Ensure stability**: No regressions in existing functionality (v1.0.4 is stable)
+5. **Ensure stability**: No regressions in existing functionality (v1.0.4 is
+   stable)
 
 ### Non-Goals
 
-1. **Feature additions**: No new features during migration (stability over features)
+1. **Feature additions**: No new features during migration (stability over
+   features)
 2. **UI/UX changes**: User interface remains identical
-3. **Performance optimization beyond architecture**: Not addressing rendering optimizations (Phase 2)
+3. **Performance optimization beyond architecture**: Not addressing rendering
+   optimizations (Phase 2)
 4. **Database migration**: JSON file storage remains (SQLite is Phase 3)
-5. **Framework rewrite**: No introduction of React/Vue/Solid (considered too risky)
+5. **Framework rewrite**: No introduction of React/Vue/Solid (considered too
+   risky)
 
 ### Success Metrics
 
@@ -172,7 +189,8 @@ After Migration:
 
 ### Mockups/Wireframes
 
-No UI changes required - user interface remains identical. Migration is purely architectural.
+No UI changes required - user interface remains identical. Migration is purely
+architectural.
 
 ### Edge Cases
 
@@ -214,11 +232,15 @@ No UI changes required - user interface remains identical. Migration is purely a
 
 ### Constraints
 
-1. **Neutralino API Limitations**: Must use Neutralino.filesystem (no Node.js fs module)
-2. **Browser Environment**: WebWorker for Stockfish (main thread blocking not acceptable)
+1. **Neutralino API Limitations**: Must use Neutralino.filesystem (no Node.js fs
+   module)
+2. **Browser Environment**: WebWorker for Stockfish (main thread blocking not
+   acceptable)
 3. **No Backend Runtime**: Cannot use backend-specific APIs (Bun.file, etc.)
-4. **Vite Bundle Size**: Adding services to frontend will increase bundle (~100-200KB)
-5. **WebWorker Communication**: Message passing overhead for Stockfish (minimal impact)
+4. **Vite Bundle Size**: Adding services to frontend will increase bundle
+   (~100-200KB)
+5. **WebWorker Communication**: Message passing overhead for Stockfish (minimal
+   impact)
 6. **Neutralino Version**: Requires Neutralino 6.4.0+ for filesystem APIs
 7. **Data Migration**: Existing save files must work without conversion
 8. **Cross-Platform**: Solution must work on Windows, Linux, macOS
@@ -253,7 +275,8 @@ No UI changes required - user interface remains identical. Migration is purely a
   - Maintains WebSocket IPC complexity
   - Doesn't follow Neutralino design philosophy
   - Doesn't achieve optimal size reduction
-- **Why rejected:** Pure Neutralino approach is simpler and achieves better results (0MB vs 15MB)
+- **Why rejected:** Pure Neutralino approach is simpler and achieves better
+  results (0MB vs 15MB)
 
 ### Option 2: Native Backend (Rust/Go)
 
@@ -266,7 +289,8 @@ No UI changes required - user interface remains identical. Migration is purely a
   - Requires Rust/Go expertise
   - High risk for stable project
   - Violates "stability over features" principle
-- **Why rejected:** Too risky and time-consuming for marginal benefit (5MB vs 0MB)
+- **Why rejected:** Too risky and time-consuming for marginal benefit (5MB vs
+  0MB)
 
 ### Option 3: Electron Framework
 
@@ -298,37 +322,36 @@ No UI changes required - user interface remains identical. Migration is purely a
 ### Phases
 
 1. **Phase 1: Backend Service Migration (Days 1-2)**
-
    - Move `src/backend/ai-opponent.ts` → `src/frontend/services/ai-opponent.ts`
-   - Move `src/backend/data-storage.ts` → `src/frontend/services/data-storage.ts`
-   - Move `src/backend/analysis-pipeline.ts` → `src/frontend/services/analysis-pipeline.ts`
-   - Move `src/backend/metrics-calculator.ts` → `src/frontend/services/metrics-calculator.ts`
-   - Move `src/backend/export-import.ts` → `src/frontend/services/export-import.ts`
+   - Move `src/backend/data-storage.ts` →
+     `src/frontend/services/data-storage.ts`
+   - Move `src/backend/analysis-pipeline.ts` →
+     `src/frontend/services/analysis-pipeline.ts`
+   - Move `src/backend/metrics-calculator.ts` →
+     `src/frontend/services/metrics-calculator.ts`
+   - Move `src/backend/export-import.ts` →
+     `src/frontend/services/export-import.ts`
    - Adapt file I/O calls from Bun APIs to Neutralino.filesystem
 
 2. **Phase 2: Stockfish WebWorker (Day 2)**
-
    - Create `src/frontend/workers/stockfish-worker.ts`
    - Implement UCI protocol message passing
    - Update engine references to use WebWorker
    - Test engine analysis quality
 
 3. **Phase 3: Remove WebSocket IPC (Day 3)**
-
    - Delete `src/backend/websocket-server.ts`
    - Delete `src/frontend/websocket-ipc-client.ts`
    - Replace IPC calls with direct service imports
    - Update all frontend modules
 
 4. **Phase 4: Update Build Scripts (Day 3)**
-
    - Modify `scripts/build-windows.ts` to skip Bun exe compilation
    - Modify `scripts/build-linux.ts` to skip Bun exe compilation
    - Modify `scripts/build-macos.ts` to skip Bun exe compilation
    - Update build output to only include Neutralino + resources.neu
 
 5. **Phase 5: Testing & Validation (Day 4)**
-
    - Run full test suite: `bun run verify`
    - Manual testing: All game modes, AI opponents, analysis
    - Cross-platform build testing
@@ -346,7 +369,8 @@ No UI changes required - user interface remains identical. Migration is purely a
 **Before Implementation:**
 
 - ✅ v1.0.4 is stable (no known bugs)
-- ✅ Optimization analysis completed (component-inventory.md, optimization-plan.md)
+- ✅ Optimization analysis completed (component-inventory.md,
+  optimization-plan.md)
 - ⏳ PRD approval (this document)
 - ⏳ Tech Spec creation and approval
 
@@ -359,42 +383,42 @@ No UI changes required - user interface remains identical. Migration is purely a
 
 ## Open Questions
 
-1. **Neutralino.filesystem performance**: Does Neutralino.filesystem match Bun.file performance for large JSON writes?
-
+1. **Neutralino.filesystem performance**: Does Neutralino.filesystem match
+   Bun.file performance for large JSON writes?
    - **Answer needed before**: Phase 1 implementation
    - **How to resolve**: Benchmark file I/O operations
 
-2. **WebWorker Stockfish initialization time**: How long does Stockfish WASM take to initialize in WebWorker?
-
+2. **WebWorker Stockfish initialization time**: How long does Stockfish WASM
+   take to initialize in WebWorker?
    - **Answer needed before**: Phase 2 implementation
    - **How to resolve**: Create prototype WebWorker, measure init time
 
-3. **Error logging strategy**: Should we keep file-based logging or switch to in-memory logs?
-
+3. **Error logging strategy**: Should we keep file-based logging or switch to
+   in-memory logs?
    - **Answer needed before**: Phase 1 implementation
    - **How to resolve**: Decide based on user needs (logs rarely accessed)
 
-4. **Development hot-reload**: Will Vite hot module replacement work with services in frontend?
-
+4. **Development hot-reload**: Will Vite hot module replacement work with
+   services in frontend?
    - **Answer needed before**: Phase 1 implementation
    - **How to resolve**: Test with `bun run dev` after initial migration
 
-5. **Stockfish multi-instance**: Can we run multiple Stockfish WebWorkers for parallel analysis?
-
+5. **Stockfish multi-instance**: Can we run multiple Stockfish WebWorkers for
+   parallel analysis?
    - **Answer needed before**: Not blocking (optimization consideration)
    - **How to resolve**: Test after Phase 2 if needed
 
 6. **Data format changes**: Do we need to version the save data format?
-
    - **Answer needed before**: Phase 1 implementation
    - **How to resolve**: Add version field to save files for future migrations
 
-7. **Bundle size threshold**: At what frontend bundle size should we consider code splitting?
-
+7. **Bundle size threshold**: At what frontend bundle size should we consider
+   code splitting?
    - **Answer needed before**: Not blocking (Phase 2 optimization)
    - **How to resolve**: Monitor bundle size, split if >1MB
 
-8. **Cross-platform testing**: Do we have access to Windows/Linux/macOS for testing?
+8. **Cross-platform testing**: Do we have access to Windows/Linux/macOS for
+   testing?
    - **Answer needed before**: Phase 5 testing
    - **How to resolve**: Confirm testing environment availability
 

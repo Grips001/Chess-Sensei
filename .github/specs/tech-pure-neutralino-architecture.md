@@ -1,10 +1,8 @@
 # Tech Spec: Pure Neutralino Architecture Migration
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-06
-> **Last Updated:** 2026-01-06
-> **PRD:** [prd-pure-neutralino-architecture.md](./prd-pure-neutralino-architecture.md)
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-06
+> **Last Updated:** 2026-01-06 **PRD:**
+> [prd-pure-neutralino-architecture.md](./prd-pure-neutralino-architecture.md)
 > **Related Issues:** CS-005
 
 ---
@@ -13,11 +11,14 @@
 
 ### Summary
 
-Migrate Chess-Sensei from a dual-process architecture (Neutralino frontend + Bun backend executable) to a single-process
-Pure Neutralino App architecture. This involves moving all backend services (`ai-opponent.ts`, `data-storage.ts`,
-`analysis-pipeline.ts`, `metrics-calculator.ts`, `export-import.ts`) to the frontend, running Stockfish in a WebWorker,
-replacing Bun file I/O with Neutralino.filesystem APIs, and eliminating the WebSocket IPC layer. The result is a
-111MB size reduction (92% of current distribution) while maintaining 100% feature parity.
+Migrate Chess-Sensei from a dual-process architecture (Neutralino frontend + Bun
+backend executable) to a single-process Pure Neutralino App architecture. This
+involves moving all backend services (`ai-opponent.ts`, `data-storage.ts`,
+`analysis-pipeline.ts`, `metrics-calculator.ts`, `export-import.ts`) to the
+frontend, running Stockfish in a WebWorker, replacing Bun file I/O with
+Neutralino.filesystem APIs, and eliminating the WebSocket IPC layer. The result
+is a 111MB size reduction (92% of current distribution) while maintaining 100%
+feature parity.
 
 ### Goals
 
@@ -25,8 +26,10 @@ replacing Bun file I/O with Neutralino.filesystem APIs, and eliminating the WebS
 2. **Convert backend services to frontend modules** using Neutralino APIs
 3. **Run Stockfish in WebWorker** for non-blocking chess analysis
 4. **Remove WebSocket IPC layer** and replace with direct function calls
-5. **Maintain 100% backward compatibility** with existing save data (JSON format unchanged)
-6. **Preserve development workflow** (keep Bun for `bun install`, `bun test`, `bun run build`)
+5. **Maintain 100% backward compatibility** with existing save data (JSON format
+   unchanged)
+6. **Preserve development workflow** (keep Bun for `bun install`, `bun test`,
+   `bun run build`)
 
 ### Non-Goals
 
@@ -65,7 +68,8 @@ replacing Bun file I/O with Neutralino.filesystem APIs, and eliminating the WebS
 
 **File Structure (Current):**
 
-- `src/backend/index.ts` - Backend entry point, IPC method registration (2175 lines)
+- `src/backend/index.ts` - Backend entry point, IPC method registration (2175
+  lines)
 - `src/backend/websocket-server.ts` - WebSocket IPC server
 - `src/backend/ai-opponent.ts` - Bot personalities and move selection
 - `src/backend/data-storage.ts` - File I/O using Bun APIs (1000 lines)
@@ -82,7 +86,8 @@ replacing Bun file I/O with Neutralino.filesystem APIs, and eliminating the WebS
 - 5 AI Opponent methods (e.g., `chess:configureBot`, `chess:getBotMove`)
 - 3 Analysis methods (e.g., `chess:analyzeGame`, `chess:calculateMetrics`)
 - 7 Data Storage methods (e.g., `chess:saveGame`, `chess:loadGame`)
-- 4 Player Progress methods (e.g., `chess:loadPlayerProfile`, `chess:getAchievements`)
+- 4 Player Progress methods (e.g., `chess:loadPlayerProfile`,
+  `chess:getAchievements`)
 - 10 Export/Import methods (e.g., `chess:exportGame`, `chess:importBatchGames`)
 - 8 Backup methods (e.g., `chess:createAutomaticBackup`, `chess:listBackups`)
 - 3 Logging methods (e.g., `chess:logMessage`, `chess:getLogPath`)
@@ -173,15 +178,20 @@ Target Architecture (Pure Neutralino App):
 
 ### 1. Data Storage Service
 
-**File:** `src/frontend/services/data-storage.ts` (migrated from `src/backend/data-storage.ts`)
+**File:** `src/frontend/services/data-storage.ts` (migrated from
+`src/backend/data-storage.ts`)
 
 **Changes:**
 
 1. Replace all `Bun.write()` calls with `Neutralino.filesystem.writeFile()`
-2. Replace `Bun.file().json()` with `Neutralino.filesystem.readFile()` + `JSON.parse()`
-3. Replace `Bun.file().exists()` with try/catch `Neutralino.filesystem.getStats()`
-4. Replace `import('fs/promises').readdir()` with `Neutralino.filesystem.readDirectory()`
-5. Replace `import('fs/promises').rename()` with write + delete (no atomic rename)
+2. Replace `Bun.file().json()` with `Neutralino.filesystem.readFile()` +
+   `JSON.parse()`
+3. Replace `Bun.file().exists()` with try/catch
+   `Neutralino.filesystem.getStats()`
+4. Replace `import('fs/promises').readdir()` with
+   `Neutralino.filesystem.readDirectory()`
+5. Replace `import('fs/promises').rename()` with write + delete (no atomic
+   rename)
 6. Update path handling to use `Neutralino.os.getPath()` for user data directory
 7. Remove in-memory fallback mode (lines 148-160, 252-256, 273-279, 286-300)
 
@@ -291,7 +301,10 @@ async function initializeEngine() {
 
   // Set up UCI output handler
   stockfish.addMessageListener((line: string) => {
-    if (currentPromiseResolve && (line.startsWith('bestmove') || line.startsWith('info score'))) {
+    if (
+      currentPromiseResolve &&
+      (line.startsWith('bestmove') || line.startsWith('info score'))
+    ) {
       messageQueue.push(line);
 
       // If this is a bestmove, resolve the promise
@@ -375,7 +388,7 @@ self.addEventListener('message', async (e: MessageEvent) => {
         self.postMessage({
           type: 'BEST_MOVES_RESULT',
           requestId,
-          payload: { moves }
+          payload: { moves },
         });
         break;
       }
@@ -393,7 +406,7 @@ self.addEventListener('message', async (e: MessageEvent) => {
         self.postMessage({
           type: 'EVALUATION_RESULT',
           requestId,
-          payload: { evaluation }
+          payload: { evaluation },
         });
         break;
       }
@@ -421,7 +434,7 @@ self.addEventListener('message', async (e: MessageEvent) => {
             centipawnLoss: cpl,
             evaluationBefore: evalBefore.score,
             evaluationAfter: evalAfter.score,
-          }
+          },
         });
         break;
       }
@@ -450,13 +463,15 @@ self.addEventListener('message', async (e: MessageEvent) => {
       requestId,
       payload: {
         error: error instanceof Error ? error.message : 'Unknown error',
-      }
+      },
     });
   }
 });
 
 // Parse UCI output to extract moves and scores
-function parseUCIOutput(uciOutput: string): Array<{ move: string; score: number }> {
+function parseUCIOutput(
+  uciOutput: string
+): Array<{ move: string; score: number }> {
   const lines = uciOutput.split('\n');
   const moves: Array<{ move: string; score: number }> = [];
 
@@ -478,7 +493,10 @@ function parseUCIOutput(uciOutput: string): Array<{ move: string; score: number 
 }
 
 // Parse UCI evaluation
-function parseEvaluation(uciOutput: string): { score: number; mate: number | null } {
+function parseEvaluation(uciOutput: string): {
+  score: number;
+  mate: number | null;
+} {
   const lines = uciOutput.split('\n');
 
   for (const line of lines) {
@@ -507,7 +525,8 @@ self.postMessage({ type: 'WORKER_READY' });
 
 ### 3. Stockfish Engine Wrapper
 
-**File:** `src/frontend/services/stockfish-engine.ts` (adapted from `src/engine/stockfish-engine.ts`)
+**File:** `src/frontend/services/stockfish-engine.ts` (adapted from
+`src/engine/stockfish-engine.ts`)
 
 **Changes:**
 
@@ -524,16 +543,26 @@ self.postMessage({ type: 'WORKER_READY' });
  * Communicates with Stockfish running in WebWorker
  */
 
-import type { BestMove, PositionEvaluation, MoveAnalysis, GetBestMovesOptions } from '../../shared/engine-types';
+import type {
+  BestMove,
+  PositionEvaluation,
+  MoveAnalysis,
+  GetBestMovesOptions,
+} from '../../shared/engine-types';
 
 export class StockfishEngine {
   private worker: Worker | null = null;
   private requestId = 0;
-  private pendingRequests = new Map<number, { resolve: (value: any) => void; reject: (error: Error) => void }>();
+  private pendingRequests = new Map<
+    number,
+    { resolve: (value: any) => void; reject: (error: Error) => void }
+  >();
   private initialized = false;
 
   constructor() {
-    this.worker = new Worker('/src/frontend/workers/stockfish-worker.ts', { type: 'module' });
+    this.worker = new Worker('/src/frontend/workers/stockfish-worker.ts', {
+      type: 'module',
+    });
 
     this.worker.addEventListener('message', (e: MessageEvent) => {
       const { type, requestId, payload } = e.data;
@@ -578,10 +607,9 @@ export class StockfishEngine {
   }
 
   async getBestMoves(options: GetBestMovesOptions): Promise<BestMove[]> {
-    const result = await this.sendMessage<{ moves: Array<{ move: string; score: number }> }>(
-      'GET_BEST_MOVES',
-      options
-    );
+    const result = await this.sendMessage<{
+      moves: Array<{ move: string; score: number }>;
+    }>('GET_BEST_MOVES', options);
 
     return result.moves.map((m, index) => ({
       move: m.move,
@@ -591,11 +619,12 @@ export class StockfishEngine {
     }));
   }
 
-  async evaluatePosition(options: GetBestMovesOptions): Promise<PositionEvaluation> {
-    const result = await this.sendMessage<{ evaluation: { score: number; mate: number | null } }>(
-      'EVALUATE_POSITION',
-      options
-    );
+  async evaluatePosition(
+    options: GetBestMovesOptions
+  ): Promise<PositionEvaluation> {
+    const result = await this.sendMessage<{
+      evaluation: { score: number; mate: number | null };
+    }>('EVALUATE_POSITION', options);
 
     return {
       score: result.evaluation.score,
@@ -604,7 +633,11 @@ export class StockfishEngine {
     };
   }
 
-  async analyzeMove(fen: string, playedMove: string, options: GetBestMovesOptions): Promise<MoveAnalysis> {
+  async analyzeMove(
+    fen: string,
+    playedMove: string,
+    options: GetBestMovesOptions
+  ): Promise<MoveAnalysis> {
     const result = await this.sendMessage<{
       centipawnLoss: number;
       evaluationBefore: number;
@@ -620,7 +653,9 @@ export class StockfishEngine {
     };
   }
 
-  private classifyMove(cpl: number): 'best' | 'good' | 'inaccuracy' | 'mistake' | 'blunder' {
+  private classifyMove(
+    cpl: number
+  ): 'best' | 'good' | 'inaccuracy' | 'mistake' | 'blunder' {
     if (cpl <= 10) return 'best';
     if (cpl <= 25) return 'good';
     if (cpl <= 100) return 'inaccuracy';
@@ -669,12 +704,14 @@ export async function createEngine(): Promise<StockfishEngine> {
 
 ### 4. AI Opponent Service
 
-**File:** `src/frontend/services/ai-opponent.ts` (migrated from `src/backend/ai-opponent.ts`)
+**File:** `src/frontend/services/ai-opponent.ts` (migrated from
+`src/backend/ai-opponent.ts`)
 
 **Changes:**
 
 1. **No API changes** - AI logic is pure JavaScript (no I/O)
-2. Update import path for `StockfishEngine` (now in `src/frontend/services/stockfish-engine.ts`)
+2. Update import path for `StockfishEngine` (now in
+   `src/frontend/services/stockfish-engine.ts`)
 3. Update import paths for shared types (`src/shared/bot-types.ts`)
 4. **No Neutralino API needed** - no file operations
 
@@ -684,7 +721,8 @@ export async function createEngine(): Promise<StockfishEngine> {
 
 ### 5. Analysis Pipeline Service
 
-**File:** `src/frontend/services/analysis-pipeline.ts` (migrated from `src/backend/analysis-pipeline.ts`)
+**File:** `src/frontend/services/analysis-pipeline.ts` (migrated from
+`src/backend/analysis-pipeline.ts`)
 
 **Changes:**
 
@@ -699,7 +737,8 @@ export async function createEngine(): Promise<StockfishEngine> {
 
 ### 6. Metrics Calculator Service
 
-**File:** `src/frontend/services/metrics-calculator.ts` (migrated from `src/backend/metrics-calculator.ts`)
+**File:** `src/frontend/services/metrics-calculator.ts` (migrated from
+`src/backend/metrics-calculator.ts`)
 
 **Changes:**
 
@@ -713,7 +752,8 @@ export async function createEngine(): Promise<StockfishEngine> {
 
 ### 7. Export/Import Manager
 
-**File:** `src/frontend/services/export-import.ts` (adapted from `src/backend/export-import.ts`)
+**File:** `src/frontend/services/export-import.ts` (adapted from
+`src/backend/export-import.ts`)
 
 **Changes:**
 
@@ -763,7 +803,8 @@ async exportGameAsPGN(game: StoredGameData, destinationPath?: string): Promise<E
 
 ### 8. Frontend Logger
 
-**File:** `src/frontend/services/frontend-logger.ts` (adapted from `src/backend/file-logger.ts`)
+**File:** `src/frontend/services/frontend-logger.ts` (adapted from
+`src/backend/file-logger.ts`)
 
 **Changes:**
 
@@ -793,7 +834,9 @@ class FrontendLogger {
 
       // Ensure logs directory exists
       try {
-        await Neutralino.filesystem.createDirectory(`${appDataPath}/Chess-Sensei/logs`);
+        await Neutralino.filesystem.createDirectory(
+          `${appDataPath}/Chess-Sensei/logs`
+        );
       } catch {
         // Directory might already exist
       }
@@ -811,9 +854,11 @@ class FrontendLogger {
 
     if (this.enabled) {
       // Write to file asynchronously (fire and forget)
-      Neutralino.filesystem.appendFile(this.logPath, logEntry + '\n').catch((err) => {
-        console.error('Failed to write log:', err);
-      });
+      Neutralino.filesystem
+        .appendFile(this.logPath, logEntry + '\n')
+        .catch((err) => {
+          console.error('Failed to write log:', err);
+        });
     }
 
     // Also log to console in dev mode
@@ -871,9 +916,18 @@ export const frontendLogger = new FrontendLogger();
 import { createEngine, StockfishEngine } from './services/stockfish-engine';
 import { AIOpponent } from './services/ai-opponent';
 import { createDataStorage, DataStorage } from './services/data-storage';
-import { createAnalysisPipeline, AnalysisPipeline } from './services/analysis-pipeline';
-import { createMetricsCalculator, MetricsCalculator } from './services/metrics-calculator';
-import { createExportImportManager, ExportImportManager } from './services/export-import';
+import {
+  createAnalysisPipeline,
+  AnalysisPipeline,
+} from './services/analysis-pipeline';
+import {
+  createMetricsCalculator,
+  MetricsCalculator,
+} from './services/metrics-calculator';
+import {
+  createExportImportManager,
+  ExportImportManager,
+} from './services/export-import';
 import { frontendLogger } from './services/frontend-logger';
 
 // Global service instances
@@ -900,7 +954,9 @@ async function initializeServices(): Promise<void> {
 
     // Initialize other services
     metricsCalculator = createMetricsCalculator();
-    exportImportManager = createExportImportManager(dataStorage.getStorageBasePath());
+    exportImportManager = createExportImportManager(
+      dataStorage.getStorageBasePath()
+    );
 
     frontendLogger.info('App', 'All services initialized successfully');
   } catch (error) {
@@ -1010,7 +1066,8 @@ await $`mv dist/Windows x64/Chess-Sensei/neutralino.exe dist/Windows x64/Chess-S
 
 ### No Data Model Changes
 
-**Critical:** JSON save file formats remain **100% identical** for backward compatibility.
+**Critical:** JSON save file formats remain **100% identical** for backward
+compatibility.
 
 **Existing Formats (Unchanged):**
 
@@ -1066,7 +1123,11 @@ export interface StockfishEngine {
   setPosition(fen: string, moves?: string[]): Promise<void>;
   getBestMoves(options: GetBestMovesOptions): Promise<BestMove[]>;
   evaluatePosition(options: GetBestMovesOptions): Promise<PositionEvaluation>;
-  analyzeMove(fen: string, playedMove: string, options: GetBestMovesOptions): Promise<MoveAnalysis>;
+  analyzeMove(
+    fen: string,
+    playedMove: string,
+    options: GetBestMovesOptions
+  ): Promise<MoveAnalysis>;
   setOption(name: string, value: number | string): Promise<void>;
   newGame(): Promise<void>;
   isInitialized(): boolean;
@@ -1075,10 +1136,30 @@ export interface StockfishEngine {
 
 // AI Opponent Service
 export class AIOpponent {
-  constructor(engine: StockfishEngine, config: { profile: BotProfile; playMode: AIPlayMode; useTimeDelays: boolean });
-  async selectMove(fen: string, moves?: string[]): Promise<{ move: string; score: number; thinkingTime: number; wasWeakened: boolean; classification: string }>;
+  constructor(
+    engine: StockfishEngine,
+    config: {
+      profile: BotProfile;
+      playMode: AIPlayMode;
+      useTimeDelays: boolean;
+    }
+  );
+  async selectMove(
+    fen: string,
+    moves?: string[]
+  ): Promise<{
+    move: string;
+    score: number;
+    thinkingTime: number;
+    wasWeakened: boolean;
+    classification: string;
+  }>;
   getProfile(): BotProfile;
-  getConfig(): { profile: BotProfile; playMode: AIPlayMode; useTimeDelays: boolean };
+  getConfig(): {
+    profile: BotProfile;
+    playMode: AIPlayMode;
+    useTimeDelays: boolean;
+  };
   // ... (6 methods total)
 }
 
@@ -1091,22 +1172,59 @@ export interface AnalysisPipeline {
 
 // Metrics Calculator Service
 export interface MetricsCalculator {
-  calculateGameMetrics(analysis: GameAnalysis, playerColor: 'white' | 'black', botElo: number, result: string): GameMetrics;
-  calculateCompositeScores(metrics: GameMetrics, wasWinning: boolean, playerWon: boolean): CompositeScores;
+  calculateGameMetrics(
+    analysis: GameAnalysis,
+    playerColor: 'white' | 'black',
+    botElo: number,
+    result: string
+  ): GameMetrics;
+  calculateCompositeScores(
+    metrics: GameMetrics,
+    wasWinning: boolean,
+    playerWon: boolean
+  ): CompositeScores;
   // ... (2 methods total)
 }
 
 // Export/Import Manager Service
 export interface ExportImportManager {
-  exportGameAsPGN(game: StoredGameData, destinationPath?: string): Promise<ExportResult>;
-  exportGameAsJSON(game: StoredGameData, analysis?: StoredAnalysisData, destinationPath?: string): Promise<ExportResult>;
-  exportAllGames(games: StoredGameData[], analyses?: StoredAnalysisData[], destinationPath?: string): Promise<ExportResult>;
-  exportPlayerProfile(profile: PlayerProfile, destinationPath?: string): Promise<ExportResult>;
-  exportFullBackup(games: StoredGameData[], analyses: StoredAnalysisData[], profile: PlayerProfile | null, destinationPath?: string): Promise<ExportResult>;
-  importGameFromJSON(filePath: string, existingIds: Set<string>): Promise<ImportResult>;
-  importBatchGames(filePath: string, existingIds: Set<string>): Promise<ImportResult>;
+  exportGameAsPGN(
+    game: StoredGameData,
+    destinationPath?: string
+  ): Promise<ExportResult>;
+  exportGameAsJSON(
+    game: StoredGameData,
+    analysis?: StoredAnalysisData,
+    destinationPath?: string
+  ): Promise<ExportResult>;
+  exportAllGames(
+    games: StoredGameData[],
+    analyses?: StoredAnalysisData[],
+    destinationPath?: string
+  ): Promise<ExportResult>;
+  exportPlayerProfile(
+    profile: PlayerProfile,
+    destinationPath?: string
+  ): Promise<ExportResult>;
+  exportFullBackup(
+    games: StoredGameData[],
+    analyses: StoredAnalysisData[],
+    profile: PlayerProfile | null,
+    destinationPath?: string
+  ): Promise<ExportResult>;
+  importGameFromJSON(
+    filePath: string,
+    existingIds: Set<string>
+  ): Promise<ImportResult>;
+  importBatchGames(
+    filePath: string,
+    existingIds: Set<string>
+  ): Promise<ImportResult>;
   importFromPGN(filePath: string): Promise<ImportResult>;
-  mergePlayerProfiles(current: PlayerProfile, incoming: PlayerProfile): Promise<PlayerProfile>;
+  mergePlayerProfiles(
+    current: PlayerProfile,
+    incoming: PlayerProfile
+  ): Promise<PlayerProfile>;
   getExportsPath(): string;
   // ... (10 methods total)
 }
@@ -1116,7 +1234,8 @@ export interface ExportImportManager {
 
 ## UI Changes
 
-**No UI changes** - User interface remains identical. Migration is purely architectural.
+**No UI changes** - User interface remains identical. Migration is purely
+architectural.
 
 ---
 
@@ -1148,7 +1267,7 @@ let exportImportManager: ExportImportManager | null = null;
 | --------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | Stockfish WebWorker fails to load       | Show error modal, disable AI features, allow sandbox mode                  | "Chess engine failed to load. AI features unavailable."          |
 | Neutralino.filesystem permission denied | Request permissions via Neutralino.os.showDialog, retry or disable storage | "File access denied. Grant permissions to save games."           |
-| Data storage initialization fails       | Continue with in-memory mode (data lost on exit), show warning             | "⚠️ Running in temporary mode. Data will not be saved."           |
+| Data storage initialization fails       | Continue with in-memory mode (data lost on exit), show warning             | "⚠️ Running in temporary mode. Data will not be saved."          |
 | Service call throws exception           | Catch at call site, log error, show user-friendly message                  | "Failed to save game. Please try again."                         |
 | Stockfish WebWorker crashes             | Reinitialize worker, show loading indicator                                | "Chess engine restarting..."                                     |
 | File write fails (disk full)            | Show error, offer export to different location                             | "Disk full. Export games to external drive?"                     |
@@ -1176,7 +1295,8 @@ let exportImportManager: ExportImportManager | null = null;
 - Update import paths in migrated services
 - Adapt `data-storage.ts`:
   - Replace `Bun.write()` → `Neutralino.filesystem.writeFile()`
-  - Replace `Bun.file().json()` → `Neutralino.filesystem.readFile()` + `JSON.parse()`
+  - Replace `Bun.file().json()` → `Neutralino.filesystem.readFile()` +
+    `JSON.parse()`
   - Replace `Bun.file().exists()` → try/catch `Neutralino.filesystem.getStats()`
   - Replace `import('fs/promises')` → `Neutralino.filesystem` equivalents
   - Update `getBasePathInternal()` to use `Neutralino.os.getPath('data')`
@@ -1433,7 +1553,8 @@ let exportImportManager: ExportImportManager | null = null;
 
 - **Frontend bundle size**: 606KB → 700-800KB (+100-200KB services)
 - **Stockfish WebWorker**: First analysis may take 100-200ms to initialize
-- **File I/O**: Neutralino.filesystem may be slightly slower than Bun.file (negligible)
+- **File I/O**: Neutralino.filesystem may be slightly slower than Bun.file
+  (negligible)
 
 ### Benchmarks
 
@@ -1477,17 +1598,22 @@ Dashboard load (100 games)  ~300ms (unchanged)
 
 ## Security Considerations
 
-- [x] No user data exposed (data remains local, Neutralino.filesystem access controlled)
-- [x] Input validation added (Neutralino.filesystem paths validated, no directory traversal)
+- [x] No user data exposed (data remains local, Neutralino.filesystem access
+      controlled)
+- [x] Input validation added (Neutralino.filesystem paths validated, no
+      directory traversal)
 - [x] No new attack vectors (eliminated WebSocket IPC port 9339)
 - [x] Reduced attack surface (no backend executable, no network communication)
 - [x] Same origin policy enforced (Neutralino apps sandboxed)
 
 **Security Improvements:**
 
-1. **No WebSocket port**: Port 9339 no longer exposed, eliminates potential RCE via IPC
-2. **No backend process**: Cannot exploit backend vulnerabilities (no process to target)
-3. **Neutralino sandboxing**: Neutralino.filesystem access controlled by OS permissions
+1. **No WebSocket port**: Port 9339 no longer exposed, eliminates potential RCE
+   via IPC
+2. **No backend process**: Cannot exploit backend vulnerabilities (no process to
+   target)
+3. **Neutralino sandboxing**: Neutralino.filesystem access controlled by OS
+   permissions
 4. **Smaller distribution**: Less code = smaller attack surface
 
 **Security Risks:**
@@ -1541,11 +1667,13 @@ Not applicable - architecture migration is all-or-nothing.
 - Doesn't follow Neutralino design philosophy
 - Doesn't achieve optimal size reduction
 
-**Why rejected:** Pure Neutralino approach is simpler and achieves better results (0MB vs 15MB)
+**Why rejected:** Pure Neutralino approach is simpler and achieves better
+results (0MB vs 15MB)
 
 ### Option 2: Native Backend (Rust/Go)
 
-**Approach:** Rewrite backend in Rust or Go, compile to ~5-10MB native executable
+**Approach:** Rewrite backend in Rust or Go, compile to ~5-10MB native
+executable
 
 **Pros:**
 
@@ -1643,43 +1771,43 @@ index.ts (UI)
 
 ## Open Questions
 
-1. **Neutralino.filesystem performance**: Does Neutralino.filesystem match Bun.file performance
-   for large JSON writes (1000+ games)?
-
+1. **Neutralino.filesystem performance**: Does Neutralino.filesystem match
+   Bun.file performance for large JSON writes (1000+ games)?
    - **Resolution needed**: Benchmark before Phase 5
    - **If slower**: Consider caching in memory, batch writes
 
-2. **WebWorker Stockfish initialization time**: How long does Stockfish WASM take to initialize in WebWorker?
-
+2. **WebWorker Stockfish initialization time**: How long does Stockfish WASM
+   take to initialize in WebWorker?
    - **Resolution needed**: Measure during Phase 2 implementation
    - **If >500ms**: Show loading indicator, initialize on app startup
 
-3. **Neutralino.filesystem atomic writes**: Does Neutralino support atomic file writes (no corruption on crash)?
-
+3. **Neutralino.filesystem atomic writes**: Does Neutralino support atomic file
+   writes (no corruption on crash)?
    - **Resolution needed**: Test during Phase 5
    - **If no**: Implement write-verify-rename pattern
 
-4. **Cross-platform path handling**: Are Neutralino.os.getPath() paths consistent across Windows/macOS/Linux?
-
+4. **Cross-platform path handling**: Are Neutralino.os.getPath() paths
+   consistent across Windows/macOS/Linux?
    - **Resolution needed**: Test on all platforms during Phase 5
    - **If inconsistent**: Add platform-specific path handling
 
-5. **WebWorker memory usage**: Does Stockfish WebWorker add significant memory overhead?
-
+5. **WebWorker memory usage**: Does Stockfish WebWorker add significant memory
+   overhead?
    - **Resolution needed**: Measure memory during Phase 5
    - **Target**: <30MB for WebWorker
 
-6. **Bundle size threshold**: At what frontend bundle size should we consider code splitting?
-
+6. **Bundle size threshold**: At what frontend bundle size should we consider
+   code splitting?
    - **Resolution needed**: Monitor bundle after Phase 1-3
    - **Threshold**: If >1MB, consider lazy loading services
 
-7. **Error recovery**: Can Stockfish WebWorker recover from crashes without restarting app?
-
+7. **Error recovery**: Can Stockfish WebWorker recover from crashes without
+   restarting app?
    - **Resolution needed**: Test crash scenarios during Phase 5
    - **Implementation**: Automatic worker re-initialization on crash
 
-8. **File watching**: Should we watch save files for external changes (multi-device sync)?
+8. **File watching**: Should we watch save files for external changes
+   (multi-device sync)?
    - **Resolution needed**: After Phase 5 (Phase 2 optimization)
    - **Decision**: Defer to Phase 2 (not critical for v1.0.5)
 
