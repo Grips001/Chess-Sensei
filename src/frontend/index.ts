@@ -191,6 +191,11 @@ function updateMoveHistory(): void {
   if (moveHistory) {
     moveHistory.scrollTop = moveHistory.scrollHeight;
   }
+
+  // Refresh CollapsibleSection height after content update
+  if (moveHistorySection) {
+    moveHistorySection.refreshHeight();
+  }
 }
 
 /**
@@ -966,6 +971,11 @@ function updateCapturedPieces(): void {
   } else if (materialDiff < 0) {
     blackAdvantage.textContent = `+${Math.abs(materialDiff)}`;
     blackAdvantage.classList.add('positive');
+  }
+
+  // Refresh CollapsibleSection height after content update
+  if (capturedPiecesSection) {
+    capturedPiecesSection.refreshHeight();
   }
 }
 
@@ -2466,15 +2476,10 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
       expanded: true,
     });
 
-    // Move existing move history content to the section
-    const existingMoveHistory = document.getElementById('move-history');
-    if (existingMoveHistory) {
-      const moveList = existingMoveHistory.querySelector('#move-list');
-      if (moveList) {
-        moveHistorySection.getContent().appendChild(moveList);
-      }
-      existingMoveHistory.remove();
-    }
+    // Create move list container directly
+    const moveList = document.createElement('div');
+    moveList.id = 'move-list';
+    moveHistorySection.getContent().appendChild(moveList);
 
     container.appendChild(moveHistorySection.getElement());
 
@@ -2486,14 +2491,29 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
       expanded: true,
     });
 
-    // Move existing captured pieces content to the section
-    const existingCapturedPieces = document.getElementById('captured-pieces');
-    if (existingCapturedPieces) {
-      capturedPiecesSection.getContent().appendChild(existingCapturedPieces);
-      // Remove ID to avoid conflicts
-      existingCapturedPieces.removeAttribute('id');
-      existingCapturedPieces.classList.add('captured-pieces-content');
-    }
+    // Create captured pieces structure directly
+    const capturedPiecesContent = document.createElement('div');
+    capturedPiecesContent.className = 'captured-pieces-content';
+
+    const whiteCapturedSection = document.createElement('div');
+    whiteCapturedSection.className = 'captured-section';
+    whiteCapturedSection.innerHTML = `
+      <div class="captured-label">White captured:</div>
+      <div id="captured-by-white" class="captured-list"></div>
+      <div class="material-advantage" id="white-advantage"></div>
+    `;
+
+    const blackCapturedSection = document.createElement('div');
+    blackCapturedSection.className = 'captured-section';
+    blackCapturedSection.innerHTML = `
+      <div class="captured-label">Black captured:</div>
+      <div id="captured-by-black" class="captured-list"></div>
+      <div class="material-advantage" id="black-advantage"></div>
+    `;
+
+    capturedPiecesContent.appendChild(whiteCapturedSection);
+    capturedPiecesContent.appendChild(blackCapturedSection);
+    capturedPiecesSection.getContent().appendChild(capturedPiecesContent);
 
     container.appendChild(capturedPiecesSection.getElement());
 

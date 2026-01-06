@@ -309,7 +309,7 @@ levels. See [Training Mode Guide](training-mode-guide.md).
 
 ## Version
 
-**Chess-Sensei v1.0.3** - Stable Release
+**Chess-Sensei v1.0.4** - Stable Release
 
 This is the first stable release of Chess-Sensei with all features complete:
 

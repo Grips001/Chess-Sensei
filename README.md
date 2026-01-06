@@ -89,7 +89,7 @@ Complete documentation is available in the [`documents/`](documents/) directory:
 
 ## Project Status
 
-**Version:** v1.0.3 - Stable Release
+**Version:** v1.0.4 - Stable Release
 
 Chess-Sensei is a complete, fully-featured chess training application.
 
@@ -122,7 +122,7 @@ Download the latest release for your platform from
 | macOS    | `Chess-Sensei-{version}-macos-x64.tar.gz` |
 | Linux    | `Chess-Sensei-{version}-linux-x64.tar.gz` |
 
-**Current Version:** v1.0.3
+**Current Version:** v1.0.4
 
 ### Installation
 

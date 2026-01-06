@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-01-06
+
+### Fixed
+
+- **Duplicate UI Elements (CS-004)**
+  - Fixed duplicate "Move History" section appearing in Training/Exam mode right
+    panel
+  - Fixed duplicate "Print Dashboard" buttons appearing when Player Progress
+    dashboard was reopened multiple times
+  - Fixed CollapsibleSection components displaying truncated content until
+    manually collapsed/expanded
+
+### Changed
+
+- **CollapsibleSection Performance Optimization**
+  - Refactored CollapsibleSection content creation to build DOM structure
+    directly in JavaScript instead of hiding and moving HTML elements
+  - Removed wasteful hidden HTML elements from index.html
+  - Added `refreshHeight()` method to CollapsibleSection to recalculate
+    maxHeight after dynamic content updates
+  - `updateMoveHistory()` and `updateCapturedPieces()` now call
+    `refreshHeight()` after populating content
+
+### Technical
+
+- Modified `index.html` to remove hardcoded Move History and Captured Pieces
+  sections
+- Updated `src/frontend/index.ts` `initializeCollapsibleSections()` to create
+  content structure programmatically
+- Added `refreshHeight()` method to `CollapsibleSection` class for dynamic
+  height recalculation
+- Added existence check before appending Print Dashboard button to prevent
+  duplicates
+
 ## [1.0.3] - 2025-12-22
 
 ### Added
