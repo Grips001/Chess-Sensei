@@ -191,6 +191,11 @@ function updateMoveHistory(): void {
   if (moveHistory) {
     moveHistory.scrollTop = moveHistory.scrollHeight;
   }
+
+  // Refresh CollapsibleSection height after content update
+  if (moveHistorySection) {
+    moveHistorySection.refreshHeight();
+  }
 }
 
 /**
@@ -966,6 +971,11 @@ function updateCapturedPieces(): void {
   } else if (materialDiff < 0) {
     blackAdvantage.textContent = `+${Math.abs(materialDiff)}`;
     blackAdvantage.classList.add('positive');
+  }
+
+  // Refresh CollapsibleSection height after content update
+  if (capturedPiecesSection) {
+    capturedPiecesSection.refreshHeight();
   }
 }
 

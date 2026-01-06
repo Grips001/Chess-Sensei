@@ -228,6 +228,16 @@ export class CollapsibleSection {
   }
 
   /**
+   * Refresh the section's height calculation
+   * Call this after dynamically updating content to recalculate maxHeight
+   */
+  refreshHeight(): void {
+    if (this.expanded) {
+      this.content.style.maxHeight = `${this.content.scrollHeight}px`;
+    }
+  }
+
+  /**
    * Destroy the section and cleanup
    */
   destroy(): void {
