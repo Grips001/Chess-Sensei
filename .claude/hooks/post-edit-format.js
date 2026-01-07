@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /* eslint-disable no-undef */
 /**
  * PostToolUse Hook: Auto-format edited files

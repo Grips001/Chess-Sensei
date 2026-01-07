@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-sensitive-files.js\"",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-sensitive-files.js\"",
             "timeout": 5
           }
         ]
@@ -58,19 +58,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-format.js\"",
+            "command": "bun \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-format.js\"",
             "timeout": 15
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-context.js\"",
-            "timeout": 10
           }
         ]
       }
