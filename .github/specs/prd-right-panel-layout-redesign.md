@@ -277,7 +277,7 @@ So that I can maximize space for information I care about
    - Keyboard navigation support
    - Final visual polish and accessibility testing
 
-### Dependencies
+### Implementation Dependencies
 
 - Completion of glassmorphic component design system (if not already documented)
 - Access to existing panel and button components
