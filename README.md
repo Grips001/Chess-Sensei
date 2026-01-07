@@ -179,6 +179,24 @@ bun run lint:fix
 bun run format
 ```
 
+#### Configuration Files
+
+Linter and formatter configurations are organized in the `.config/` directory:
+
+- `.config/.prettierrc.json` - Prettier code formatting
+- `.config/.stylelintrc.json` - CSS linting rules
+- `.config/.markdownlint-cli2.jsonc` - Markdown linting config
+- `.config/.prettierignore` - Files to exclude from Prettier
+- `.config/.markdownlintignore` - Files to exclude from markdown linting
+
+Tool-required configs remain in project root:
+
+- `eslint.config.mjs` - ESLint v9 flat config
+- `vite.config.mts` - Vite build configuration
+- `neutralino.config.json` - Neutralino window settings
+- `tsconfig.json` - TypeScript compiler settings
+- `bun.lockb` - Bun package lock file
+
 See [SETUP.md](SETUP.md) for complete setup documentation and
 [documents/building.md](documents/building.md) for detailed build instructions.
 

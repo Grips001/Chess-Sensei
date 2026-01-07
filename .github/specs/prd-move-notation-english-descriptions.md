@@ -220,7 +220,7 @@ Best Moves:
    - Responsive design testing
    - UI polish and spacing refinements
 
-### Dependencies
+### Implementation Dependencies
 
 - Access to existing Best Moves panel code
 - Understanding of current move notation format used by engine

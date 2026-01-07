@@ -8,7 +8,7 @@ and this project adheres to
 
 ## [1.0.4] - 2026-01-06
 
-### Fixed
+### Fixed 1.0.4
 
 - **Duplicate UI Elements (CS-004)**
   - Fixed duplicate "Move History" section appearing in Training/Exam mode right
@@ -18,7 +18,7 @@ and this project adheres to
   - Fixed CollapsibleSection components displaying truncated content until
     manually collapsed/expanded
 
-### Changed
+### Changed 1.0.4
 
 - **CollapsibleSection Performance Optimization**
   - Refactored CollapsibleSection content creation to build DOM structure
@@ -29,7 +29,7 @@ and this project adheres to
   - `updateMoveHistory()` and `updateCapturedPieces()` now call
     `refreshHeight()` after populating content
 
-### Technical
+### Technical 1.0.4
 
 - Modified `index.html` to remove hardcoded Move History and Captured Pieces
   sections
@@ -42,7 +42,7 @@ and this project adheres to
 
 ## [1.0.3] - 2025-12-22
 
-### Added
+### Added 1.0.3
 
 - **Right Panel Layout Redesign (CS-003)**
   - Created glassmorphic Control Toolbar component detached from right panel for
@@ -56,14 +56,14 @@ and this project adheres to
   - Enhanced mobile responsiveness with proper button layout breakpoints
   - Maintained signature glassmorphic aesthetic throughout new components
 
-### Fixed
+### Fixed 1.0.3
 
 - Fixed missing HTML container structure for collapsible sections
   (`#collapsible-sections-container`)
 - Fixed explanation modal closing immediately after opening (race condition in
   event propagation)
 
-### Technical
+### Technical 1.0.3
 
 - New file: `src/frontend/components/control-toolbar.ts` (183 lines)
   - ControlToolbar class with mount/unmount, show/hide, and button state
@@ -99,7 +99,7 @@ and this project adheres to
 
 ## [1.0.2] - 2025-12-22
 
-### Added
+### Added 1.0.2
 
 - **Move Reasoning Explanations (CS-002)**
   - Added interactive explanation system for Training Mode move highlights
@@ -114,7 +114,7 @@ and this project adheres to
     and concepts
   - Explanation modal with glassmorphic styling matching app aesthetic
 
-### Technical
+### Technical 1.0.2
 
 - Modified: `src/shared/explanation-generator.ts` (507 lines, +320 new)
   - Added tactical pattern detection functions: detectsPin, detectsFork,
@@ -136,7 +136,7 @@ and this project adheres to
 
 ## [1.0.1] - 2025-12-22
 
-### Added
+### Added 1.0.1
 
 - **Move Notation with English Descriptions (CS-001)**
   - Added dual-format move display in Best Moves panel showing both Standard
@@ -149,7 +149,7 @@ and this project adheres to
   - Visual hierarchy maintained with notation as primary element and description
     as secondary
 
-### Technical
+### Technical 1.0.1
 
 - New file: `src/shared/notation-parser.ts` (194 lines)
 - New file: `tests/unit/notation-parser.test.ts` (201 lines)
@@ -159,11 +159,11 @@ and this project adheres to
 
 ## [1.0.0] - 2025-12-10
 
-### Release
+### Release 1.0.0
 
 This is the first stable release of Chess-Sensei.
 
-### Added
+### Added 1.0.0
 
 - **Code Optimization**
   - Centralized helper modules for error handling and responses
@@ -181,7 +181,7 @@ This is the first stable release of Chess-Sensei.
   - Consolidated transition variables
   - Cleaned up duplicate logging statements
 
-### Changed
+### Changed 1.0.0
 
 - Version updated to v1.0.0 across all configuration files
 - Documentation updated to reflect stable release status
@@ -189,7 +189,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.9.0] - 2025-12-08
 
-### Added
+### Added 0.9.0
 
 - **Polish & Optimization**
   - Enhanced UI animations with soft haptic-feel transitions
@@ -201,14 +201,14 @@ This is the first stable release of Chess-Sensei.
   - Responsive design for tablet, mobile, and large screens
   - Comprehensive test suite (114 tests)
 
-### Fixed
+### Fixed 0.9.0
 
 - In-memory storage fallback for data persistence issues
 - Various UI and stability improvements
 
 ## [0.8.0] - 2025-12-06
 
-### Added
+### Added 0.8.0
 
 - **Import/Export & Data Management** (Phase 8)
   - Export single game as PGN or JSON format
@@ -231,7 +231,7 @@ This is the first stable release of Chess-Sensei.
 - IPC methods for all export/import/backup operations
 - User documentation: `documents/data-management.md`
 
-### Technical
+### Technical 0.8.0
 
 - ExportImportManager class for export/import operations
 - BackupSettings and BackupInfo types for backup configuration
@@ -241,7 +241,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.7.0] - 2025-12-06
 
-### Added
+### Added 0.7.0
 
 - **Sandbox Mode** (Phase 7)
   - Board editor with drag-and-drop piece placement
@@ -256,7 +256,7 @@ This is the first stable release of Chess-Sensei.
   - Evaluation bar and score display
 - User documentation: `documents/sandbox-mode.md`
 
-### Technical
+### Technical 0.7.0
 
 - New file: `src/frontend/sandbox-mode.ts`
 - SandboxModeManager and SandboxUIManager classes
@@ -265,7 +265,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.6.1] - 2025-12-06
 
-### Fixed
+### Fixed 0.6.1
 
 - **Progress Dashboard not appearing** - Dashboard overlay had same z-index as
   mode selection screen, causing it to render behind. Increased z-index from
@@ -274,7 +274,7 @@ This is the first stable release of Chess-Sensei.
   clipped. Implemented dynamic SVG viewBox calculation that automatically
   adjusts to fit all labels regardless of content length.
 
-### Changed
+### Changed 0.6.1
 
 - Radar chart now uses origin-centered coordinates with dynamic bounds
   calculation
@@ -283,7 +283,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.6.0] - 2025-12-06
 
-### Added
+### Added 0.6.0
 
 - **Player Progress Dashboard** (Phase 6)
   - Composite score radar chart displaying 9 skill dimensions
@@ -299,14 +299,14 @@ This is the first stable release of Chess-Sensei.
 - Backend achievement storage with atomic file writes
 - User documentation: `documents/progress-dashboard.md`
 
-### Changed
+### Changed 0.6.0
 
 - Dashboard button styling to match mode selection theme
 - CSS organization for dashboard-specific overrides
 
 ## [0.5.2] - 2025-12-05
 
-### Fixed
+### Fixed 0.5.2
 
 - **Game mode switching bug**: Fixed issue where switching from Training Mode to
   Exam Mode (or vice versa) after completing a game would show the previous
@@ -316,7 +316,7 @@ This is the first stable release of Chess-Sensei.
 - **Consolidated new game flow**: Unified all "New Game" paths to use a single
   `showModeSelection()` function for consistent hard reset behavior
 
-### Changed
+### Changed 0.5.2
 
 - Removed redundant `startNewGame()` and `handleNewGameControl()` functions in
   favor of centralized `showModeSelection()` reset logic
@@ -325,7 +325,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.5.1] - 2025-12-05
 
-### Added
+### Added 0.5.1
 
 - **Post-Game Analysis UI** (Phase 5)
   - Three-tab analysis interface (Review/Summary/Analytics)
@@ -352,7 +352,7 @@ This is the first stable release of Chess-Sensei.
   - Post-game analysis guide (`documents/post-game-analysis.md`)
   - Debug logging documentation in TASKS.md
 
-### Technical
+### Technical 0.5.1
 
 - New files: `src/frontend/analysis-ui.ts`, `src/frontend/frontend-logger.ts`
 - New files: `src/backend/file-logger.ts`, `src/shared/logger-types.ts`
@@ -361,19 +361,19 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.5.0] - 2025-12-05
 
-### Added
+### Added 0.5.0
 
 - **Post-Game Analysis Pipeline** (Phase 4 continuation)
   - Batch analysis infrastructure for game review
   - Integration preparation for Analysis UI
 
-### Technical
+### Technical 0.5.0
 
 - Intermediate release for Phase 5 development base
 
 ## [0.4.0] - 2025-12-04
 
-### Added
+### Added 0.4.0
 
 - **Exam Mode**
   - Play without guidance to test your skills
@@ -412,7 +412,7 @@ This is the first stable release of Chess-Sensei.
 - **Documentation**
   - Exam Mode metrics guide (`documents/exam-mode-metrics.md`)
 
-### Technical
+### Technical 0.4.0
 
 - New files: `src/backend/exam-mode.ts`, `src/backend/analysis-pipeline.ts`
 - New files: `src/backend/metrics-calculator.ts`, `src/backend/data-storage.ts`
@@ -421,32 +421,32 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.3.2] - 2025-12-04
 
-### Fixed
+### Fixed 0.3.2
 
 - Flip Board button causing board grid corruption (9 columns instead of 8)
 - Piece position shifts when board was flipped
 - Checkerboard pattern replaced by solid color columns when flipped
 
-### Changed
+### Changed 0.3.2
 
 - Updated documentation build references to point to documents/building.md
 
 ## [0.3.1] - 2025-12-04
 
-### Fixed
+### Fixed 0.3.1
 
 - Best Moves panel visibility states not toggling correctly
 - Stockfish engine loading in compiled executables
 - Windows build configuration and distribution path format
 
-### Changed
+### Changed 0.3.1
 
 - Synchronized all version numbers across project files
 - Updated documentation to reflect v0.3.1
 
 ## [0.3.0] - 2025-12-04
 
-### Added
+### Added 0.3.0
 
 - **AI Opponent System**
   - 5 unique bot personalities: Sensei, Student, Club Player, Tactician,
@@ -478,12 +478,12 @@ This is the first stable release of Chess-Sensei.
 - **Documentation**
   - Training Mode user guide (`documents/training-mode-guide.md`)
 
-### Changed
+### Changed 0.3.0
 
 - Board color scheme updated from warm beige/brown to cool gray/slate
 - Right panel reorganized to accommodate guidance system
 
-### Technical
+### Technical 0.3.0
 
 - New files: `src/frontend/training-mode.ts`, `src/frontend/move-guidance.ts`
 - New shared types: `src/shared/bot-types.ts`, `src/shared/game-state.ts`
@@ -492,7 +492,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.2.0] - 2025-12-04
 
-### Added
+### Added 0.2.0
 
 - **Chessboard UI**
   - Responsive 8x8 grid layout with proper aspect ratio
@@ -526,7 +526,7 @@ This is the first stable release of Chess-Sensei.
   - FAQ (`documents/faq.md`)
   - Troubleshooting guide (`documents/troubleshooting.md`)
 
-### Technical
+### Technical 0.2.0
 
 - Frontend built with Vite and vanilla TypeScript
 - Glassmorphism styling for right panel
@@ -535,7 +535,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.1.0] - 2025-12-04
 
-### Added
+### Added 0.1.0
 
 - **Stockfish WASM Integration**
   - Stockfish v17.1 NNUE Lite (single-threaded)
@@ -563,7 +563,7 @@ This is the first stable release of Chess-Sensei.
   - Engine integration guide (`documents/engine-integration.md`)
   - Build instructions (`documents/building.md`)
 
-### Technical
+### Technical 0.1.0
 
 - Buntralino framework (Bun + Neutralino.js)
 - TypeScript with strict mode
@@ -572,7 +572,7 @@ This is the first stable release of Chess-Sensei.
 
 ## [0.0.0] - 2025-12-04
 
-### Added
+### Added 0.0.0
 
 - **Project Foundation**
   - Repository structure established

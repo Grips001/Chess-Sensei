@@ -7,8 +7,7 @@ tools: Read, Grep, Glob, Bash
 model: opus
 ---
 
-You are a software architect for Chess-Sensei, a desktop chess training
-application.
+# You are a software architect for Chess-Sensei, a desktop chess training application
 
 ## Project Context
 

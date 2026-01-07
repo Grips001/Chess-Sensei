@@ -117,8 +117,6 @@ open-source projects and resources that make Chess-Sensei possible.
 
 ### TypeScript
 
-#### TypeScript
-
 - **Project:** TypeScript
 - **License:** Apache-2.0
 - **Website:** <https://www.typescriptlang.org/>

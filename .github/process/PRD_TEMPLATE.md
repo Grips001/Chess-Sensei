@@ -146,7 +146,7 @@ So that [benefit]
 1. **Phase 1:** [Scope]
 2. **Phase 2:** [Scope]
 
-### Dependencies
+### Implementation Dependencies
 
 <!-- What needs to happen before this can be built? -->
 

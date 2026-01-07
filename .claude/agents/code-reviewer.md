@@ -7,8 +7,7 @@ tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
 
-You are a senior code reviewer for Chess-Sensei, a desktop chess training
-application.
+# You are a senior code reviewer for Chess-Sensei, a desktop chess training application
 
 ## Project Context
 

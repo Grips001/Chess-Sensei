@@ -108,7 +108,7 @@ Note: Platform-specific builds run Vite first, then package for distribution.
 See [documents/building.md](documents/building.md) for detailed build
 instructions and troubleshooting.
 
-### Code Quality
+### Running Code Quality Checks
 
 ```bash
 # Run all linters
@@ -120,6 +120,26 @@ bun run lint:fix
 # Format code
 bun run format
 ```
+
+#### Configuration Files
+
+Linter and formatter configurations are organized in the `.config/` directory for a
+cleaner project root:
+
+- `.config/.prettierrc.json` - Prettier code formatting rules
+- `.config/.stylelintrc.json` - CSS linting configuration
+- `.config/.markdownlint-cli2.jsonc` - Markdown linting config
+- `.config/.markdownlint.json` - Markdown rules (used by markdownlint-cli2)
+- `.config/.prettierignore` - Prettier exclusion patterns
+- `.config/.markdownlintignore` - Markdown linting exclusions
+
+Tool-required configs remain in project root (cannot be moved):
+
+- `eslint.config.mjs` - ESLint v9+ flat config (required in root)
+- `vite.config.mts` - Vite build configuration (required in root)
+- `neutralino.config.json` - Neutralino CLI settings (required in root)
+- `tsconfig.json` - TypeScript compiler options (required in root)
+- `bun.lockb` - Bun package lock file
 
 ## Project Status
 

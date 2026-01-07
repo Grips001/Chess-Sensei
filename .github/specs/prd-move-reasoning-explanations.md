@@ -265,7 +265,7 @@ So that I can connect concepts to specific positions easily
    - Add keyboard navigation
    - Performance optimization
 
-### Dependencies
+### Implementation Dependencies
 
 - Completion of move notation system (if implementing
   prd-move-notation-english-descriptions.md first)

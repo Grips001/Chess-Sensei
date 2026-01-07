@@ -16,11 +16,11 @@
     "verify": "bun run typecheck && bun run lint && bun run test",
     "lint": "bun run lint:ts && bun run lint:css && bun run lint:md && bun run lint:format",
     "lint:ts": "eslint . --ext .ts,.tsx,.mts,.js,.mjs",
-    "lint:css": "stylelint \"src/**/*.css\" --ignore-path .gitignore",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
-    "lint:format": "prettier --check \"**/*.{ts,tsx,mts,js,mjs,json,md,html,css}\"",
+    "lint:css": "stylelint \"src/**/*.css\" --config .config/.stylelintrc.json --ignore-path .gitignore",
+    "lint:md": "markdownlint-cli2 --config .config/.markdownlint-cli2.jsonc \"**/*.md\" \"#node_modules\"",
+    "lint:format": "prettier --config .config/.prettierrc.json --ignore-path .config/.prettierignore --check \"**/*.{ts,tsx,mts,js,mjs,json,md,html,css}\"",
     "lint:fix": "bun run lint:ts --fix && bun run lint:css --fix && bun run lint:format --write && bun run lint:md --fix",
-    "format": "prettier --write \"**/*.{ts,tsx,mts,js,mjs,json,md,html,css}\""
+    "format": "prettier --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write \"**/*.{ts,tsx,mts,js,mjs,json,md,html,css}\""
   },
   "keywords": [
     "chess",
