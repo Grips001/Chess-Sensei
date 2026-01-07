@@ -123,8 +123,8 @@ bun run format
 
 #### Configuration Files
 
-Linter and formatter configurations are organized in the `.config/` directory for a
-cleaner project root:
+Linter and formatter configurations are organized in the `.config/` directory
+for a cleaner project root:
 
 - `.config/.prettierrc.json` - Prettier code formatting rules
 - `.config/.stylelintrc.json` - CSS linting configuration

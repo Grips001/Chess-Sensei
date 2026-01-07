@@ -4,7 +4,11 @@ node_modules/
 # Build outputs
 dist/
 app/
+build/
 .neutralino/
+
+# Local development
+localonly/
 
 # Test results
 test-results/
