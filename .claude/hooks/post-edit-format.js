@@ -60,9 +60,10 @@ process.stdin.on('end', () => {
     // Run Prettier on the file with explicit config path
     // Using the prettier binary from node_modules since we already have it installed
     try {
-      const prettierCmd = process.platform === 'win32'
-        ? './node_modules/.bin/prettier.exe'
-        : './node_modules/.bin/prettier';
+      const prettierCmd =
+        process.platform === 'win32'
+          ? './node_modules/.bin/prettier.exe'
+          : './node_modules/.bin/prettier';
 
       execSync(
         `"${prettierCmd}" --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
