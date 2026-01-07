@@ -60,7 +60,7 @@ process.stdin.on('end', () => {
     // Run Prettier on the file with explicit config path
     try {
       execSync(
-        `npx prettier --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
+        `bun x prettier --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
         {
           encoding: 'utf8',
           timeout: 10000,
