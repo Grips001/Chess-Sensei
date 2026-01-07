@@ -61,15 +61,16 @@ process.stdin.on('end', () => {
     // Using the prettier binary from node_modules since we already have it installed
     try {
       const prettierCmd = process.platform === 'win32'
-        ? '.\\node_modules\\.bin\\prettier.cmd'
+        ? './node_modules/.bin/prettier.exe'
         : './node_modules/.bin/prettier';
 
       execSync(
-        `${prettierCmd} --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
+        `"${prettierCmd}" --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
         {
           encoding: 'utf8',
           timeout: 10000,
           stdio: 'pipe',
+          shell: process.platform === 'win32' ? 'cmd.exe' : '/bin/bash',
         }
       );
     } catch {
