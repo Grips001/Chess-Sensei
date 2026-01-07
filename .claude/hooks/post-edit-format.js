@@ -58,9 +58,14 @@ process.stdin.on('end', () => {
     }
 
     // Run Prettier on the file with explicit config path
+    // Using the prettier binary from node_modules since we already have it installed
     try {
+      const prettierCmd = process.platform === 'win32'
+        ? '.\\node_modules\\.bin\\prettier.cmd'
+        : './node_modules/.bin/prettier';
+
       execSync(
-        `bun x prettier --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
+        `${prettierCmd} --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
         {
           encoding: 'utf8',
           timeout: 10000,
