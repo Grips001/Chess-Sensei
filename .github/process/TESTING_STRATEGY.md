@@ -4,14 +4,14 @@ This document describes the testing requirements and standards for Chess-Sensei.
 
 ## Test Stack
 
-| Tool         | Purpose                    | Location             |
-| ------------ | -------------------------- | -------------------- |
-| Bun Test     | Unit and integration tests | `tests/`             |
-| TypeScript   | Type checking              | `tsconfig`           |
-| ESLint       | Code quality               | `eslint.config.mjs`  |
-| Stylelint    | CSS quality                | `.stylelintrc.json`  |
-| Markdownlint | Documentation quality      | `.markdownlint.json` |
-| Prettier     | Code formatting            | `.prettierrc.json`   |
+| Tool         | Purpose                    | Location                           |
+| ------------ | -------------------------- | ---------------------------------- |
+| Bun Test     | Unit and integration tests | `tests/`                           |
+| TypeScript   | Type checking              | `tsconfig.json`                    |
+| ESLint       | Code quality               | `eslint.config.mjs`                |
+| Stylelint    | CSS quality                | `.config/.stylelintrc.json`        |
+| Markdownlint | Documentation quality      | `.config/.markdownlint-cli2.jsonc` |
+| Prettier     | Code formatting            | `.config/.prettierrc.json`         |
 
 ## Test Commands
 

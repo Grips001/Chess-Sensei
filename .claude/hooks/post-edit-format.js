@@ -57,13 +57,16 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
 
-    // Run Prettier on the file
+    // Run Prettier on the file with explicit config path
     try {
-      execSync(`npx prettier --write "${filePath}"`, {
-        encoding: 'utf8',
-        timeout: 10000,
-        stdio: 'pipe',
-      });
+      execSync(
+        `npx prettier --config .config/.prettierrc.json --ignore-path .config/.prettierignore --write "${filePath}"`,
+        {
+          encoding: 'utf8',
+          timeout: 10000,
+          stdio: 'pipe',
+        }
+      );
     } catch {
       // Prettier failed - don't block, just continue
       // The lint step will catch any issues
