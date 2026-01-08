@@ -44,9 +44,25 @@ This directory contains all user and technical documentation for Chess-Sensei.
 
 ### Technical Documentation
 
+#### For Users
+
 - **[Building Guide](building.md)** - Build Chess-Sensei from source
 - **[Engine Integration](engine-integration.md)** - Chess engine technical
   details
+
+#### For Developers
+
+- **[API Reference](api-reference.md)** - Complete IPC method reference (45 methods)
+- **[Data Model](data-model.md)** - Data schemas, storage, and persistence
+- **[Security Model](security.md)** - Threat model, validation, and privacy
+- **[Operations Guide](operations.md)** - Logging, debugging, and runbooks
+
+#### Architecture Documentation
+
+- **[Architecture Overview](../.github/process/ARCHITECTURE.md)** - System
+  architecture and diagrams
+- For comprehensive architectural details, see the process documentation in
+  `.github/process/`
 
 ## Related Resources
 

@@ -354,11 +354,36 @@ Chess-Sensei/
 
 ## Performance Characteristics
 
-| Operation       | Typical Time | Notes                  |
-| --------------- | ------------ | ---------------------- |
-| App startup     | ~2s          | Engine init is slowest |
-| Engine analysis | 100-500ms    | Depth-dependent        |
-| Save game       | <50ms        | Atomic write           |
-| Load profile    | <100ms       | JSON parse             |
-| Board render    | <16ms        | 60fps target           |
-| Guidance update | ~200ms       | Engine + UI update     |
+| Operation             | Typical Time | Notes                                   |
+| --------------------- | ------------ | --------------------------------------- |
+| App startup           | ~2s          | Engine init is slowest                  |
+| Engine analysis       | 100-500ms    | Depth-dependent                         |
+| Save game             | <50ms        | Atomic write                            |
+| Load profile          | <100ms       | JSON parse                              |
+| Board render          | <16ms        | 60fps target                            |
+| Guidance update       | ~200ms       | Engine + UI update                      |
+| Full game analysis    | 5-10s        | 40-move game, parallelized              |
+
+## Component Statistics
+
+- **Total Components:** 170
+- **Frontend Modules:** 45
+- **Backend Modules:** 20
+- **Engine Modules:** 5
+- **Shared Modules:** 15
+- **IPC Methods:** 45
+- **Build Scripts:** 3
+- **Configuration Files:** 14
+
+## Additional Documentation
+
+For comprehensive architectural details, see:
+
+- **[API Reference](../../documents/api-reference.md)** - All 45 IPC methods with
+  parameters and examples
+- **[Data Model](../../documents/data-model.md)** - Complete schemas for Game
+  Record, Analysis, Profile, and Achievement
+- **[Security Model](../../documents/security.md)** - Threat model, input
+  validation, and privacy principles
+- **[Operations Guide](../../documents/operations.md)** - Logging, debugging,
+  health checks, and operational runbooks

@@ -83,9 +83,18 @@ Complete documentation is available in the [`documents/`](documents/) directory:
 
 ### Technical Documentation
 
+#### For Users
+
 - [**Building Guide**](documents/building.md) --- Build from source
 - [**Engine Integration**](documents/engine-integration.md) --- Chess engine
   technical details
+
+#### For Developers
+
+- [**API Reference**](documents/api-reference.md) --- Complete IPC method reference
+- [**Data Model**](documents/data-model.md) --- Data schemas and storage
+- [**Security Model**](documents/security.md) --- Threat model and validation
+- [**Operations Guide**](documents/operations.md) --- Logging and debugging
 
 ## Project Status
 
