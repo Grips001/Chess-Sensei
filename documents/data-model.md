@@ -1,7 +1,6 @@
 # Data Model and Storage
 
-**Version:** 1.1.0
-**Last Updated:** 2026-01-08
+**Version:** 1.1.0 **Last Updated:** 2026-01-08
 
 This document describes Chess-Sensei's data structures, storage implementation,
 and persistence mechanisms.
@@ -53,12 +52,12 @@ characteristics:
 
 Chess-Sensei stores all user data in platform-specific directories:
 
-| Platform | Path                                                  |
-| -------- | ----------------------------------------------------- |
-| Windows  | `%APPDATA%\Chess-Sensei\`                             |
+| Platform | Path                                                       |
+| -------- | ---------------------------------------------------------- |
+| Windows  | `%APPDATA%\Chess-Sensei\`                                  |
 |          | Example: `C:\Users\YourName\AppData\Roaming\Chess-Sensei\` |
-| macOS    | `~/Library/Application Support/Chess-Sensei/`         |
-| Linux    | `~/.config/Chess-Sensei/`                             |
+| macOS    | `~/Library/Application Support/Chess-Sensei/`              |
+| Linux    | `~/.config/Chess-Sensei/`                                  |
 
 ### Getting Storage Path
 
@@ -79,28 +78,28 @@ Complete record of a finished game.
 
 ```typescript
 interface GameRecord {
-  gameId: string;              // Unique identifier (UUID)
+  gameId: string; // Unique identifier (UUID)
   metadata: {
-    date: string;              // ISO 8601 timestamp
+    date: string; // ISO 8601 timestamp
     mode: 'training' | 'exam' | 'sandbox';
     result: '1-0' | '0-1' | '1/2-1/2';
     termination: 'checkmate' | 'resignation' | 'draw' | 'stalemate';
     playerColor: 'white' | 'black';
-    duration: number;          // Game duration in seconds
-    totalMoves: number;        // Total half-moves
+    duration: number; // Game duration in seconds
+    totalMoves: number; // Total half-moves
     botConfig?: {
       personality: string;
       elo: number;
       mode: string;
     };
-    opening?: string;          // Opening name (e.g., "Sicilian Defense")
+    opening?: string; // Opening name (e.g., "Sicilian Defense")
   };
   moves: Array<{
-    moveNumber: number;        // Full move number (1, 2, 3, ...)
+    moveNumber: number; // Full move number (1, 2, 3, ...)
     white?: {
-      san: string;             // Standard Algebraic Notation (e.g., "e4")
-      uci: string;             // UCI notation (e.g., "e2e4")
-      fen: string;             // Position after move
+      san: string; // Standard Algebraic Notation (e.g., "e4")
+      uci: string; // UCI notation (e.g., "e2e4")
+      fen: string; // Position after move
     };
     black?: {
       san: string;
@@ -108,7 +107,7 @@ interface GameRecord {
       fen: string;
     };
   }>;
-  pgn: string;                 // Complete PGN notation
+  pgn: string; // Complete PGN notation
 }
 ```
 
@@ -159,18 +158,18 @@ Detailed analysis of each move in a game.
 
 ```typescript
 interface GameAnalysis {
-  gameId: string;              // Links to GameRecord
-  analysisDate: string;        // ISO 8601 timestamp
+  gameId: string; // Links to GameRecord
+  analysisDate: string; // ISO 8601 timestamp
   moves: Array<{
     moveNumber: number;
     san: string;
     uci: string;
     fen: string;
     evaluationBefore: {
-      score: number;           // Centipawns (positive = white advantage)
+      score: number; // Centipawns (positive = white advantage)
       type: 'cp' | 'mate';
-      mate?: number;           // Moves to mate (if mate found)
-      bestMove: string;        // UCI best move
+      mate?: number; // Moves to mate (if mate found)
+      bestMove: string; // UCI best move
     };
     evaluationAfter: {
       score: number;
@@ -178,12 +177,18 @@ interface GameAnalysis {
       mate?: number;
       bestMove: string;
     };
-    cpl: number;               // Centipawn Loss (quality metric)
-    classification: 'brilliant' | 'good' | 'ok' | 'inaccuracy' | 'mistake' | 'blunder';
+    cpl: number; // Centipawn Loss (quality metric)
+    classification:
+      | 'brilliant'
+      | 'good'
+      | 'ok'
+      | 'inaccuracy'
+      | 'mistake'
+      | 'blunder';
     alternatives: Array<{
-      move: string;            // UCI move
+      move: string; // UCI move
       score: number;
-      pv: string[];            // Principal variation
+      pv: string[]; // Principal variation
     }>;
   }>;
   summary: {
@@ -200,14 +205,14 @@ interface GameAnalysis {
 
 **Move Classifications:**
 
-| Classification | CPL Range    | Description                                  |
-| -------------- | ------------ | -------------------------------------------- |
-| Brilliant      | 0 (special)  | Exceptional move, often sacrificial         |
-| Good           | 0-10         | Strong move, minimal loss                   |
-| OK             | 10-25        | Reasonable move                             |
-| Inaccuracy     | 25-100       | Suboptimal but not critical                 |
-| Mistake        | 100-300      | Significant error                           |
-| Blunder        | 300+         | Severe error, potentially game-losing       |
+| Classification | CPL Range   | Description                           |
+| -------------- | ----------- | ------------------------------------- |
+| Brilliant      | 0 (special) | Exceptional move, often sacrificial   |
+| Good           | 0-10        | Strong move, minimal loss             |
+| OK             | 10-25       | Reasonable move                       |
+| Inaccuracy     | 25-100      | Suboptimal but not critical           |
+| Mistake        | 100-300     | Significant error                     |
+| Blunder        | 300+        | Severe error, potentially game-losing |
 
 **Example:**
 
@@ -256,42 +261,42 @@ Player statistics and skill metrics.
 
 ```typescript
 interface PlayerProfile {
-  playerId: string;            // Unique player identifier
-  createdAt: string;           // ISO 8601 timestamp
-  lastUpdated: string;         // ISO 8601 timestamp
+  playerId: string; // Unique player identifier
+  createdAt: string; // ISO 8601 timestamp
+  lastUpdated: string; // ISO 8601 timestamp
   totalGames: number;
   wins: number;
   losses: number;
   draws: number;
   metrics: {
-    tacticalVision: number;          // 0-100
+    tacticalVision: number; // 0-100
     positionalUnderstanding: number; // 0-100
-    endgameTechnique: number;        // 0-100
-    openingPreparation: number;      // 0-100
-    timeManagement: number;          // 0-100
-    calculationDepth: number;        // 0-100
-    decisionAccuracy: number;        // 0-100
-    blunderAvoidance: number;        // 0-100
-    consistency: number;             // 0-100
+    endgameTechnique: number; // 0-100
+    openingPreparation: number; // 0-100
+    timeManagement: number; // 0-100
+    calculationDepth: number; // 0-100
+    decisionAccuracy: number; // 0-100
+    blunderAvoidance: number; // 0-100
+    consistency: number; // 0-100
   };
-  recentGames: string[];       // Array of gameIds (most recent first)
-  achievements: string[];      // Array of unlocked achievement IDs
+  recentGames: string[]; // Array of gameIds (most recent first)
+  achievements: string[]; // Array of unlocked achievement IDs
 }
 ```
 
 **Metrics Explanation:**
 
-| Metric                      | Description                                                  |
-| --------------------------- | ------------------------------------------------------------ |
-| Tactical Vision             | Ability to spot tactical opportunities                       |
-| Positional Understanding    | Strategic play and long-term planning                        |
-| Endgame Technique           | Performance in endgame positions                             |
-| Opening Preparation         | Knowledge and accuracy in opening phase                      |
-| Time Management             | Efficiency of move selection                                 |
-| Calculation Depth           | Ability to calculate long variations                         |
-| Decision Accuracy           | Overall quality of move choices                              |
-| Blunder Avoidance           | Consistency in avoiding major errors                         |
-| Consistency                 | Stability of performance across games                        |
+| Metric                   | Description                             |
+| ------------------------ | --------------------------------------- |
+| Tactical Vision          | Ability to spot tactical opportunities  |
+| Positional Understanding | Strategic play and long-term planning   |
+| Endgame Technique        | Performance in endgame positions        |
+| Opening Preparation      | Knowledge and accuracy in opening phase |
+| Time Management          | Efficiency of move selection            |
+| Calculation Depth        | Ability to calculate long variations    |
+| Decision Accuracy        | Overall quality of move choices         |
+| Blunder Avoidance        | Consistency in avoiding major errors    |
+| Consistency              | Stability of performance across games   |
 
 **Example:**
 
@@ -319,11 +324,7 @@ interface PlayerProfile {
     "550e8400-e29b-41d4-a716-446655440000",
     "660e8400-e29b-41d4-a716-446655440001"
   ],
-  "achievements": [
-    "first-win",
-    "tactical-master",
-    "endgame-expert"
-  ]
+  "achievements": ["first-win", "tactical-master", "endgame-expert"]
 }
 ```
 
@@ -335,14 +336,14 @@ Achievement definition and unlock status.
 
 ```typescript
 interface Achievement {
-  id: string;                  // Unique achievement ID
-  name: string;                // Display name
-  description: string;         // Achievement description
-  icon: string;                // Icon identifier
-  unlockedAt?: string;         // ISO 8601 timestamp (if unlocked)
+  id: string; // Unique achievement ID
+  name: string; // Display name
+  description: string; // Achievement description
+  icon: string; // Icon identifier
+  unlockedAt?: string; // ISO 8601 timestamp (if unlocked)
   progress?: {
-    current: number;           // Current progress
-    target: number;            // Target for unlock
+    current: number; // Current progress
+    target: number; // Target for unlock
   };
 }
 ```
@@ -399,6 +400,7 @@ async function atomicWrite(path: string, data: any): Promise<void> {
 ### File Format
 
 All JSON files use:
+
 - **Encoding:** UTF-8
 - **Indentation:** 2 spaces
 - **Line Endings:** LF (Unix-style)
@@ -419,6 +421,7 @@ await ipcClient.call('chess:initializeStorage');
 ### Automatic Backups
 
 Chess-Sensei can automatically create backups based on:
+
 - Game count threshold (e.g., every 10 games)
 - Time interval (e.g., daily, weekly)
 - Manual trigger
@@ -426,6 +429,7 @@ Chess-Sensei can automatically create backups based on:
 ### Backup Format
 
 Backups are ZIP archives containing:
+
 - All game records (`games/*.json`)
 - Player profile (`profile.json`)
 - Achievements (`achievements.json`)
@@ -452,7 +456,9 @@ await ipcClient.call('chess:exportBackup');
 const { backups } = await ipcClient.call('chess:listBackups');
 
 // Verify backup
-await ipcClient.call('chess:verifyBackup', { backupPath: 'path/to/backup.zip' });
+await ipcClient.call('chess:verifyBackup', {
+  backupPath: 'path/to/backup.zip',
+});
 ```
 
 ### Backup Retention
@@ -472,7 +478,9 @@ Each data file includes a version field for migration tracking:
 ```json
 {
   "dataVersion": "1.1.0",
-  "data": { /* actual data */ }
+  "data": {
+    /* actual data */
+  }
 }
 ```
 
@@ -481,6 +489,7 @@ Each data file includes a version field for migration tracking:
 **Current Version:** 1.1.0 (no migrations yet, first stable release)
 
 **Future migrations will:**
+
 1. Detect data version on load
 2. Apply migrations sequentially (1.0.0 → 1.1.0 → 1.2.0)
 3. Create backup before migration
@@ -507,24 +516,24 @@ async function migrateFrom_1_0_to_1_1(data: any): Promise<any> {
 
 ### Operation Times
 
-| Operation           | Typical Time | Notes                                   |
-| ------------------- | ------------ | --------------------------------------- |
-| Save game           | <50ms        | Atomic write with verification          |
-| Load game           | <100ms       | JSON parse                              |
-| Load profile        | <100ms       | JSON parse                              |
-| Save profile        | <50ms        | Atomic write                            |
-| Create backup       | 1-5s         | ZIP compression, size-dependent         |
-| Export PGN (single) | <100ms       | String formatting                       |
+| Operation           | Typical Time | Notes                                      |
+| ------------------- | ------------ | ------------------------------------------ |
+| Save game           | <50ms        | Atomic write with verification             |
+| Load game           | <100ms       | JSON parse                                 |
+| Load profile        | <100ms       | JSON parse                                 |
+| Save profile        | <50ms        | Atomic write                               |
+| Create backup       | 1-5s         | ZIP compression, size-dependent            |
+| Export PGN (single) | <100ms       | String formatting                          |
 | Export PGN (all)    | 500ms-2s     | Multiple file writes, game count dependent |
 
 ### Storage Size Estimates
 
-| Data Type          | Per Item Size | Notes                                |
-| ------------------ | ------------- | ------------------------------------ |
-| Game record        | ~5-15 KB      | Depends on game length               |
-| Game analysis      | ~20-50 KB     | Depends on move count and alternatives |
-| Player profile     | ~2-5 KB       | Fixed size                           |
-| Backup (25 games)  | ~500 KB-1 MB  | Compressed ZIP                       |
+| Data Type         | Per Item Size | Notes                                  |
+| ----------------- | ------------- | -------------------------------------- |
+| Game record       | ~5-15 KB      | Depends on game length                 |
+| Game analysis     | ~20-50 KB     | Depends on move count and alternatives |
+| Player profile    | ~2-5 KB       | Fixed size                             |
+| Backup (25 games) | ~500 KB-1 MB  | Compressed ZIP                         |
 
 ### Disk Space Requirements
 
@@ -557,6 +566,7 @@ Standard Portable Game Notation format:
 ### JSON Export
 
 Complete data export including:
+
 - All game records
 - All analysis data
 - Player profile
@@ -595,6 +605,7 @@ Complete data export including:
 ### User Data Control
 
 Users can:
+
 - Export all data at any time
 - Import data from backups
 - Delete all data (delete storage directory)
@@ -609,6 +620,7 @@ Users can:
 **Symptoms:** Cannot save games or profiles
 
 **Solution:**
+
 1. Verify disk space available (100+ MB recommended)
 2. Check directory permissions
 3. Call `chess:initializeStorage` manually
@@ -619,6 +631,7 @@ Users can:
 **Symptoms:** Cannot load game or profile
 
 **Solution:**
+
 1. Check for `.tmp` files in storage directory
 2. Restore from recent backup
 3. Delete corrupted file and recreate
@@ -628,6 +641,7 @@ Users can:
 **Symptoms:** Backup operation returns error
 
 **Solution:**
+
 1. Verify disk space for backup size
 2. Check exports directory permissions
 3. Verify source files are readable
@@ -643,6 +657,5 @@ Users can:
 
 ---
 
-**Storage Version:** 1.1.0
-**Format:** JSON with atomic writes
-**Backup:** ZIP archives with manifest
+**Storage Version:** 1.1.0 **Format:** JSON with atomic writes **Backup:** ZIP
+archives with manifest

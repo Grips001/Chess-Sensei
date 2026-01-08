@@ -1,7 +1,6 @@
 # Operations and Debugging Guide
 
-**Version:** 1.1.0
-**Last Updated:** 2026-01-08
+**Version:** 1.1.0 **Last Updated:** 2026-01-08
 
 This document provides operational procedures, debugging techniques, and
 troubleshooting runbooks for Chess-Sensei developers and maintainers.
@@ -25,17 +24,18 @@ troubleshooting runbooks for Chess-Sensei developers and maintainers.
 ### Overview
 
 Chess-Sensei uses a two-tier logging system:
+
 - **Frontend logs** - Sent to backend via IPC
 - **Backend logs** - Written to file
 
 ### Log Levels
 
-| Level   | Purpose                      | Example Use Case                |
-| ------- | ---------------------------- | ------------------------------- |
-| `DEBUG` | Detailed diagnostic info     | IPC message traces              |
-| `INFO`  | General informational        | Engine initialized, game saved  |
-| `WARN`  | Warning conditions           | Deprecated API usage            |
-| `ERROR` | Error conditions             | Failed file write, engine crash |
+| Level   | Purpose                  | Example Use Case                |
+| ------- | ------------------------ | ------------------------------- |
+| `DEBUG` | Detailed diagnostic info | IPC message traces              |
+| `INFO`  | General informational    | Engine initialized, game saved  |
+| `WARN`  | Warning conditions       | Deprecated API usage            |
+| `ERROR` | Error conditions         | Failed file write, engine crash |
 
 ### Frontend Logging
 
@@ -64,7 +64,7 @@ export async function log(
     level,
     module,
     message,
-    data
+    data,
   });
 }
 ```
@@ -74,6 +74,7 @@ export async function log(
 **Location:** `src/backend/file-logger.ts`
 
 **Log Files:**
+
 - **Path:** `{executableDir}/logs/chess-sensei-{date}.log`
 - **Format:** `[2026-01-08 10:30:45.123] [INFO] [Module] Message { data }`
 - **Rotation:** Not yet implemented (manual cleanup)
@@ -100,6 +101,7 @@ Chess-Sensei.exe --dev
 ```
 
 **Dev mode features:**
+
 - Console output in addition to file
 - Neutralino DevTools enabled
 - More detailed IPC traces
@@ -214,7 +216,7 @@ export async function myIPCHandler(params: any) {
     // Return error response
     return createErrorResponse('OPERATION_FAILED', error.message, {
       operation: 'myOperation',
-      params
+      params,
     });
   }
 }
@@ -229,11 +231,13 @@ export async function myIPCHandler(params: any) {
 #### Browser DevTools
 
 **Enable DevTools:**
+
 1. Run app in dev mode: `bun run dev`
 2. Right-click anywhere in app
 3. Select "Inspect Element"
 
 **DevTools features:**
+
 - Console for logs and errors
 - Network tab for WebSocket messages
 - Elements tab for DOM inspection
@@ -259,11 +263,13 @@ await window.testIPC();
 // In browser console
 const ws = new WebSocket('ws://localhost:9339');
 ws.onopen = () => {
-  ws.send(JSON.stringify({
-    id: 1,
-    method: 'chess:sayHello',
-    params: { message: 'Test' }
-  }));
+  ws.send(
+    JSON.stringify({
+      id: 1,
+      method: 'chess:sayHello',
+      params: { message: 'Test' },
+    })
+  );
 };
 ws.onmessage = (event) => {
   console.log('Response:', JSON.parse(event.data));
@@ -338,7 +344,7 @@ console.log(`Analysis took ${duration}ms`);
 // Enable engine profiling
 const analysis = await ipcClient.call('chess:evaluatePosition', {
   fen,
-  depth: 18
+  depth: 18,
 });
 
 // Check evaluation time in logs
@@ -351,14 +357,14 @@ const analysis = await ipcClient.call('chess:evaluatePosition', {
 
 ### Key Metrics
 
-| Operation              | Target Time | Acceptable | Critical |
-| ---------------------- | ----------- | ---------- | -------- |
-| App startup            | <2s         | <3s        | >5s      |
-| Engine analysis        | <200ms      | <500ms     | >1s      |
-| Save game              | <50ms       | <100ms     | >200ms   |
-| Load profile           | <100ms      | <150ms     | >300ms   |
-| Board render           | <16ms       | <33ms      | >50ms    |
-| Full game analysis     | <10s        | <20s       | >30s     |
+| Operation          | Target Time | Acceptable | Critical |
+| ------------------ | ----------- | ---------- | -------- |
+| App startup        | <2s         | <3s        | >5s      |
+| Engine analysis    | <200ms      | <500ms     | >1s      |
+| Save game          | <50ms       | <100ms     | >200ms   |
+| Load profile       | <100ms      | <150ms     | >300ms   |
+| Board render       | <16ms       | <33ms      | >50ms    |
+| Full game analysis | <10s        | <20s       | >30s     |
 
 ### Performance Testing
 
@@ -393,7 +399,7 @@ console.log('Memory:', performance.memory);
 const mem = process.memoryUsage();
 logger.info('Memory', 'Usage', {
   heapUsed: `${Math.round(mem.heapUsed / 1024 / 1024)}MB`,
-  heapTotal: `${Math.round(mem.heapTotal / 1024 / 1024)}MB`
+  heapTotal: `${Math.round(mem.heapTotal / 1024 / 1024)}MB`,
 });
 ```
 
@@ -439,7 +445,7 @@ async function healthCheck() {
   const checks = {
     ipc: false,
     engine: false,
-    storage: false
+    storage: false,
   };
 
   // Test IPC
@@ -476,6 +482,7 @@ console.log('Health status:', status);
 ### Game Save Failures
 
 **Symptoms:**
+
 - Games not saving after completion
 - Error displayed: "Failed to save game"
 - Missing games in game list
@@ -483,16 +490,19 @@ console.log('Health status:', status);
 **Diagnosis:**
 
 1. Check log file for storage errors:
+
    ```bash
    grep "DataStorage" logs/chess-sensei-*.log | grep "ERROR"
    ```
 
 2. Verify storage directory exists:
+
    ```bash
    ls "%APPDATA%/Chess-Sensei/games/"
    ```
 
 3. Check disk space:
+
    ```bash
    # Windows
    wmic logicaldisk get size,freespace,caption
@@ -504,6 +514,7 @@ console.log('Health status:', status);
 **Resolution:**
 
 1. **If directory missing:**
+
    ```typescript
    await ipcClient.call('chess:initializeStorage');
    ```
@@ -527,6 +538,7 @@ console.log('Health status:', status);
 ### Engine Initialization Failures
 
 **Symptoms:**
+
 - No move suggestions displayed
 - Analysis not working
 - Error: "Engine not initialized"
@@ -534,17 +546,20 @@ console.log('Health status:', status);
 **Diagnosis:**
 
 1. Check engine status:
+
    ```typescript
    const { initialized } = await ipcClient.call('chess:getEngineStatus');
    console.log('Engine initialized:', initialized);
    ```
 
 2. Check log file:
+
    ```bash
    grep "StockfishEngine" logs/chess-sensei-*.log
    ```
 
 3. Verify Stockfish files exist:
+
    ```bash
    ls stockfish/stockfish-17.1-lite-single-03e3232.{js,wasm}
    ```
@@ -552,6 +567,7 @@ console.log('Health status:', status);
 **Resolution:**
 
 1. **Manual initialization:**
+
    ```typescript
    await ipcClient.call('chess:startNewGame');
    ```
@@ -570,6 +586,7 @@ console.log('Health status:', status);
 ### WebSocket Connection Failures
 
 **Symptoms:**
+
 - Frontend not responding to interactions
 - IPC methods timing out
 - Error: "WebSocket connection failed"
@@ -577,6 +594,7 @@ console.log('Health status:', status);
 **Diagnosis:**
 
 1. Check backend is running:
+
    ```bash
    # Windows
    netstat -an | findstr "9339"
@@ -586,6 +604,7 @@ console.log('Health status:', status);
    ```
 
 2. Test connection manually:
+
    ```typescript
    const ws = new WebSocket('ws://localhost:9339');
    ws.onopen = () => console.log('Connected');
@@ -604,6 +623,7 @@ console.log('Health status:', status);
    - Restart application
 
 2. **Kill orphaned backend process:**
+
    ```bash
    # Windows
    taskkill /F /IM Chess-Sensei.exe
@@ -613,6 +633,7 @@ console.log('Health status:', status);
    ```
 
 3. **Check port conflict:**
+
    ```bash
    # Find process using port 9339
    # Windows
@@ -632,6 +653,7 @@ console.log('Health status:', status);
 ### Analysis Performance Issues
 
 **Symptoms:**
+
 - Game analysis taking >30 seconds
 - Engine analysis timeouts
 - UI freezing during analysis
@@ -639,6 +661,7 @@ console.log('Health status:', status);
 **Diagnosis:**
 
 1. Check game length:
+
    ```typescript
    const gameLength = moves.length / 2; // Full moves
    console.log('Analyzing', gameLength, 'moves');
@@ -646,6 +669,7 @@ console.log('Health status:', status);
    ```
 
 2. Monitor engine during analysis:
+
    ```bash
    tail -f logs/chess-sensei-*.log | grep "StockfishEngine"
    ```
@@ -657,6 +681,7 @@ console.log('Health status:', status);
 **Resolution:**
 
 1. **Reduce analysis depth:**
+
    ```typescript
    // Default: depth 18
    // Reduce to: depth 15 for faster analysis
@@ -676,6 +701,7 @@ console.log('Health status:', status);
 ### Backup Creation Failures
 
 **Symptoms:**
+
 - Backup operation fails with error
 - Incomplete backup files
 - "Backup creation failed" message
@@ -683,17 +709,20 @@ console.log('Health status:', status);
 **Diagnosis:**
 
 1. Check available disk space:
+
    ```bash
    # Need ~2x game data size for backup
    # Typical: 500KB - 1MB for 25 games
    ```
 
 2. Check backup directory:
+
    ```bash
    ls "%APPDATA%/Chess-Sensei/backups/"
    ```
 
 3. Review error logs:
+
    ```bash
    grep "Backup" logs/chess-sensei-*.log | grep "ERROR"
    ```
@@ -706,6 +735,7 @@ console.log('Health status:', status);
    - Minimum 10MB free recommended
 
 2. **Verify source files:**
+
    ```bash
    # Check games directory
    ls "%APPDATA%/Chess-Sensei/games/"
@@ -715,6 +745,7 @@ console.log('Health status:', status);
    ```
 
 3. **Manual backup:**
+
    ```bash
    # Create ZIP manually
    cd "%APPDATA%/Chess-Sensei"
@@ -722,9 +753,10 @@ console.log('Health status:', status);
    ```
 
 4. **Verify backup integrity:**
+
    ```typescript
    await ipcClient.call('chess:verifyBackup', {
-     backupPath: 'path/to/backup.zip'
+     backupPath: 'path/to/backup.zip',
    });
    ```
 
@@ -735,11 +767,13 @@ console.log('Health status:', status);
 ### Issue: "Application won't start"
 
 **Possible causes:**
+
 - Corrupted installation
 - Missing dependencies
 - Port 9339 in use
 
 **Solutions:**
+
 1. Reinstall application
 2. Check port availability
 3. Review logs for startup errors
@@ -749,11 +783,13 @@ console.log('Health status:', status);
 ### Issue: "Moves not highlighting"
 
 **Possible causes:**
+
 - Engine not initialized
 - Invalid FEN string
 - JavaScript error in renderer
 
 **Solutions:**
+
 1. Check browser console for errors
 2. Verify engine status
 3. Restart application
@@ -763,11 +799,13 @@ console.log('Health status:', status);
 ### Issue: "Analysis shows no mistakes"
 
 **Possible causes:**
+
 - Perfect game (rare!)
 - Analysis depth too low
 - Classification thresholds not met
 
 **Solutions:**
+
 1. Verify analysis completed
 2. Check CPL values (should vary)
 3. Review classification thresholds
@@ -783,6 +821,5 @@ console.log('Health status:', status);
 
 ---
 
-**Operations Guide Version:** 1.1.0
-**Target Audience:** Developers and maintainers
-**Update Frequency:** After significant architectural changes
+**Operations Guide Version:** 1.1.0 **Target Audience:** Developers and
+maintainers **Update Frequency:** After significant architectural changes

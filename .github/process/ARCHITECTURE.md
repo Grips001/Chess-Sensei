@@ -354,15 +354,15 @@ Chess-Sensei/
 
 ## Performance Characteristics
 
-| Operation             | Typical Time | Notes                                   |
-| --------------------- | ------------ | --------------------------------------- |
-| App startup           | ~2s          | Engine init is slowest                  |
-| Engine analysis       | 100-500ms    | Depth-dependent                         |
-| Save game             | <50ms        | Atomic write                            |
-| Load profile          | <100ms       | JSON parse                              |
-| Board render          | <16ms        | 60fps target                            |
-| Guidance update       | ~200ms       | Engine + UI update                      |
-| Full game analysis    | 5-10s        | 40-move game, parallelized              |
+| Operation          | Typical Time | Notes                      |
+| ------------------ | ------------ | -------------------------- |
+| App startup        | ~2s          | Engine init is slowest     |
+| Engine analysis    | 100-500ms    | Depth-dependent            |
+| Save game          | <50ms        | Atomic write               |
+| Load profile       | <100ms       | JSON parse                 |
+| Board render       | <16ms        | 60fps target               |
+| Guidance update    | ~200ms       | Engine + UI update         |
+| Full game analysis | 5-10s        | 40-move game, parallelized |
 
 ## Component Statistics
 
@@ -379,8 +379,8 @@ Chess-Sensei/
 
 For comprehensive architectural details, see:
 
-- **[API Reference](../../documents/api-reference.md)** - All 45 IPC methods with
-  parameters and examples
+- **[API Reference](../../documents/api-reference.md)** - All 45 IPC methods
+  with parameters and examples
 - **[Data Model](../../documents/data-model.md)** - Complete schemas for Game
   Record, Analysis, Profile, and Achievement
 - **[Security Model](../../documents/security.md)** - Threat model, input

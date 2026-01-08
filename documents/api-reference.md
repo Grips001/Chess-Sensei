@@ -1,8 +1,7 @@
 # Chess-Sensei IPC API Reference
 
-**Version:** 1.1.0
-**Last Updated:** 2026-01-08
-**Protocol:** WebSocket RPC (Port 9339)
+**Version:** 1.1.0 **Last Updated:** 2026-01-08 **Protocol:** WebSocket RPC
+(Port 9339)
 
 This document provides a complete reference for all IPC methods available in
 Chess-Sensei's WebSocket-based communication protocol.
@@ -72,7 +71,7 @@ all frontend-backend communication. The backend runs a WebSocket server on port
 
 ### WebSocket URL
 
-```
+```text
 ws://localhost:9339
 ```
 
@@ -103,7 +102,7 @@ Test IPC connection.
 
 ```typescript
 {
-  message: string       // Test message
+  message: string; // Test message
 }
 ```
 
@@ -111,7 +110,7 @@ Test IPC connection.
 
 ```typescript
 {
-  reply: string         // Echo response
+  reply: string; // Echo response
 }
 ```
 
@@ -134,7 +133,7 @@ Initialize the chess engine for a new game.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -166,11 +165,11 @@ Get the top N best moves from the engine using Multi-PV analysis.
 ```typescript
 {
   moves: Array<{
-    move: string,       // UCI move (e.g., "e2e4")
-    score: number,      // Evaluation in centipawns
-    pv: string[],       // Principal variation
-    mate?: number       // Moves to mate (if applicable)
-  }>
+    move: string; // UCI move (e.g., "e2e4")
+    score: number; // Evaluation in centipawns
+    pv: string[]; // Principal variation
+    mate?: number; // Moves to mate (if applicable)
+  }>;
 }
 ```
 
@@ -180,7 +179,7 @@ Get the top N best moves from the engine using Multi-PV analysis.
 await ipcClient.call('chess:requestBestMoves', {
   fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   depth: 15,
-  count: 3
+  count: 3,
 });
 // Returns top 3 moves with evaluations
 ```
@@ -219,7 +218,7 @@ Get position evaluation from the engine.
 ```typescript
 await ipcClient.call('chess:evaluatePosition', {
   fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-  depth: 18
+  depth: 18,
 });
 // Returns: { evaluation: { score: 25, type: 'cp', bestMove: 'e7e5' }, formattedScore: '+0.25' }
 ```
@@ -267,7 +266,7 @@ Analyze a single move to determine its quality.
 await ipcClient.call('chess:analyzeMove', {
   fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   playedMove: 'e2e4',
-  depth: 18
+  depth: 18,
 });
 // Returns move quality analysis
 ```
@@ -292,11 +291,11 @@ Get top 3 moves for real-time guidance (optimized for Training Mode).
 ```typescript
 {
   moves: Array<{
-    move: string,       // UCI move
-    score: number,      // Evaluation
-    pv: string[],       // Principal variation
-    color: 'blue' | 'green' | 'yellow'  // Guidance color
-  }>
+    move: string; // UCI move
+    score: number; // Evaluation
+    pv: string[]; // Principal variation
+    color: 'blue' | 'green' | 'yellow'; // Guidance color
+  }>;
 }
 ```
 
@@ -305,7 +304,7 @@ Get top 3 moves for real-time guidance (optimized for Training Mode).
 ```typescript
 await ipcClient.call('chess:getGuidanceMoves', {
   fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-  depth: 12
+  depth: 12,
 });
 // Returns: { moves: [{ move: 'e7e5', score: 30, color: 'blue' }, ...] }
 ```
@@ -320,7 +319,7 @@ Adjust engine playing strength.
 
 ```typescript
 {
-  level: number         // Skill level (0-20, where 20 = max strength)
+  level: number; // Skill level (0-20, where 20 = max strength)
 }
 ```
 
@@ -328,7 +327,7 @@ Adjust engine playing strength.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -351,7 +350,7 @@ Check engine initialization status.
 
 ```typescript
 {
-  initialized: boolean
+  initialized: boolean;
 }
 ```
 
@@ -377,7 +376,7 @@ Configure AI opponent personality and difficulty.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -387,7 +386,7 @@ Configure AI opponent personality and difficulty.
 await ipcClient.call('chess:configureBot', {
   personality: 'sensei',
   elo: 1500,
-  mode: 'training'
+  mode: 'training',
 });
 ```
 
@@ -401,7 +400,7 @@ Request AI opponent move.
 
 ```typescript
 {
-  fen: string           // Current position
+  fen: string; // Current position
 }
 ```
 
@@ -409,7 +408,7 @@ Request AI opponent move.
 
 ```typescript
 {
-  move: string          // UCI move
+  move: string; // UCI move
 }
 ```
 
@@ -417,7 +416,7 @@ Request AI opponent move.
 
 ```typescript
 await ipcClient.call('chess:getBotMove', {
-  fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+  fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
 });
 // Returns: { move: 'e7e5' }
 ```
@@ -435,10 +434,10 @@ Get list of available bot personalities.
 ```typescript
 {
   profiles: Array<{
-    id: string,
-    name: string,
-    description: string
-  }>
+    id: string;
+    name: string;
+    description: string;
+  }>;
 }
 ```
 
@@ -473,10 +472,10 @@ Get available difficulty presets.
 ```typescript
 {
   presets: Array<{
-    name: string,
-    elo: number,
-    description: string
-  }>
+    name: string;
+    elo: number;
+    description: string;
+  }>;
 }
 ```
 
@@ -535,7 +534,9 @@ Batch-analyze all moves in a completed game.
 ```typescript
 await ipcClient.call('chess:analyzeGame', {
   gameId: 'game-123',
-  moves: [/* move list */]
+  moves: [
+    /* move list */
+  ],
 });
 // Returns complete game analysis
 ```
@@ -670,7 +671,7 @@ Save game analysis to storage.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -687,12 +688,12 @@ Get list of all saved games.
 ```typescript
 {
   games: Array<{
-    gameId: string,
-    date: string,
-    mode: string,
-    result: string,
-    duration: number
-  }>
+    gameId: string;
+    date: string;
+    mode: string;
+    result: string;
+    duration: number;
+  }>;
 }
 ```
 
@@ -706,7 +707,7 @@ Load a specific game by ID.
 
 ```typescript
 {
-  gameId: string
+  gameId: string;
 }
 ```
 
@@ -714,7 +715,7 @@ Load a specific game by ID.
 
 ```typescript
 {
-  gameRecord: GameRecord
+  gameRecord: GameRecord;
 }
 ```
 
@@ -728,7 +729,7 @@ Load analysis for a specific game.
 
 ```typescript
 {
-  gameId: string
+  gameId: string;
 }
 ```
 
@@ -736,7 +737,7 @@ Load analysis for a specific game.
 
 ```typescript
 {
-  analysis: GameAnalysis
+  analysis: GameAnalysis;
 }
 ```
 
@@ -752,7 +753,7 @@ Get the storage directory path.
 
 ```typescript
 {
-  path: string          // Platform-specific path
+  path: string; // Platform-specific path
 }
 ```
 
@@ -805,7 +806,7 @@ Save updated player profile.
 
 ```typescript
 {
-  profile: PlayerProfile
+  profile: PlayerProfile;
 }
 ```
 
@@ -813,7 +814,7 @@ Save updated player profile.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -830,16 +831,16 @@ Get list of all achievements with unlock status.
 ```typescript
 {
   achievements: Array<{
-    id: string,
-    name: string,
-    description: string,
-    icon: string,
-    unlockedAt?: string,
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    unlockedAt?: string;
     progress?: {
-      current: number,
-      target: number
-    }
-  }>
+      current: number;
+      target: number;
+    };
+  }>;
 }
 ```
 
@@ -853,7 +854,7 @@ Unlock an achievement.
 
 ```typescript
 {
-  achievementId: string
+  achievementId: string;
 }
 ```
 
@@ -861,7 +862,7 @@ Unlock an achievement.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -877,7 +878,7 @@ Export a single game to PGN format.
 
 ```typescript
 {
-  gameId: string
+  gameId: string;
 }
 ```
 
@@ -955,7 +956,7 @@ Import a game from PGN format.
 
 ```typescript
 {
-  pgn: string          // PGN content
+  pgn: string; // PGN content
 }
 ```
 
@@ -978,7 +979,7 @@ Import multiple games from PGN.
 
 ```typescript
 {
-  pgn: string          // PGN content (multiple games)
+  pgn: string; // PGN content (multiple games)
 }
 ```
 
@@ -1011,7 +1012,7 @@ Merge an imported profile with existing profile.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -1027,7 +1028,7 @@ Get the exports directory path.
 
 ```typescript
 {
-  path: string
+  path: string;
 }
 ```
 
@@ -1071,7 +1072,7 @@ Update backup configuration.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -1123,11 +1124,11 @@ List all available backups.
 ```typescript
 {
   backups: Array<{
-    filename: string,
-    date: string,
-    size: number,
-    type: 'automatic' | 'manual'
-  }>
+    filename: string;
+    date: string;
+    size: number;
+    type: 'automatic' | 'manual';
+  }>;
 }
 ```
 
@@ -1141,7 +1142,7 @@ Verify backup integrity.
 
 ```typescript
 {
-  backupPath: string
+  backupPath: string;
 }
 ```
 
@@ -1166,7 +1167,7 @@ Get the backups directory path.
 
 ```typescript
 {
-  path: string
+  path: string;
 }
 ```
 
@@ -1193,7 +1194,7 @@ Send log message from frontend to backend.
 
 ```typescript
 {
-  success: boolean
+  success: boolean;
 }
 ```
 
@@ -1209,7 +1210,7 @@ Get the log file path.
 
 ```typescript
 {
-  path: string
+  path: string;
 }
 ```
 
@@ -1225,7 +1226,7 @@ Check if logging is enabled.
 
 ```typescript
 {
-  enabled: boolean
+  enabled: boolean;
 }
 ```
 
@@ -1235,18 +1236,18 @@ Check if logging is enabled.
 
 ### Error Codes
 
-| Code                     | Description                            |
-| ------------------------ | -------------------------------------- |
-| `ENGINE_NOT_INITIALIZED` | Engine not ready                       |
-| `INVALID_FEN`            | Invalid FEN string                     |
-| `INVALID_MOVE`           | Invalid UCI move                       |
-| `ANALYSIS_FAILED`        | Analysis error                         |
-| `STORAGE_ERROR`          | File system error                      |
-| `GAME_NOT_FOUND`         | Game ID not found                      |
-| `IMPORT_ERROR`           | Import validation failed               |
-| `BACKUP_ERROR`           | Backup creation failed                 |
-| `BOT_NOT_CONFIGURED`     | Bot must be configured before use      |
-| `INVALID_PARAMETERS`     | Invalid method parameters              |
+| Code                     | Description                       |
+| ------------------------ | --------------------------------- |
+| `ENGINE_NOT_INITIALIZED` | Engine not ready                  |
+| `INVALID_FEN`            | Invalid FEN string                |
+| `INVALID_MOVE`           | Invalid UCI move                  |
+| `ANALYSIS_FAILED`        | Analysis error                    |
+| `STORAGE_ERROR`          | File system error                 |
+| `GAME_NOT_FOUND`         | Game ID not found                 |
+| `IMPORT_ERROR`           | Import validation failed          |
+| `BACKUP_ERROR`           | Backup creation failed            |
+| `BOT_NOT_CONFIGURED`     | Bot must be configured before use |
+| `INVALID_PARAMETERS`     | Invalid method parameters         |
 
 ### Error Response Example
 
@@ -1271,10 +1272,10 @@ Check if logging is enabled.
 
 ```typescript
 interface BestMove {
-  move: string;         // UCI move (e.g., "e2e4")
-  score: number;        // Evaluation in centipawns
-  pv: string[];         // Principal variation
-  mate?: number;        // Moves to mate (if applicable)
+  move: string; // UCI move (e.g., "e2e4")
+  score: number; // Evaluation in centipawns
+  pv: string[]; // Principal variation
+  mate?: number; // Moves to mate (if applicable)
 }
 ```
 
@@ -1282,10 +1283,10 @@ interface BestMove {
 
 ```typescript
 interface Evaluation {
-  score: number;        // Centipawns
+  score: number; // Centipawns
   type: 'cp' | 'mate';
-  mate?: number;        // Moves to mate
-  bestMove: string;     // UCI best move
+  mate?: number; // Moves to mate
+  bestMove: string; // UCI best move
 }
 ```
 
@@ -1384,7 +1385,7 @@ await ipcClient.call('chess:startNewGame');
 const result = await ipcClient.call('chess:requestBestMoves', {
   fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   depth: 15,
-  count: 3
+  count: 3,
 });
 
 console.log('Top 3 moves:', result.moves);
@@ -1393,12 +1394,12 @@ console.log('Top 3 moves:', result.moves);
 await ipcClient.call('chess:configureBot', {
   personality: 'sensei',
   elo: 1500,
-  mode: 'training'
+  mode: 'training',
 });
 
 // Get bot move
 const botMove = await ipcClient.call('chess:getBotMove', {
-  fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+  fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
 });
 
 console.log('Bot plays:', botMove.move);

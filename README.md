@@ -91,7 +91,8 @@ Complete documentation is available in the [`documents/`](documents/) directory:
 
 #### For Developers
 
-- [**API Reference**](documents/api-reference.md) --- Complete IPC method reference
+- [**API Reference**](documents/api-reference.md) --- Complete IPC method
+  reference
 - [**Data Model**](documents/data-model.md) --- Data schemas and storage
 - [**Security Model**](documents/security.md) --- Threat model and validation
 - [**Operations Guide**](documents/operations.md) --- Logging and debugging
