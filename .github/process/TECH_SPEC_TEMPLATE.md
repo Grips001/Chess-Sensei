@@ -1,8 +1,11 @@
 # Tech Spec: [Feature Name]
 
+> **Filename:** `NNN-tech-[feature-name].md` (where NNN matches the corresponding PRD number)
 > **Status:** Draft | In Review | Approved | Implemented **Author:** [Name]
-> **Created:** YYYY-MM-DD **Last Updated:** YYYY-MM-DD **PRD:** [Link to PRD]
+> **Created:** YYYY-MM-DD **Last Updated:** YYYY-MM-DD **PRD:** `NNN-prd-[feature-name].md`
 > **Related Issues:** #XXX
+>
+> **Note:** The tech spec number (NNN) must exactly match its corresponding PRD number. PRDs are numbered chronologically, so your tech spec inherits that same number (e.g., `005-tech-feature.md` pairs with `005-prd-feature.md`)
 
 ---
 
