@@ -143,7 +143,7 @@ Tool-required configs remain in project root (cannot be moved):
 
 ## Project Status
 
-**Version:** v1.0.4 - Stable Release
+**Version:** v1.1.0 - Stable Release
 
 Chess-Sensei is a complete chess training application with all features
 implemented and tested.
@@ -218,4 +218,4 @@ Check that `neutralino.config.json` is valid JSON and paths are correct.
 
 ## Success
 
-Chess-Sensei v1.0.4 is complete and ready for use.
+Chess-Sensei v1.1.0 is complete and ready for use.

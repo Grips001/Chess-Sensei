@@ -6,6 +6,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-08
+
+### Changed 1.1.0
+
+- **Code Modularization (CS-001)**
+  - Refactored monolithic frontend and backend files into focused,
+    single-responsibility modules
+  - Reduced frontend orchestrator from 2,720 lines to 976 lines
+  - Reduced backend orchestrator from 943 lines to 136 lines
+  - Created 60+ new module files organized by domain:
+    - Frontend: `board/`, `ui/`, `game/`, `modes/`, `analysis/` directories
+    - Backend: `handlers/` directory with engine, bot, and storage handlers
+  - Implemented dependency injection pattern for state management
+  - Added barrel exports (index.ts) for clean imports
+  - All 282 tests pass - zero breaking changes
+  - Application functions identically from user perspective
+
+### Technical 1.1.0
+
+- Extracted board rendering and interaction into `src/frontend/board/` modules
+- Extracted UI components into `src/frontend/ui/` modules
+- Extracted game controllers into `src/frontend/game/` modules
+- Extracted game mode initialization into `src/frontend/modes/` modules
+- Extracted analysis UI into `src/frontend/analysis/` modules with 9 component
+  files
+- Extracted IPC handlers into `src/backend/handlers/` modules
+- Updated all documentation to reflect new modular structure
+- Updated component diagrams in ARCHITECTURE.md
+
 ## [1.0.4] - 2026-01-06
 
 ### Fixed 1.0.4

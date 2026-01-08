@@ -1,0 +1,221 @@
+/* ========================================
+   Animation Utility Classes
+   Phase 9: Polish & Optimization
+   Soft haptic-style animations for UI feedback
+   ======================================== */
+
+/* Fade animations */
+.animate-fade-in {
+  animation: utilFadeIn var(--duration-normal) var(--ease-out-soft);
+}
+
+.animate-fade-out {
+  animation: utilFadeOut var(--duration-normal) var(--ease-out-soft) forwards;
+}
+
+@keyframes utilFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes utilFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide animations */
+.animate-slide-up {
+  animation: utilSlideUp var(--duration-normal) var(--ease-spring);
+}
+
+.animate-slide-down {
+  animation: utilSlideDown var(--duration-normal) var(--ease-spring);
+}
+
+@keyframes utilSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes utilSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale animations - haptic pop effect */
+.animate-pop {
+  animation: utilPop var(--duration-normal) var(--ease-bounce-soft);
+}
+
+.animate-shrink {
+  animation: utilShrink var(--duration-fast) var(--ease-out-soft) forwards;
+}
+
+@keyframes utilPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes utilShrink {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+/* Pulse animation - attention grabber */
+.animate-pulse {
+  animation: utilPulse 2s var(--ease-in-out-soft) infinite;
+}
+
+@keyframes utilPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.02);
+  }
+}
+
+/* Glow animation - soft highlight */
+.animate-glow {
+  animation: utilGlow 2s var(--ease-in-out-soft) infinite;
+}
+
+@keyframes utilGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgb(100 150 255 / 30%);
+  }
+  50% {
+    box-shadow: 0 0 16px rgb(100 150 255 / 50%);
+  }
+}
+
+/* Shake animation - error feedback */
+.animate-shake {
+  animation: utilShake var(--duration-slow) var(--ease-out-soft);
+}
+
+@keyframes utilShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  50%,
+  90% {
+    transform: translateX(-4px);
+  }
+  30%,
+  70% {
+    transform: translateX(4px);
+  }
+}
+
+/* Bounce animation - success feedback */
+.animate-bounce {
+  animation: utilBounce var(--duration-slow) var(--ease-bounce-soft);
+}
+
+@keyframes utilBounce {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  70% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Spinner animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinnerGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--color-primary-glow);
+  }
+  50% {
+    box-shadow: 0 0 16px var(--color-primary-glow);
+  }
+}
+
+/* Overlay fade animation */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal slide in animation */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

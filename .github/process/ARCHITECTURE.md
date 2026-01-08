@@ -86,7 +86,41 @@ Chess-Sensei.
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  index.ts ─────────────────────────────────────────────────────────────────  │
-│     │    Main entry point, board rendering, game flow orchestration          │
+│     │    Main orchestrator, coordinates all modules via dependency injection │
+│     │                                                                        │
+│     ├── board/ ──────────────────────────────────────────────────────────── │
+│     │   ├── board-renderer.ts    Board rendering, FEN parsing, piece display │
+│     │   ├── board-events.ts      Drag-and-drop, click-to-move handlers      │
+│     │   └── board-highlights.ts  Legal moves, selection, multi-color system │
+│     │                                                                        │
+│     ├── ui/ ─────────────────────────────────────────────────────────────── │
+│     │   ├── turn-indicator.ts    Turn display updates                       │
+│     │   ├── move-history.ts      Move list rendering with collapsible UI    │
+│     │   ├── captured-pieces.ts   Material advantage display                 │
+│     │   ├── game-alerts.ts       Check/checkmate/draw indicators            │
+│     │   └── dialogs.ts           Confirmation and promotion dialogs         │
+│     │                                                                        │
+│     ├── game/ ───────────────────────────────────────────────────────────── │
+│     │   ├── game-controller.ts      Move execution, undo/redo, game state   │
+│     │   ├── bot-integration.ts      Bot move requests for Training/Exam     │
+│     │   ├── guidance-controller.ts  Move guidance UI and highlighting       │
+│     │   ├── save-analyze.ts         Game saving and analysis pipeline       │
+│     │   └── sandbox-controller.ts   Sandbox mode board editing and analysis │
+│     │                                                                        │
+│     ├── modes/ ──────────────────────────────────────────────────────────── │
+│     │   └── mode-controller.ts   Training and Exam mode initialization      │
+│     │                                                                        │
+│     ├── analysis/ ───────────────────────────────────────────────────────── │
+│     │   ├── analysis-controller.ts  Main analysis UI manager (AnalysisUIManager) │
+│     │   └── components/             9 analysis component modules:          │
+│     │       ├── board-renderer.ts      Interactive replay board            │
+│     │       ├── evaluation-graph.ts    Position evaluation visualization   │
+│     │       ├── move-list.ts           Annotated move list with navigation │
+│     │       ├── position-analysis.ts   Move-by-move analysis panel         │
+│     │       ├── summary-panel.ts       Game summary and statistics         │
+│     │       ├── recommendations.ts     Training recommendations            │
+│     │       ├── alternatives-modal.ts  Mistake deep-dive modal             │
+│     │       └── navigation-controls.ts Playback controls                   │
 │     │                                                                        │
 │     ├── training-mode.ts ────────────────────────────────────────────────── │
 │     │      Training Mode UI, bot selection, move guidance integration        │
@@ -98,7 +132,7 @@ Chess-Sensei.
 │     │      Board editor, piece placement, position analysis                  │
 │     │                                                                        │
 │     ├── analysis-ui.ts ──────────────────────────────────────────────────── │
-│     │      Post-game analysis, replay, evaluation graph, deep analytics      │
+│     │      Post-game analysis factory function (creates AnalysisUIManager)   │
 │     │                                                                        │
 │     ├── progress-dashboard.ts ───────────────────────────────────────────── │
 │     │      Player stats, radar chart, achievements, game history             │
@@ -122,7 +156,12 @@ Chess-Sensei.
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  index.ts ─────────────────────────────────────────────────────────────────  │
-│     │    Entry point, initializes services, registers IPC handlers           │
+│     │    Main entry point, initializes services, orchestrates IPC handlers   │
+│     │                                                                        │
+│     ├── handlers/ ───────────────────────────────────────────────────────── │
+│     │   ├── engine-handlers.ts    Core engine IPC methods                   │
+│     │   ├── bot-handlers.ts       AI opponent IPC methods                   │
+│     │   └── storage-handlers.ts   Data persistence IPC methods              │
 │     │                                                                        │
 │     ├── websocket-server.ts ─────────────────────────────────────────────── │
 │     │      WebSocket server, message routing, pub/sub channels               │

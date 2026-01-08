@@ -1,0 +1,182 @@
+/* ========================================
+   CSS Custom Properties (Design Tokens)
+   Phase 9: Refined color palette with
+   WCAG 2.1 AA contrast compliance
+   ======================================== */
+:root {
+  /* ---- Core Surface Colors ---- */
+
+  /* Porcelain white - softer on eyes than pure white */
+  --color-porcelain: #faf9f7;
+  --color-porcelain-rgb: 250 249 247;
+
+  /* Background gradient colors */
+  --color-bg-light: #f0efed;
+  --color-bg-medium: #e8e7e5;
+  --color-bg-dark: #d8d7d5;
+
+  /* ---- Text Colors (WCAG AA compliant) ---- */
+
+  /* Primary: 7:1 contrast on porcelain */
+  --color-text-primary: #2d2d2d;
+
+  /* Secondary: 4.5:1 contrast on porcelain */
+  --color-text-secondary: #5a5a5a;
+
+  /* Muted: 3:1 contrast (for large text/decorative) */
+  --color-text-muted: #757575;
+
+  /* Disabled: intentionally lower contrast */
+  --color-text-disabled: #a0a0a0;
+
+  /* ---- Semantic Colors ---- */
+
+  /* Primary accent - calm blue */
+  --color-primary: #4a7fc7;
+  --color-primary-hover: #3d6eb5;
+  --color-primary-active: #345fa0;
+  --color-primary-light: rgb(74 127 199 / 15%);
+  --color-primary-glow: rgb(74 127 199 / 40%);
+
+  /* Success - muted green */
+  --color-success: #4a9c6d;
+  --color-success-hover: #3d8a5e;
+  --color-success-light: rgb(74 156 109 / 15%);
+  --color-success-glow: rgb(74 156 109 / 40%);
+
+  /* Warning - warm amber */
+  --color-warning: #c9a227;
+  --color-warning-hover: #b89420;
+  --color-warning-light: rgb(201 162 39 / 15%);
+  --color-warning-glow: rgb(201 162 39 / 40%);
+
+  /* Error/Danger - muted red */
+  --color-error: #c75a5a;
+  --color-error-hover: #b54a4a;
+  --color-error-light: rgb(199 90 90 / 15%);
+  --color-error-glow: rgb(199 90 90 / 40%);
+
+  /* Info - neutral blue */
+  --color-info: #5a8fc7;
+  --color-info-light: rgb(90 143 199 / 15%);
+
+  /* ---- Chess Board Colors ---- */
+
+  /* Light squares - warm gray with subtle warmth */
+  --color-square-light: #e8ecef;
+  --color-square-light-hover: #edf0f2;
+
+  /* Dark squares - slate blue-gray */
+  --color-square-dark: #7c8ea0;
+  --color-square-dark-hover: #8a9aab;
+
+  /* ---- Guidance Highlight Colors ---- */
+
+  /* Best move - blue */
+  --color-guidance-blue: rgb(70 130 220 / 70%);
+  --color-guidance-blue-glow: rgb(70 130 220 / 50%);
+  --color-guidance-blue-bg: rgb(70 130 220 / 15%);
+
+  /* Second-best - green */
+  --color-guidance-green: rgb(80 180 100 / 70%);
+  --color-guidance-green-glow: rgb(80 180 100 / 50%);
+  --color-guidance-green-bg: rgb(80 180 100 / 15%);
+
+  /* Third-best - yellow */
+  --color-guidance-yellow: rgb(220 180 50 / 70%);
+  --color-guidance-yellow-glow: rgb(220 180 50 / 50%);
+  --color-guidance-yellow-bg: rgb(220 180 50 / 15%);
+
+  /* ---- Game State Colors ---- */
+
+  /* Check - amber warning */
+  --color-check: rgb(255 200 50);
+  --color-check-bg: rgb(255 200 50 / 30%);
+  --color-check-text: #8b6914;
+
+  /* Checkmate - red critical */
+  --color-checkmate: rgb(220 50 50);
+  --color-checkmate-bg: rgb(220 50 50 / 30%);
+  --color-checkmate-text: #7a2e2e;
+
+  /* Draw - neutral blue */
+  --color-draw: rgb(100 150 200);
+  --color-draw-bg: rgb(100 150 200 / 30%);
+  --color-draw-text: #2d4f5f;
+
+  /* ---- Move Classification Colors ----
+     Used in analysis for move quality indicators */
+
+  /* Excellent/Best - bright green */
+  --color-move-excellent: #22c55e;
+  --color-move-excellent-dark: #16a34a;
+  --color-move-excellent-bg: rgb(34 197 94 / 15%);
+
+  /* Good - teal */
+  --color-move-good: #14b8a6;
+  --color-move-good-dark: #0d9488;
+  --color-move-good-bg: rgb(20 184 166 / 15%);
+
+  /* Inaccuracy - yellow */
+  --color-move-inaccuracy: #eab308;
+  --color-move-inaccuracy-dark: #ca8a04;
+  --color-move-inaccuracy-bg: rgb(234 179 8 / 15%);
+
+  /* Mistake - orange */
+  --color-move-mistake: #f97316;
+  --color-move-mistake-dark: #ea580c;
+  --color-move-mistake-bg: rgb(249 115 22 / 15%);
+
+  /* Blunder - red */
+  --color-move-blunder: #ef4444;
+  --color-move-blunder-dark: #dc2626;
+  --color-move-blunder-bg: rgb(239 68 68 / 15%);
+
+  /* ---- Shadow Colors ---- */
+  --shadow-color-light: rgb(0 0 0 / 8%);
+  --shadow-color-medium: rgb(0 0 0 / 12%);
+  --shadow-color-dark: rgb(0 0 0 / 20%);
+  --shadow-highlight: rgb(255 255 255 / 80%);
+
+  /* ---- Animation timing functions - soft haptic feel ---- */
+  --ease-out-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce-soft: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ---- Animation durations - consistent timing ---- */
+  --duration-instant: 0.1s;
+  --duration-fast: 0.15s;
+  --duration-normal: 0.25s;
+  --duration-slow: 0.4s;
+  --duration-slower: 0.6s;
+
+  /* ---- Transition presets - combines duration with easing ---- */
+  --transition-fast: all var(--duration-fast) var(--ease-out-soft);
+  --transition-normal: all var(--duration-normal) var(--ease-out-soft);
+  --transition-slow: all var(--duration-slow) var(--ease-out-soft);
+
+  /* ---- Glow intensities ---- */
+  --glow-subtle: 0 0 8px;
+  --glow-medium: 0 0 16px;
+  --glow-strong: 0 0 24px;
+
+  /* ---- Spacing scale ---- */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* ---- Border radius scale ---- */
+  --radius-xs: 2px;
+  --radius-xs-sm: 3px;
+  --radius-sm: 4px;
+  --radius-sm-md: 6px;
+  --radius-md: 8px;
+  --radius-md-lg: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+}

@@ -383,7 +383,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What's in the current release?
 
-**Version 1.0.4** is the latest stable release and includes:
+**Version 1.1.0** is the latest stable release and includes:
 
 - **Training Mode** - Practice against AI with real-time move guidance
 - **Exam Mode** - Test skills without assistance, with post-game analysis
@@ -399,7 +399,7 @@ Yes! Chess-Sensei is fully open-source. Check the repository for the license.
 
 ### What features are planned?
 
-Chess-Sensei v1.0.4 is a complete, stable release. Future updates will focus on
+Chess-Sensei v1.1.0 is a complete, stable release. Future updates will focus on
 bug fixes and community-requested improvements.
 
 ### Can I request a feature?
@@ -412,7 +412,7 @@ Yes! Open a feature request on GitHub with:
 
 ### How often are updates released?
 
-Chess-Sensei v1.0.4 is stable. Updates are released for bug fixes and
+Chess-Sensei v1.1.0 is stable. Updates are released for bug fixes and
 improvements as needed.
 
 Major releases are announced on GitHub.

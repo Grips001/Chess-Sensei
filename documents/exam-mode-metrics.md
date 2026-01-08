@@ -202,12 +202,16 @@ All data is stored in JSON format for:
 - `src/backend/analysis-pipeline.ts` - Post-game analysis engine
 - `src/backend/metrics-calculator.ts` - Composite score calculations
 - `src/backend/data-storage.ts` - File persistence layer
-- `src/backend/index.ts` - IPC methods for frontend
+- `src/backend/index.ts` - Main entry point, orchestrates IPC handlers
+- `src/backend/handlers/` - Modular IPC handler modules
 
 ### Frontend
 
 - `src/frontend/exam-mode.ts` - Exam Mode manager and UI
-- `src/frontend/index.ts` - Game flow integration
+- `src/frontend/modes/mode-controller.ts` - Exam mode initialization flow
+- `src/frontend/game/` - Game controller modules (move execution, bot
+  integration, etc.)
+- `src/frontend/index.ts` - Main orchestrator, coordinates all modules
 
 ### IPC Methods
 

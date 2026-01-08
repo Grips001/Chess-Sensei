@@ -229,15 +229,30 @@ src/
 │   ├── chess-logic.ts           # Chess.js wrapper
 │   └── chess-logic-manual-test.ts  # Chess logic tests
 ├── backend/
-│   ├── index.ts                 # IPC registration (all methods)
+│   ├── index.ts                 # Main entry point, orchestrates IPC handlers
+│   ├── handlers/                # Modular IPC handler modules
+│   │   ├── engine-handlers.ts   # Core engine IPC methods
+│   │   ├── bot-handlers.ts      # AI opponent IPC methods
+│   │   └── storage-handlers.ts  # Data persistence IPC methods
 │   ├── ai-opponent.ts           # AI opponent logic
 │   ├── analysis-pipeline.ts     # Post-game analysis
 │   ├── metrics-calculator.ts    # Composite scores
 │   └── data-storage.ts          # File persistence
 └── frontend/
+    ├── index.ts                 # Main orchestrator
     ├── training-mode.ts         # Training Mode UI
+    ├── exam-mode.ts             # Exam Mode UI
     ├── move-guidance.ts         # Best-move guidance
-    └── exam-mode.ts             # Exam Mode UI
+    ├── modes/                   # Game mode initialization
+    │   └── mode-controller.ts   # Training/Exam mode startup
+    ├── game/                    # Game controller modules
+    │   ├── game-controller.ts   # Move execution, undo/redo
+    │   ├── bot-integration.ts   # Bot move requests
+    │   └── guidance-controller.ts # Move guidance UI
+    └── board/                   # Board rendering & interaction
+        ├── board-renderer.ts    # Board rendering
+        ├── board-events.ts      # Drag-and-drop handlers
+        └── board-highlights.ts  # Legal moves highlighting
 ```
 
 ## Troubleshooting
