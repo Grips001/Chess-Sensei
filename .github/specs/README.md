@@ -1,15 +1,17 @@
 # Feature Specifications
 
-This directory contains PRDs (Product Requirements Documents) and Tech Specs for Chess-Sensei features.
+This directory contains PRDs (Product Requirements Documents) and Tech Specs for
+Chess-Sensei features.
 
 ## File Naming Convention
 
-All spec files use **chronological numbering** to maintain a historical record of feature development:
+All spec files use **chronological numbering** to maintain a historical record
+of feature development:
 
-| Document Type | Pattern                      | Example                                   |
-| ------------- | ---------------------------- | ----------------------------------------- |
-| PRD           | `NNN-prd-[feature-name].md`  | `005-prd-performance-optimization.md`     |
-| Tech Spec     | `NNN-tech-[feature-name].md` | `005-tech-performance-optimization.md`    |
+| Document Type | Pattern                      | Example                                |
+| ------------- | ---------------------------- | -------------------------------------- |
+| PRD           | `NNN-prd-[feature-name].md`  | `005-prd-performance-optimization.md`  |
+| Tech Spec     | `NNN-tech-[feature-name].md` | `005-tech-performance-optimization.md` |
 
 **Numbering Rules:**
 
@@ -22,24 +24,28 @@ All spec files use **chronological numbering** to maintain a historical record o
 
 ### Implemented Features (001-004)
 
-- **001**: Move Notation with English Descriptions *(v1.0.1, Dec 22, 2025)* - PRD + Tech Spec
-- **002**: Move Reasoning Explanations *(v1.0.2, Dec 22, 2025)* - PRD + Tech Spec
-- **003**: Right Panel Layout Redesign *(v1.0.3, Dec 22, 2025)* - PRD + Tech Spec
-- **004**: Code Modularization *(v1.1.0, Jan 8, 2026)* - PRD + Tech Spec
+- **001**: Move Notation with English Descriptions _(v1.0.1, Dec 22, 2025)_ -
+  PRD + Tech Spec
+- **002**: Move Reasoning Explanations _(v1.0.2, Dec 22, 2025)_ - PRD + Tech
+  Spec
+- **003**: Right Panel Layout Redesign _(v1.0.3, Dec 22, 2025)_ - PRD + Tech
+  Spec
+- **004**: Code Modularization _(v1.1.0, Jan 8, 2026)_ - PRD + Tech Spec
 
 ### Planned Features (005-010)
 
-- **005**: Performance Optimization Phase 1 *(Weeks 1-2)* - PRD only
-- **006**: Architecture Refactoring *(Weeks 3-5)* - PRD only
-- **007**: Testing Strategy Enhancement *(Weeks 6-8)* - PRD only
-- **008**: Code Quality Improvements *(Weeks 9-10)* - PRD only
-- **009**: Observability Enhancement *(Weeks 11-12)* - PRD only
-- **010**: Security Hardening *(Weeks 11-12)* - PRD only
+- **005**: Performance Optimization Phase 1 _(Weeks 1-2)_ - PRD only
+- **006**: Architecture Refactoring _(Weeks 3-5)_ - PRD only
+- **007**: Testing Strategy Enhancement _(Weeks 6-8)_ - PRD only
+- **008**: Code Quality Improvements _(Weeks 9-10)_ - PRD only
+- **009**: Observability Enhancement _(Weeks 11-12)_ - PRD only
+- **010**: Security Hardening _(Weeks 11-12)_ - PRD only
 
 ## Templates
 
 - PRD Template: [../process/PRD_TEMPLATE.md](../process/PRD_TEMPLATE.md)
-- Tech Spec Template: [../process/TECH_SPEC_TEMPLATE.md](../process/TECH_SPEC_TEMPLATE.md)
+- Tech Spec Template:
+  [../process/TECH_SPEC_TEMPLATE.md](../process/TECH_SPEC_TEMPLATE.md)
 
 ## Workflow
 
@@ -75,4 +81,5 @@ All spec files use **chronological numbering** to maintain a historical record o
 Draft → In Review → Approved → Implemented
 ```
 
-Once implemented, specs are kept as historical documentation and should not be modified (create new specs for changes).
+Once implemented, specs are kept as historical documentation and should not be
+modified (create new specs for changes).

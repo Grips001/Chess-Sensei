@@ -1,10 +1,8 @@
 # Tech Spec: Security Hardening - Input Validation & Rate Limiting
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **Related PRD:** [010-prd-security-hardening.md](./010-prd-security-hardening.md)
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-08
+> **Last Updated:** 2026-01-08 **Related PRD:**
+> [010-prd-security-hardening.md](./010-prd-security-hardening.md)
 
 ---
 
@@ -12,7 +10,10 @@
 
 ### 1.1 Summary
 
-Implement comprehensive security hardening through input validation, file path sanitization, and IPC rate limiting. This includes a robust FEN validation library, path traversal prevention, rate limiting for expensive operations, and integration with Zod schema validation.
+Implement comprehensive security hardening through input validation, file path
+sanitization, and IPC rate limiting. This includes a robust FEN validation
+library, path traversal prevention, rate limiting for expensive operations, and
+integration with Zod schema validation.
 
 ### 1.2 Goals
 
@@ -37,17 +38,20 @@ Implement comprehensive security hardening through input validation, file path s
 ### 2.1 Current Architecture
 
 **Input Validation:**
+
 - Basic FEN validation in chess-logic.ts
 - Manual parameter checking in IPC handlers
 - Generic error messages
 - No centralized validation library
 
 **File Operations:**
+
 - Direct file path usage in data-storage.ts
 - No explicit path sanitization
 - Trust user-provided paths
 
 **IPC Security:**
+
 - No rate limiting
 - Synchronous expensive operations
 - No protection against rapid requests
@@ -55,21 +59,25 @@ Implement comprehensive security hardening through input validation, file path s
 ### 2.2 Key Concepts
 
 **FEN (Forsyth-Edwards Notation):**
+
 - Standard notation for chess positions
 - Format: `[pieces] [turn] [castling] [en passant] [halfmove] [fullmove]`
 - Must be thoroughly validated to prevent engine crashes
 
 **Path Traversal:**
+
 - Security vulnerability where `../` in paths access parent directories
 - Can expose system files or corrupt user data
 - Prevented through path normalization and validation
 
 **Rate Limiting:**
+
 - Throttle expensive operations to prevent resource exhaustion
 - Sliding window algorithm for fair distribution
 - Per-operation limits based on computational cost
 
 **Defense in Depth:**
+
 - Multiple layers of security validation
 - Fail-safe defaults
 - Clear error messages without sensitive details
@@ -201,13 +209,17 @@ export class FENValidator {
     // Validate halfmove clock
     const halfmoveNum = parseInt(halfmove, 10);
     if (isNaN(halfmoveNum) || halfmoveNum < 0) {
-      errors.push(`Halfmove clock must be a non-negative integer, got '${halfmove}'`);
+      errors.push(
+        `Halfmove clock must be a non-negative integer, got '${halfmove}'`
+      );
     }
 
     // Validate fullmove number
     const fullmoveNum = parseInt(fullmove, 10);
     if (isNaN(fullmoveNum) || fullmoveNum < 1) {
-      errors.push(`Fullmove number must be a positive integer, got '${fullmove}'`);
+      errors.push(
+        `Fullmove number must be a positive integer, got '${fullmove}'`
+      );
     }
 
     if (errors.length > 0) {
@@ -304,18 +316,26 @@ export class FENValidator {
 
     // Validate queen count (can be promoted, so up to 9)
     if (pieceCount.Q > 9) {
-      errors.push(`Cannot have more than 9 white queens (found ${pieceCount.Q})`);
+      errors.push(
+        `Cannot have more than 9 white queens (found ${pieceCount.Q})`
+      );
     }
     if (pieceCount.q > 9) {
-      errors.push(`Cannot have more than 9 black queens (found ${pieceCount.q})`);
+      errors.push(
+        `Cannot have more than 9 black queens (found ${pieceCount.q})`
+      );
     }
 
     // Validate pawn count and position
     if (pieceCount.P > 8) {
-      errors.push(`Cannot have more than 8 white pawns (found ${pieceCount.P})`);
+      errors.push(
+        `Cannot have more than 8 white pawns (found ${pieceCount.P})`
+      );
     }
     if (pieceCount.p > 8) {
-      errors.push(`Cannot have more than 8 black pawns (found ${pieceCount.p})`);
+      errors.push(
+        `Cannot have more than 8 black pawns (found ${pieceCount.p})`
+      );
     }
 
     // Check pawns not on first/last rank
@@ -405,10 +425,13 @@ export class FENValidator {
   static validateOrThrow(fen: string): FENComponents {
     const result = this.validate(fen);
     if (!result.valid) {
-      throw new ValidationError(`Invalid FEN format:\n${result.errors.map((e) => ` - ${e}`).join('\n')}`, {
-        fen,
-        errors: result.errors,
-      });
+      throw new ValidationError(
+        `Invalid FEN format:\n${result.errors.map((e) => ` - ${e}`).join('\n')}`,
+        {
+          fen,
+          errors: result.errors,
+        }
+      );
     }
     return result.components!;
   }
@@ -431,13 +454,21 @@ export interface PathValidationOptions {
 
 export class PathSanitizer {
   private static readonly MAX_PATH_LENGTH = 4096;
-  private static readonly TRAVERSAL_PATTERNS = ['../', '..\\', '%2e%2e/', '%2e%2e\\'];
+  private static readonly TRAVERSAL_PATTERNS = [
+    '../',
+    '..\\',
+    '%2e%2e/',
+    '%2e%2e\\',
+  ];
 
   /**
    * Sanitizes and validates a file path
    * @throws SecurityError if path is invalid or contains traversal
    */
-  static sanitize(filePath: string, options: PathValidationOptions = {}): string {
+  static sanitize(
+    filePath: string,
+    options: PathValidationOptions = {}
+  ): string {
     const {
       allowedDirectory,
       allowedExtensions,
@@ -482,11 +513,10 @@ export class PathSanitizer {
     try {
       normalizedPath = path.resolve(trimmedPath);
     } catch (error) {
-      throw new SecurityError(
-        'INVALID_PATH',
-        'Failed to normalize file path',
-        { path: trimmedPath, error: error instanceof Error ? error.message : String(error) }
-      );
+      throw new SecurityError('INVALID_PATH', 'Failed to normalize file path', {
+        path: trimmedPath,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
 
     // If allowed directory specified, ensure path is within it
@@ -507,7 +537,11 @@ export class PathSanitizer {
     // Validate file extension if specified
     if (allowedExtensions && allowedExtensions.length > 0) {
       const ext = path.extname(normalizedPath).toLowerCase();
-      const normalizedExtensions = allowedExtensions.map((e) => e.toLowerCase().startsWith('.') ? e.toLowerCase() : `.${e.toLowerCase()}`);
+      const normalizedExtensions = allowedExtensions.map((e) =>
+        e.toLowerCase().startsWith('.')
+          ? e.toLowerCase()
+          : `.${e.toLowerCase()}`
+      );
 
       if (!normalizedExtensions.includes(ext)) {
         throw new SecurityError(
@@ -595,7 +629,8 @@ export class RateLimiter {
     'engine.analyze': {
       maxRequests: 1,
       windowMs: 1000,
-      message: 'Analysis rate limit reached. Please wait before requesting another analysis.',
+      message:
+        'Analysis rate limit reached. Please wait before requesting another analysis.',
     },
     'engine.getBestMoves': {
       maxRequests: 10,
@@ -605,7 +640,8 @@ export class RateLimiter {
     'bot.makeMove': {
       maxRequests: 1,
       windowMs: 1000,
-      message: 'Bot move rate limit reached. Please wait before requesting another move.',
+      message:
+        'Bot move rate limit reached. Please wait before requesting another move.',
     },
     'guidance.request': {
       maxRequests: 10,
@@ -626,7 +662,9 @@ export class RateLimiter {
 
   constructor() {
     // Initialize with default configs
-    for (const [operation, config] of Object.entries(RateLimiter.DEFAULT_CONFIGS)) {
+    for (const [operation, config] of Object.entries(
+      RateLimiter.DEFAULT_CONFIGS
+    )) {
       this.configs.set(operation, config);
     }
 
@@ -714,7 +752,10 @@ export class RateLimiter {
   /**
    * Gets current usage for an operation
    */
-  getUsage(operation: string, identifier: string = 'default'): {
+  getUsage(
+    operation: string,
+    identifier: string = 'default'
+  ): {
     current: number;
     limit: number;
     resetInMs: number;
@@ -737,7 +778,9 @@ export class RateLimiter {
     const windowStart = now - config.windowMs;
     const validTimestamps = record.timestamps.filter((ts) => ts > windowStart);
     const oldestTimestamp = validTimestamps[0];
-    const resetInMs = oldestTimestamp ? oldestTimestamp + config.windowMs - now : 0;
+    const resetInMs = oldestTimestamp
+      ? oldestTimestamp + config.windowMs - now
+      : 0;
 
     return {
       current: validTimestamps.length,
@@ -773,7 +816,7 @@ export class RateLimitError extends ChessSenseiError {
 
 #### 3.2.5 Updated IPC Handler with Validation
 
-**Example: Engine Analysis Handler**
+##### Example: Engine Analysis Handler
 
 **File:** `backend/src/ipc/engine-handlers.ts`
 
@@ -786,13 +829,17 @@ import { logger } from '../logging/logger';
 
 // Zod schema with custom FEN validation
 const RequestAnalysisSchema = z.object({
-  fen: z.string().min(15).max(100).refine(
-    (fen) => FENValidator.validate(fen).valid,
-    (fen) => {
-      const result = FENValidator.validate(fen);
-      return { message: `Invalid FEN: ${result.errors.join(', ')}` };
-    }
-  ),
+  fen: z
+    .string()
+    .min(15)
+    .max(100)
+    .refine(
+      (fen) => FENValidator.validate(fen).valid,
+      (fen) => {
+        const result = FENValidator.validate(fen);
+        return { message: `Invalid FEN: ${result.errors.join(', ')}` };
+      }
+    ),
   depth: z.number().int().min(1).max(30),
 });
 
@@ -820,7 +867,10 @@ export async function handleRequestAnalysis(params: unknown) {
     });
 
     // 4. Execute analysis
-    const analysis = await engine.analyzePosition(validated.fen, validated.depth);
+    const analysis = await engine.analyzePosition(
+      validated.fen,
+      validated.depth
+    );
 
     // 5. Log success
     logger.info('Analysis completed', {
@@ -876,7 +926,10 @@ import { logger } from '../logging/logger';
 import path from 'path';
 
 // Assume USER_DATA_DIR is defined in config
-const USER_DATA_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '', '.chess-sensei');
+const USER_DATA_DIR = path.join(
+  process.env.HOME || process.env.USERPROFILE || '',
+  '.chess-sensei'
+);
 
 const ExportGameSchema = z.object({
   gameId: z.string().uuid(),
@@ -1068,9 +1121,13 @@ describe('FENValidator', () => {
     });
 
     test('rejects FEN with wrong component count', () => {
-      const result = FENValidator.validate('rnbqkbnr/pppppppp w KQkq - 0 1 extra');
+      const result = FENValidator.validate(
+        'rnbqkbnr/pppppppp w KQkq - 0 1 extra'
+      );
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('FEN must have exactly 6 space-separated components');
+      expect(result.errors).toContain(
+        'FEN must have exactly 6 space-separated components'
+      );
     });
 
     test('rejects FEN with missing king', () => {
@@ -1078,7 +1135,9 @@ describe('FENValidator', () => {
         'rnbq1bnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       );
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('Must have exactly 1 black king'))).toBe(true);
+      expect(
+        result.errors.some((e) => e.includes('Must have exactly 1 black king'))
+      ).toBe(true);
     });
 
     test('rejects FEN with pawns on first rank', () => {
@@ -1086,7 +1145,11 @@ describe('FENValidator', () => {
         'rnbqkbnP/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
       );
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('Pawns cannot be on the first rank'))).toBe(true);
+      expect(
+        result.errors.some((e) =>
+          e.includes('Pawns cannot be on the first rank')
+        )
+      ).toBe(true);
     });
 
     test('rejects invalid turn', () => {
@@ -1094,7 +1157,11 @@ describe('FENValidator', () => {
         'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR x KQkq - 0 1'
       );
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes("Turn must be 'w' (white) or 'b' (black)"))).toBe(true);
+      expect(
+        result.errors.some((e) =>
+          e.includes("Turn must be 'w' (white) or 'b' (black)")
+        )
+      ).toBe(true);
     });
 
     test('rejects invalid castling rights', () => {
@@ -1102,7 +1169,9 @@ describe('FENValidator', () => {
         'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkqX - 0 1'
       );
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('Invalid castling character'))).toBe(true);
+      expect(
+        result.errors.some((e) => e.includes('Invalid castling character'))
+      ).toBe(true);
     });
 
     test('rejects invalid en passant square', () => {
@@ -1110,7 +1179,11 @@ describe('FENValidator', () => {
         'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e4 0 1'
       );
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('En passant square must be on rank 3'))).toBe(true);
+      expect(
+        result.errors.some((e) =>
+          e.includes('En passant square must be on rank 3')
+        )
+      ).toBe(true);
     });
 
     test('provides detailed error messages', () => {
@@ -1132,7 +1205,9 @@ describe('FENValidator', () => {
     });
 
     test('throws ValidationError for invalid FEN', () => {
-      expect(() => FENValidator.validateOrThrow('invalid')).toThrow(ValidationError);
+      expect(() => FENValidator.validateOrThrow('invalid')).toThrow(
+        ValidationError
+      );
     });
   });
 });
@@ -1156,15 +1231,21 @@ describe('PathSanitizer', () => {
     });
 
     test('rejects path with traversal (.../)', () => {
-      expect(() => PathSanitizer.sanitize('../../../etc/passwd')).toThrow(SecurityError);
+      expect(() => PathSanitizer.sanitize('../../../etc/passwd')).toThrow(
+        SecurityError
+      );
     });
 
     test('rejects path with traversal (..\\)', () => {
-      expect(() => PathSanitizer.sanitize('..\\..\\..\\windows\\system32')).toThrow(SecurityError);
+      expect(() =>
+        PathSanitizer.sanitize('..\\..\\..\\windows\\system32')
+      ).toThrow(SecurityError);
     });
 
     test('rejects path with URL-encoded traversal', () => {
-      expect(() => PathSanitizer.sanitize('%2e%2e/etc/passwd')).toThrow(SecurityError);
+      expect(() => PathSanitizer.sanitize('%2e%2e/etc/passwd')).toThrow(
+        SecurityError
+      );
     });
 
     test('rejects empty path', () => {
@@ -1173,29 +1254,36 @@ describe('PathSanitizer', () => {
 
     test('rejects path exceeding max length', () => {
       const longPath = 'a'.repeat(5000);
-      expect(() => PathSanitizer.sanitize(longPath, { maxPathLength: 100 })).toThrow(SecurityError);
+      expect(() =>
+        PathSanitizer.sanitize(longPath, { maxPathLength: 100 })
+      ).toThrow(SecurityError);
     });
 
     test('enforces allowed directory restriction', () => {
       const allowedDir = '/home/user/data';
       const outsidePath = '/home/other/file.txt';
 
-      expect(() => PathSanitizer.sanitize(outsidePath, { allowedDirectory: allowedDir }))
-        .toThrow(SecurityError);
+      expect(() =>
+        PathSanitizer.sanitize(outsidePath, { allowedDirectory: allowedDir })
+      ).toThrow(SecurityError);
     });
 
     test('allows path within allowed directory', () => {
       const allowedDir = '/home/user/data';
       const insidePath = '/home/user/data/games/game1.json';
 
-      const safePath = PathSanitizer.sanitize(insidePath, { allowedDirectory: allowedDir });
+      const safePath = PathSanitizer.sanitize(insidePath, {
+        allowedDirectory: allowedDir,
+      });
       expect(safePath).toContain('data');
     });
 
     test('enforces file extension restriction', () => {
-      expect(() => PathSanitizer.sanitize('/home/user/file.exe', {
-        allowedExtensions: ['.json', '.pgn'],
-      })).toThrow(SecurityError);
+      expect(() =>
+        PathSanitizer.sanitize('/home/user/file.exe', {
+          allowedExtensions: ['.json', '.pgn'],
+        })
+      ).toThrow(SecurityError);
     });
 
     test('allows valid file extension', () => {
@@ -1208,7 +1296,9 @@ describe('PathSanitizer', () => {
 
   describe('getSafeFilename', () => {
     test('extracts filename from path', () => {
-      const filename = PathSanitizer.getSafeFilename('/home/user/data/file.txt');
+      const filename = PathSanitizer.getSafeFilename(
+        '/home/user/data/file.txt'
+      );
       expect(filename).toBe('file.txt');
     });
 
@@ -1218,7 +1308,9 @@ describe('PathSanitizer', () => {
     });
 
     test('rejects filename with only invalid characters', () => {
-      expect(() => PathSanitizer.getSafeFilename('<>:"|?')).toThrow(SecurityError);
+      expect(() => PathSanitizer.getSafeFilename('<>:"|?')).toThrow(
+        SecurityError
+      );
     });
   });
 });
@@ -1255,7 +1347,9 @@ describe('RateLimiter', () => {
       limiter.checkLimit('test.operation');
       limiter.checkLimit('test.operation');
 
-      expect(() => limiter.checkLimit('test.operation')).toThrow(RateLimitError);
+      expect(() => limiter.checkLimit('test.operation')).toThrow(
+        RateLimitError
+      );
     });
 
     test('resets after window expires', async () => {
@@ -1277,8 +1371,12 @@ describe('RateLimiter', () => {
       limiter.checkLimit('test.operation', 'user1');
       limiter.checkLimit('test.operation', 'user2');
 
-      expect(() => limiter.checkLimit('test.operation', 'user1')).toThrow(RateLimitError);
-      expect(() => limiter.checkLimit('test.operation', 'user2')).toThrow(RateLimitError);
+      expect(() => limiter.checkLimit('test.operation', 'user1')).toThrow(
+        RateLimitError
+      );
+      expect(() => limiter.checkLimit('test.operation', 'user2')).toThrow(
+        RateLimitError
+      );
     });
 
     test('includes reset time in error details', () => {
@@ -1290,7 +1388,9 @@ describe('RateLimiter', () => {
         limiter.checkLimit('test.operation');
       } catch (error) {
         expect(error).toBeInstanceOf(RateLimitError);
-        expect((error as RateLimitError).details?.resetInSeconds).toBeGreaterThan(0);
+        expect(
+          (error as RateLimitError).details?.resetInSeconds
+        ).toBeGreaterThan(0);
       }
     });
   });
@@ -1313,7 +1413,9 @@ describe('RateLimiter', () => {
       limiter.setConfig('test.operation', { maxRequests: 1, windowMs: 1000 });
 
       limiter.checkLimit('test.operation');
-      expect(() => limiter.checkLimit('test.operation')).toThrow(RateLimitError);
+      expect(() => limiter.checkLimit('test.operation')).toThrow(
+        RateLimitError
+      );
 
       limiter.reset('test.operation');
       expect(() => limiter.checkLimit('test.operation')).not.toThrow();
@@ -1329,9 +1431,11 @@ describe('RateLimiter', () => {
 ### 4.1 Phase Breakdown
 
 #### Phase 6A: Input Validation (Week 13)
+
 **Duration:** 10 hours
 
 **Tasks:**
+
 1. Create FEN validator with comprehensive error messages (3h)
 2. Create input validator for length/size limits (1h)
 3. Add validation tests (100+ test cases) (3h)
@@ -1339,15 +1443,18 @@ describe('RateLimiter', () => {
 5. Document validation rules (1h)
 
 **Deliverables:**
+
 - `backend/src/validators/fen-validator.ts`
 - `backend/src/validators/input-validator.ts`
 - `tests/unit/validators/fen-validator.test.ts`
 - Test coverage >95%
 
 #### Phase 6B: File Path Security (Week 13)
+
 **Duration:** 8 hours
 
 **Tasks:**
+
 1. Create path sanitizer utility (2h)
 2. Audit all file operations (storage, export, import) (2h)
 3. Add path validation to file I/O functions (2h)
@@ -1355,15 +1462,18 @@ describe('RateLimiter', () => {
 5. Test on Windows, macOS, Linux (1h)
 
 **Deliverables:**
+
 - `backend/src/validators/path-sanitizer.ts`
 - Updated `backend/src/data-storage.ts`
 - Updated `backend/src/export-import.ts`
 - `tests/unit/validators/path-sanitizer.test.ts`
 
 #### Phase 6C: Rate Limiting (Week 14)
+
 **Duration:** 10 hours
 
 **Tasks:**
+
 1. Create RateLimiter class with sliding window (3h)
 2. Identify expensive operations to rate limit (1h)
 3. Add rate limiting to IPC handlers (3h)
@@ -1371,15 +1481,18 @@ describe('RateLimiter', () => {
 5. Add rate limiter tests (2h)
 
 **Deliverables:**
+
 - `backend/src/validators/rate-limiter.ts`
 - Updated IPC handlers with rate limiting
 - Frontend error display for rate limits
 - `tests/unit/validators/rate-limiter.test.ts`
 
 #### Phase 6D: Testing & Security Audit (Week 14)
+
 **Duration:** 12 hours
 
 **Tasks:**
+
 1. Comprehensive edge case testing (3h)
 2. Security audit of all inputs (3h)
 3. Fuzz testing with invalid inputs (2h)
@@ -1387,6 +1500,7 @@ describe('RateLimiter', () => {
 5. Document security measures in troubleshooting.md (2h)
 
 **Deliverables:**
+
 - Security audit report
 - Performance benchmark results
 - Updated `documents/troubleshooting.md`
@@ -1394,25 +1508,25 @@ describe('RateLimiter', () => {
 
 ### 4.2 File Changes Summary
 
-| File | Type | Changes | Lines |
-|------|------|---------|-------|
-| `backend/src/validators/fen-validator.ts` | New | FEN validation library | ~350 |
-| `backend/src/validators/path-sanitizer.ts` | New | Path sanitization | ~180 |
-| `backend/src/validators/rate-limiter.ts` | New | Rate limiting | ~200 |
-| `backend/src/validators/input-validator.ts` | New | Input length validation | ~80 |
-| `backend/src/errors/chess-sensei-error.ts` | Modify | Add SecurityError, RateLimitError | +20 |
-| `backend/src/ipc/engine-handlers.ts` | Modify | Add validation & rate limiting | +40 |
-| `backend/src/ipc/guidance-handlers.ts` | Modify | Add validation & rate limiting | +30 |
-| `backend/src/ipc/bot-handlers.ts` | Modify | Add validation & rate limiting | +30 |
-| `backend/src/ipc/storage-handlers.ts` | Modify | Add path sanitization | +50 |
-| `backend/src/data-storage.ts` | Modify | Add path validation | +30 |
-| `backend/src/export-import.ts` | Modify | Add path validation & size limits | +40 |
-| `tests/unit/validators/fen-validator.test.ts` | New | FEN validation tests | ~400 |
-| `tests/unit/validators/path-sanitizer.test.ts` | New | Path sanitization tests | ~200 |
-| `tests/unit/validators/rate-limiter.test.ts` | New | Rate limiter tests | ~150 |
-| `tests/integration/security.test.ts` | New | End-to-end security tests | ~200 |
-| `documents/troubleshooting.md` | Modify | Document security features | +50 |
-| **Total** | | **16 files** | **~2,030 lines** |
+| File                                           | Type   | Changes                           | Lines            |
+| ---------------------------------------------- | ------ | --------------------------------- | ---------------- |
+| `backend/src/validators/fen-validator.ts`      | New    | FEN validation library            | ~350             |
+| `backend/src/validators/path-sanitizer.ts`     | New    | Path sanitization                 | ~180             |
+| `backend/src/validators/rate-limiter.ts`       | New    | Rate limiting                     | ~200             |
+| `backend/src/validators/input-validator.ts`    | New    | Input length validation           | ~80              |
+| `backend/src/errors/chess-sensei-error.ts`     | Modify | Add SecurityError, RateLimitError | +20              |
+| `backend/src/ipc/engine-handlers.ts`           | Modify | Add validation & rate limiting    | +40              |
+| `backend/src/ipc/guidance-handlers.ts`         | Modify | Add validation & rate limiting    | +30              |
+| `backend/src/ipc/bot-handlers.ts`              | Modify | Add validation & rate limiting    | +30              |
+| `backend/src/ipc/storage-handlers.ts`          | Modify | Add path sanitization             | +50              |
+| `backend/src/data-storage.ts`                  | Modify | Add path validation               | +30              |
+| `backend/src/export-import.ts`                 | Modify | Add path validation & size limits | +40              |
+| `tests/unit/validators/fen-validator.test.ts`  | New    | FEN validation tests              | ~400             |
+| `tests/unit/validators/path-sanitizer.test.ts` | New    | Path sanitization tests           | ~200             |
+| `tests/unit/validators/rate-limiter.test.ts`   | New    | Rate limiter tests                | ~150             |
+| `tests/integration/security.test.ts`           | New    | End-to-end security tests         | ~200             |
+| `documents/troubleshooting.md`                 | Modify | Document security features        | +50              |
+| **Total**                                      |        | **16 files**                      | **~2,030 lines** |
 
 ---
 
@@ -1421,13 +1535,17 @@ describe('RateLimiter', () => {
 ### 5.1 Threat Model
 
 **Threats Mitigated:**
-1. **Malformed Input Crashes**: Comprehensive FEN validation prevents engine crashes
+
+1. **Malformed Input Crashes**: Comprehensive FEN validation prevents engine
+   crashes
 2. **Path Traversal**: Sanitization prevents access to system files
 3. **Resource Exhaustion**: Rate limiting prevents DoS via rapid requests
 4. **Data Corruption**: File size limits prevent memory exhaustion
-5. **Information Disclosure**: Sanitized error messages prevent leaking sensitive details
+5. **Information Disclosure**: Sanitized error messages prevent leaking
+   sensitive details
 
 **Out of Scope:**
+
 - Network attacks (app is offline)
 - Code injection (WASM sandbox)
 - Memory corruption (TypeScript/WASM memory safety)
@@ -1443,6 +1561,7 @@ describe('RateLimiter', () => {
 ### 5.3 Security Testing
 
 **Test Categories:**
+
 1. **Fuzzing**: Random invalid inputs to find edge cases
 2. **Boundary Testing**: Min/max values, empty inputs, huge inputs
 3. **Injection Testing**: Path traversal, special characters
@@ -1458,6 +1577,7 @@ describe('RateLimiter', () => {
 **Target:** <5ms per request
 
 **Optimizations:**
+
 - Compiled regex patterns (cached)
 - Early exit on first error (fail-fast)
 - Lazy validation (only validate when needed)
@@ -1466,11 +1586,13 @@ describe('RateLimiter', () => {
 ### 6.2 Memory Usage
 
 **Rate Limiter Memory:**
+
 - ~100 bytes per operation per user
 - Automatic cleanup every 5 minutes
 - Max 1000 requests tracked per operation
 
 **Validation Memory:**
+
 - Zero allocations for valid inputs (regex test)
 - Minimal allocations for error messages
 
@@ -1493,23 +1615,28 @@ Total validation overhead:         ~0.75ms per request
 **Option:** Use chess.js for FEN validation
 
 **Pros:**
+
 - Battle-tested, widely used
 - Handles edge cases
 
 **Cons:**
+
 - Adds dependency
 - Generic error messages (not user-friendly)
 - Performance overhead (full board representation)
 
-**Decision:** Implement custom validator for detailed error messages and performance
+**Decision:** Implement custom validator for detailed error messages and
+performance
 
 ### 7.2 Token Bucket vs Sliding Window
 
 **Token Bucket:**
+
 - Allows bursts of traffic
 - More complex implementation
 
 **Sliding Window:**
+
 - More predictable behavior
 - Simpler implementation
 - Better for user experience
@@ -1519,14 +1646,17 @@ Total validation overhead:         ~0.75ms per request
 ### 7.3 Client-Side vs Server-Side Validation
 
 **Client-Side Only:**
+
 - Pros: Immediate feedback, no IPC call
 - Cons: Can be bypassed, inconsistent with backend
 
 **Server-Side Only:**
+
 - Pros: Single source of truth, secure
 - Cons: Slower feedback, IPC overhead
 
-**Decision:** Both - client-side for UX, server-side for security (defense in depth)
+**Decision:** Both - client-side for UX, server-side for security (defense in
+depth)
 
 ---
 
@@ -1568,19 +1698,20 @@ Total validation overhead:         ~0.75ms per request
 
 ## 10. Risks and Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Validation too strict, rejects valid input | Medium | Medium | Comprehensive testing with real-world FENs, chess.js comparison |
-| Rate limiting impacts legitimate use | Low | Medium | Conservative limits, tune based on testing |
-| Path sanitization breaks valid paths | Low | High | Test on all platforms, use standard path.resolve() |
-| Validation overhead impacts performance | Low | Low | Benchmark in Phase 6D, optimize if needed |
-| False positives in security tests | Medium | Low | Review all security test failures manually |
+| Risk                                       | Likelihood | Impact | Mitigation                                                      |
+| ------------------------------------------ | ---------- | ------ | --------------------------------------------------------------- |
+| Validation too strict, rejects valid input | Medium     | Medium | Comprehensive testing with real-world FENs, chess.js comparison |
+| Rate limiting impacts legitimate use       | Low        | Medium | Conservative limits, tune based on testing                      |
+| Path sanitization breaks valid paths       | Low        | High   | Test on all platforms, use standard path.resolve()              |
+| Validation overhead impacts performance    | Low        | Low    | Benchmark in Phase 6D, optimize if needed                       |
+| False positives in security tests          | Medium     | Low    | Review all security test failures manually                      |
 
 ---
 
 ## 11. Success Criteria
 
 **Completion Criteria:**
+
 - [ ] All IPC handlers have input validation
 - [ ] All file operations have path sanitization
 - [ ] Rate limiting on expensive operations (analyze, guidance, bot move)
@@ -1590,6 +1721,7 @@ Total validation overhead:         ~0.75ms per request
 - [ ] Security audit passes with no high-severity issues
 
 **Quality Metrics:**
+
 - No path traversal vulnerabilities
 - Clear, actionable error messages
 - No performance degradation in normal usage
@@ -1602,6 +1734,7 @@ Total validation overhead:         ~0.75ms per request
 ### 12.1 User-Facing Documentation
 
 Update `documents/troubleshooting.md` with:
+
 - Common validation errors and fixes
 - Rate limit explanations
 - File path requirements
@@ -1609,6 +1742,7 @@ Update `documents/troubleshooting.md` with:
 ### 12.2 Developer Documentation
 
 Add to codebase:
+
 - JSDoc comments for all validators
 - Security best practices guide
 - Testing guide for security features
@@ -1617,28 +1751,28 @@ Add to codebase:
 
 ## 13. Timeline
 
-| Week | Phase | Tasks | Hours |
-|------|-------|-------|-------|
-| 13 | 6A | Input validation library | 10 |
-| 13 | 6B | File path security | 8 |
-| 14 | 6C | Rate limiting | 10 |
-| 14 | 6D | Testing & audit | 12 |
-| **Total** | | | **40 hours** |
+| Week      | Phase | Tasks                    | Hours        |
+| --------- | ----- | ------------------------ | ------------ |
+| 13        | 6A    | Input validation library | 10           |
+| 13        | 6B    | File path security       | 8            |
+| 14        | 6C    | Rate limiting            | 10           |
+| 14        | 6D    | Testing & audit          | 12           |
+| **Total** |       |                          | **40 hours** |
 
 ---
 
 ## Approval
 
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Product Owner | | | Pending |
-| Tech Lead | | | Pending |
-| Security Review | | | Pending |
+| Role            | Name | Date | Status  |
+| --------------- | ---- | ---- | ------- |
+| Product Owner   |      |      | Pending |
+| Tech Lead       |      |      | Pending |
+| Security Review |      |      | Pending |
 
 ---
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 0.1 | 2026-01-08 | Claude | Initial draft |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

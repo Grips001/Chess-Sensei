@@ -1,16 +1,16 @@
 # PRD: Code Quality Improvements - Type Safety & Error Handling
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **Related Issues:** N/A
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-08
+> **Last Updated:** 2026-01-08 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Eliminate all TypeScript `any` types and implement standardized error handling throughout Chess-Sensei. This improves type safety, reduces runtime errors, and creates a consistent error handling strategy that makes debugging easier and code more maintainable.
+Eliminate all TypeScript `any` types and implement standardized error handling
+throughout Chess-Sensei. This improves type safety, reduces runtime errors, and
+creates a consistent error handling strategy that makes debugging easier and
+code more maintainable.
 
 ## Problem Statement
 
@@ -35,7 +35,8 @@ Chess-Sensei v1.1.0 has good TypeScript practices but room for improvement:
 
 ### Impact
 
-**Affected Users:** Developers, maintainers, and indirectly end-users (fewer bugs)
+**Affected Users:** Developers, maintainers, and indirectly end-users (fewer
+bugs)
 
 **Severity:** Medium - Code works but lacks robustness and safety
 
@@ -58,13 +59,13 @@ Chess-Sensei v1.1.0 has good TypeScript practices but room for improvement:
 
 ### Success Metrics
 
-| Metric                        | Current | Target | Measurement Method                |
-| ----------------------------- | ------- | ------ | --------------------------------- |
-| TypeScript `any` count        | ~15     | 0      | ESLint no-explicit-any violations |
-| Type coverage                 | ~85%    | 100%   | TypeScript strict checks          |
-| Error handling consistency    | 30%     | 100%   | Code audit                        |
-| Input validation coverage     | 40%     | 100%   | Review all IPC handlers           |
-| Runtime type errors           | 5/month | <1/month| Error tracking logs              |
+| Metric                     | Current | Target   | Measurement Method                |
+| -------------------------- | ------- | -------- | --------------------------------- |
+| TypeScript `any` count     | ~15     | 0        | ESLint no-explicit-any violations |
+| Type coverage              | ~85%    | 100%     | TypeScript strict checks          |
+| Error handling consistency | 30%     | 100%     | Code audit                        |
+| Input validation coverage  | 40%     | 100%     | Review all IPC handlers           |
+| Runtime type errors        | 5/month | <1/month | Error tracking logs               |
 
 ## User Stories
 
@@ -96,24 +97,24 @@ So that I can follow established conventions
 
 ### Functional Requirements
 
-| ID    | Requirement                                              | Priority | Notes                                   |
-| ----- | -------------------------------------------------------- | -------- | --------------------------------------- |
-| FR-01 | Remove all `any` types, replace with proper types        | Must     | Backend, frontend, shared code          |
-| FR-02 | Implement standardized error class hierarchy             | Must     | Base class + category-specific classes  |
-| FR-03 | Add Zod schema validation for IPC parameters             | Must     | All 45 IPC methods                      |
-| FR-04 | Standardize error response format                        | Must     | Consistent structure across IPC         |
-| FR-05 | Enable additional TypeScript strict checks               | Must     | noUncheckedIndexedAccess, etc.          |
-| FR-06 | Add comprehensive FEN validation library                 | Should   | Detailed error messages for invalid FEN |
-| FR-07 | Implement error tracking and aggregation                 | Should   | Count recurring errors                  |
+| ID    | Requirement                                       | Priority | Notes                                   |
+| ----- | ------------------------------------------------- | -------- | --------------------------------------- |
+| FR-01 | Remove all `any` types, replace with proper types | Must     | Backend, frontend, shared code          |
+| FR-02 | Implement standardized error class hierarchy      | Must     | Base class + category-specific classes  |
+| FR-03 | Add Zod schema validation for IPC parameters      | Must     | All 45 IPC methods                      |
+| FR-04 | Standardize error response format                 | Must     | Consistent structure across IPC         |
+| FR-05 | Enable additional TypeScript strict checks        | Must     | noUncheckedIndexedAccess, etc.          |
+| FR-06 | Add comprehensive FEN validation library          | Should   | Detailed error messages for invalid FEN |
+| FR-07 | Implement error tracking and aggregation          | Should   | Count recurring errors                  |
 
 ### Non-Functional Requirements
 
-| ID     | Requirement            | Criteria                                           |
-| ------ | ---------------------- | -------------------------------------------------- |
-| NFR-01 | Backward Compatibility | No breaking changes to IPC contracts               |
-| NFR-02 | Performance            | Validation overhead <5ms per request               |
-| NFR-03 | Developer Experience   | Clear error messages with actionable context       |
-| NFR-04 | Maintainability        | Consistent patterns, well-documented               |
+| ID     | Requirement            | Criteria                                     |
+| ------ | ---------------------- | -------------------------------------------- |
+| NFR-01 | Backward Compatibility | No breaking changes to IPC contracts         |
+| NFR-02 | Performance            | Validation overhead <5ms per request         |
+| NFR-03 | Developer Experience   | Clear error messages with actionable context |
+| NFR-04 | Maintainability        | Consistent patterns, well-documented         |
 
 ## User Experience
 
@@ -188,14 +189,17 @@ try {
     logger.error('Storage error', {
       code: error.code,
       message: error.message,
-      details: error.details
+      details: error.details,
     });
     return {
       error: {
         code: 'STORAGE_ERROR',
         message: 'Failed to save game: disk full or permissions issue',
-        details: { path: error.details.path, diskSpace: error.details.available }
-      }
+        details: {
+          path: error.details.path,
+          diskSpace: error.details.available,
+        },
+      },
     };
   }
   // Handle other error types...
@@ -204,12 +208,12 @@ try {
 
 ### Edge Cases
 
-| Scenario                              | Expected Behavior                                      |
-| ------------------------------------- | ------------------------------------------------------ |
-| IPC params fail schema validation     | Return ValidationError with detailed field-level errors|
-| Unexpected error type caught          | Log full stack, return generic INTERNAL_ERROR          |
-| Array index access potentially undefined | TypeScript error forces null check                  |
-| Optional property accessed            | TypeScript error forces undefined check                |
+| Scenario                                 | Expected Behavior                                       |
+| ---------------------------------------- | ------------------------------------------------------- |
+| IPC params fail schema validation        | Return ValidationError with detailed field-level errors |
+| Unexpected error type caught             | Log full stack, return generic INTERNAL_ERROR           |
+| Array index access potentially undefined | TypeScript error forces null check                      |
+| Optional property accessed               | TypeScript error forces undefined check                 |
 
 ## Technical Considerations
 
@@ -229,12 +233,12 @@ try {
 
 ### Risks
 
-| Risk                                  | Likelihood | Impact | Mitigation                                        |
-| ------------------------------------- | ---------- | ------ | ------------------------------------------------- |
-| Breaking changes during `any` removal | Medium     | High   | Thorough testing, incremental approach            |
-| Validation overhead impacts perf      | Low        | Medium | Benchmark validation, optimize if needed          |
-| Over-engineering error hierarchy      | Low        | Low    | Keep simple, add complexity only as needed        |
-| Strict checks reveal hidden bugs      | High       | Medium | Good! Fix bugs, improve quality                   |
+| Risk                                  | Likelihood | Impact | Mitigation                                 |
+| ------------------------------------- | ---------- | ------ | ------------------------------------------ |
+| Breaking changes during `any` removal | Medium     | High   | Thorough testing, incremental approach     |
+| Validation overhead impacts perf      | Low        | Medium | Benchmark validation, optimize if needed   |
+| Over-engineering error hierarchy      | Low        | Low    | Keep simple, add complexity only as needed |
+| Strict checks reveal hidden bugs      | High       | Medium | Good! Fix bugs, improve quality            |
 
 ## Alternatives Considered
 
@@ -296,7 +300,8 @@ try {
 1. **Should we track error frequency?** (Identify recurring issues)
    - Proposal: Yes, implement lightweight error tracking
 
-2. **Should validation errors include field paths?** (e.g., "params.depth must be number")
+2. **Should validation errors include field paths?** (e.g., "params.depth must
+   be number")
    - Proposal: Yes, Zod provides this automatically
 
 3. **Should we validate responses in addition to requests?**
@@ -317,6 +322,6 @@ try {
 
 ## Revision History
 
-| Version | Date       | Author  | Changes         |
-| ------- | ---------- | ------- | --------------- |
-| 0.1     | 2026-01-08 | Claude  | Initial draft   |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

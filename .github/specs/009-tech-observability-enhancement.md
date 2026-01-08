@@ -1,12 +1,9 @@
 # Tech Spec: Observability Enhancement - Logging, Metrics & Monitoring
 
-> **Filename:** `009-tech-observability-enhancement.md`
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **PRD:** `009-prd-observability-enhancement.md`
-> **Related Issues:** N/A
+> **Filename:** `009-tech-observability-enhancement.md` **Status:** Draft
+> **Author:** Claude (AI Assistant) **Created:** 2026-01-08 **Last Updated:**
+> 2026-01-08 **PRD:** `009-prd-observability-enhancement.md` **Related Issues:**
+> N/A
 
 ---
 
@@ -14,7 +11,10 @@
 
 ### Summary
 
-Implement structured JSON logging with request correlation IDs, performance metrics collection for critical operations, error tracking with aggregation, comprehensive health checks for all components, and metrics export capability for debugging.
+Implement structured JSON logging with request correlation IDs, performance
+metrics collection for critical operations, error tracking with aggregation,
+comprehensive health checks for all components, and metrics export capability
+for debugging.
 
 ### Goals
 
@@ -37,6 +37,7 @@ Implement structured JSON logging with request correlation IDs, performance metr
 ### Current Architecture
 
 **Logging (Basic):**
+
 ```typescript
 // src/backend/file-logger.ts
 export function log(level: LogLevel, message: string) {
@@ -47,11 +48,13 @@ export function log(level: LogLevel, message: string) {
 ```
 
 **No Metrics:**
+
 - Manual `console.time()` / `console.timeEnd()` in development
 - No systematic metric collection
 - No metric persistence
 
 **No Error Tracking:**
+
 - Errors logged individually
 - No aggregation or frequency analysis
 - No pattern detection
@@ -228,7 +231,7 @@ export class FileLogger {
 
   private cleanupOldLogs(): void {
     const files = fs.readdirSync(this.logPath);
-    const cutoffTime = Date.now() - (this.retentionDays * 24 * 60 * 60 * 1000);
+    const cutoffTime = Date.now() - this.retentionDays * 24 * 60 * 60 * 1000;
 
     for (const file of files) {
       if (!file.startsWith('app-')) continue;
@@ -427,16 +430,19 @@ export class MetricsCollector {
 }
 
 export interface MetricsSnapshot {
-  histograms: Record<string, {
-    count: number;
-    sum: number;
-    min: number;
-    max: number;
-    mean: number;
-    p50: number;
-    p95: number;
-    p99: number;
-  }>;
+  histograms: Record<
+    string,
+    {
+      count: number;
+      sum: number;
+      min: number;
+      max: number;
+      mean: number;
+      p50: number;
+      p95: number;
+      p99: number;
+    }
+  >;
   counters: Record<string, number>;
   gauges: Record<string, number>;
   timestamp: number;
@@ -524,7 +530,10 @@ export class ErrorTracker {
 
     return {
       errors,
-      totalErrorCount: Array.from(this.errors.values()).reduce((sum, e) => sum + e.count, 0),
+      totalErrorCount: Array.from(this.errors.values()).reduce(
+        (sum, e) => sum + e.count,
+        0
+      ),
       uniqueErrorCount: this.errors.size,
       timestamp: Date.now(),
     };
@@ -582,7 +591,10 @@ export class HealthCheckManager {
     const start = Date.now();
     try {
       // Test engine with simple position
-      await engine.evaluatePosition('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', 1);
+      await engine.evaluatePosition(
+        'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        1
+      );
       return {
         name: 'Engine',
         status: HealthStatus.HEALTHY,
@@ -651,7 +663,8 @@ export class HealthCheckManager {
 
     return {
       name: 'Memory',
-      status: heapUsedMB < threshold ? HealthStatus.HEALTHY : HealthStatus.DEGRADED,
+      status:
+        heapUsedMB < threshold ? HealthStatus.HEALTHY : HealthStatus.DEGRADED,
       message: `Heap: ${heapUsedMB.toFixed(2)} MB`,
       lastCheck: Date.now(),
     };
@@ -676,10 +689,10 @@ export class HealthCheckManager {
   }
 
   private computeOverallStatus(components: ComponentHealth[]): HealthStatus {
-    if (components.some(c => c.status === HealthStatus.UNHEALTHY)) {
+    if (components.some((c) => c.status === HealthStatus.UNHEALTHY)) {
       return HealthStatus.UNHEALTHY;
     }
-    if (components.some(c => c.status === HealthStatus.DEGRADED)) {
+    if (components.some((c) => c.status === HealthStatus.DEGRADED)) {
       return HealthStatus.DEGRADED;
     }
     return HealthStatus.HEALTHY;
@@ -734,12 +747,12 @@ export interface HistogramStats {
 
 #### New IPC Methods
 
-| Method | Request Type | Response Type | Description |
-| ------ | ------------ | ------------- | ----------- |
-| `observability:getMetrics` | `void` | `MetricsSnapshot` | Get current metrics |
-| `observability:getErrorReport` | `void` | `ErrorReport` | Get error frequency report |
-| `observability:getHealthCheck` | `void` | `HealthCheckReport` | Get system health status |
-| `observability:exportDiagnostics` | `void` | `DiagnosticsExport` | Export all diagnostic data |
+| Method                            | Request Type | Response Type       | Description                |
+| --------------------------------- | ------------ | ------------------- | -------------------------- |
+| `observability:getMetrics`        | `void`       | `MetricsSnapshot`   | Get current metrics        |
+| `observability:getErrorReport`    | `void`       | `ErrorReport`       | Get error frequency report |
+| `observability:getHealthCheck`    | `void`       | `HealthCheckReport` | Get system health status   |
+| `observability:exportDiagnostics` | `void`       | `DiagnosticsExport` | Export all diagnostic data |
 
 ### UI Changes
 
@@ -755,12 +768,12 @@ No UI changes initially - diagnostics accessible via IPC for developer tools.
 
 ### Error Handling
 
-| Error Condition | Handling Strategy | User Feedback |
-| --------------- | ----------------- | ------------- |
-| Log write failure | Console fallback, continue execution | None (silent fallback) |
-| Metrics overflow | Drop oldest values (LRU) | None (automatic management) |
-| Health check timeout | Mark as DEGRADED | None (background check) |
-| Log rotation failure | Continue with current file | Log warning |
+| Error Condition      | Handling Strategy                    | User Feedback               |
+| -------------------- | ------------------------------------ | --------------------------- |
+| Log write failure    | Console fallback, continue execution | None (silent fallback)      |
+| Metrics overflow     | Drop oldest values (LRU)             | None (automatic management) |
+| Health check timeout | Mark as DEGRADED                     | None (background check)     |
+| Log rotation failure | Continue with current file           | Log warning                 |
 
 ## Implementation Plan
 
@@ -817,56 +830,58 @@ No UI changes initially - diagnostics accessible via IPC for developer tools.
 
 ### File Changes Summary
 
-| File | Action | Description |
-| ---- | ------ | ----------- |
-| `src/backend/file-logger.ts` | Modify | Add structured JSON logging |
-| `src/backend/metrics-collector.ts` | Create | Metrics collection system |
-| `src/backend/error-tracker.ts` | Create | Error aggregation |
-| `src/backend/health-check.ts` | Create | Health check system |
-| `src/shared/correlation.ts` | Create | Request ID correlation |
-| `src/shared/observability-types.ts` | Create | Observability types |
+| File                                             | Action | Description                    |
+| ------------------------------------------------ | ------ | ------------------------------ |
+| `src/backend/file-logger.ts`                     | Modify | Add structured JSON logging    |
+| `src/backend/metrics-collector.ts`               | Create | Metrics collection system      |
+| `src/backend/error-tracker.ts`                   | Create | Error aggregation              |
+| `src/backend/health-check.ts`                    | Create | Health check system            |
+| `src/shared/correlation.ts`                      | Create | Request ID correlation         |
+| `src/shared/observability-types.ts`              | Create | Observability types            |
 | `src/backend/handlers/observability-handlers.ts` | Create | IPC handlers for observability |
-| All backend services | Modify | Add structured logging calls |
-| All frontend modules | Modify | Add request ID correlation |
+| All backend services                             | Modify | Add structured logging calls   |
+| All frontend modules                             | Modify | Add request ID correlation     |
 
 ## Testing Strategy
 
 ### Unit Tests
 
-| Test Case | File | Description |
-| --------- | ---- | ----------- |
-| Structured Logging | `tests/unit/file-logger.test.ts` | Test JSON format |
-| Log Rotation | `tests/unit/file-logger.test.ts` | Test size-based rotation |
-| Metrics Collection | `tests/unit/metrics-collector.test.ts` | Test histogram/counter/gauge |
-| Percentile Calculation | `tests/unit/metrics-collector.test.ts` | Test p50/p95/p99 |
-| Error Tracking | `tests/unit/error-tracker.test.ts` | Test aggregation |
-| Health Checks | `tests/unit/health-check.test.ts` | Test component checks |
+| Test Case              | File                                   | Description                  |
+| ---------------------- | -------------------------------------- | ---------------------------- |
+| Structured Logging     | `tests/unit/file-logger.test.ts`       | Test JSON format             |
+| Log Rotation           | `tests/unit/file-logger.test.ts`       | Test size-based rotation     |
+| Metrics Collection     | `tests/unit/metrics-collector.test.ts` | Test histogram/counter/gauge |
+| Percentile Calculation | `tests/unit/metrics-collector.test.ts` | Test p50/p95/p99             |
+| Error Tracking         | `tests/unit/error-tracker.test.ts`     | Test aggregation             |
+| Health Checks          | `tests/unit/health-check.test.ts`      | Test component checks        |
 
 ### Integration Tests
 
-| Test Case | Description |
-| --------- | ----------- |
+| Test Case          | Description                                  |
+| ------------------ | -------------------------------------------- |
 | End-to-End Logging | Verify request ID flows through entire stack |
-| Metrics Collection | Verify metrics captured for real operations |
-| Health Check All | Verify all components report correctly |
+| Metrics Collection | Verify metrics captured for real operations  |
+| Health Check All   | Verify all components report correctly       |
 
 ### Manual Test Cases
 
-| ID | Steps | Expected Result |
-| -- | ----- | --------------- |
-| MT-1 | Check log file format | Valid JSON lines |
-| MT-2 | Export diagnostics | Complete snapshot |
-| MT-3 | Run health check | All components HEALTHY |
+| ID   | Steps                 | Expected Result        |
+| ---- | --------------------- | ---------------------- |
+| MT-1 | Check log file format | Valid JSON lines       |
+| MT-2 | Export diagnostics    | Complete snapshot      |
+| MT-3 | Run health check      | All components HEALTHY |
 
 ## Performance Considerations
 
 ### Expected Impact
 
 **Logging Overhead:**
+
 - JSON serialization: ~0.1ms per log
 - File I/O: async, non-blocking
 
 **Metrics Overhead:**
+
 - Histogram update: ~0.01ms
 - Counter increment: ~0.001ms
 - Total: <1% of operation time
@@ -944,24 +959,24 @@ None - pure TypeScript implementation
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| ---- | ---------- | ------ | ---------- |
-| Logging overhead impacts performance | Low | Medium | Benchmark, make async if needed |
-| Log files consume excessive disk | Medium | Low | Rotation with retention policy |
-| Metrics collection adds complexity | Low | Low | Keep simple, well-documented |
+| Risk                                 | Likelihood | Impact | Mitigation                      |
+| ------------------------------------ | ---------- | ------ | ------------------------------- |
+| Logging overhead impacts performance | Low        | Medium | Benchmark, make async if needed |
+| Log files consume excessive disk     | Medium     | Low    | Rotation with retention policy  |
+| Metrics collection adds complexity   | Low        | Low    | Keep simple, well-documented    |
 
 ---
 
 ## Approval
 
-| Role | Name | Date | Status |
-| ---- | ---- | ---- | ------ |
-| Tech Lead | | | Pending |
-| Reviewer 1 | | | Pending |
-| Reviewer 2 | | | Pending |
+| Role       | Name | Date | Status  |
+| ---------- | ---- | ---- | ------- |
+| Tech Lead  |      |      | Pending |
+| Reviewer 1 |      |      | Pending |
+| Reviewer 2 |      |      | Pending |
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-| ------- | ---- | ------ | ------- |
-| 0.1 | 2026-01-08 | Claude | Initial draft |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

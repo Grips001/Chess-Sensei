@@ -1,16 +1,16 @@
 # PRD: Observability Enhancement - Logging, Metrics & Monitoring
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **Related Issues:** N/A
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-08
+> **Last Updated:** 2026-01-08 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Enhance Chess-Sensei's observability through structured logging, performance metrics collection, error tracking, and health checks. This enables proactive issue detection, performance monitoring, and easier debugging for both developers and advanced users.
+Enhance Chess-Sensei's observability through structured logging, performance
+metrics collection, error tracking, and health checks. This enables proactive
+issue detection, performance monitoring, and easier debugging for both
+developers and advanced users.
 
 ## Problem Statement
 
@@ -27,6 +27,7 @@ Chess-Sensei v1.1.0 has basic logging but limited observability:
 ### User Pain Points
 
 **Developer Pain Points:**
+
 - Difficult to diagnose performance issues (no metrics)
 - Hard to identify recurring errors (no aggregation)
 - Cannot proactively detect degradation (no monitoring)
@@ -34,6 +35,7 @@ Chess-Sensei v1.1.0 has basic logging but limited observability:
 - No visibility into system health over time
 
 **Advanced User Pain Points:**
+
 - No way to report performance data with bug reports
 - Cannot see why app is slow or unresponsive
 - No diagnostic information for support requests
@@ -63,13 +65,13 @@ Chess-Sensei v1.1.0 has basic logging but limited observability:
 
 ### Success Metrics
 
-| Metric                        | Current | Target | Measurement Method                |
-| ----------------------------- | ------- | ------ | --------------------------------- |
-| Structured log adoption       | 0%      | 100%   | Code audit                        |
-| Performance metrics tracked   | 0       | 10+    | Metrics collection coverage       |
-| Error aggregation coverage    | 0%      | 100%   | Error tracking implementation     |
-| Health check coverage         | 20%     | 90%    | Component health check coverage   |
-| Debug data quality (user rep) | Low     | High   | Support ticket effectiveness      |
+| Metric                        | Current | Target | Measurement Method              |
+| ----------------------------- | ------- | ------ | ------------------------------- |
+| Structured log adoption       | 0%      | 100%   | Code audit                      |
+| Performance metrics tracked   | 0       | 10+    | Metrics collection coverage     |
+| Error aggregation coverage    | 0%      | 100%   | Error tracking implementation   |
+| Health check coverage         | 20%     | 90%    | Component health check coverage |
+| Debug data quality (user rep) | Low     | High   | Support ticket effectiveness    |
 
 ## User Stories
 
@@ -101,25 +103,25 @@ So that I can ensure all components are working correctly
 
 ### Functional Requirements
 
-| ID    | Requirement                                              | Priority | Notes                                   |
-| ----- | -------------------------------------------------------- | -------- | --------------------------------------- |
-| FR-01 | Implement structured JSON logging with context           | Must     | Replace text logs with structured format|
-| FR-02 | Add request correlation IDs for tracing                  | Must     | Track requests across frontend/backend  |
-| FR-03 | Collect performance metrics for critical operations      | Must     | Analysis time, guidance time, etc.      |
-| FR-04 | Implement error tracking with aggregation                | Must     | Count recurring errors, detect patterns |
-| FR-05 | Create comprehensive health check system                 | Must     | Engine, storage, IPC health             |
-| FR-06 | Add metrics snapshot/export capability                   | Should   | Export diagnostics for bug reports      |
-| FR-07 | Implement performance monitoring hooks                   | Should   | Instrument critical code paths          |
-| FR-08 | Add log level filtering and configuration                | Should   | Control log verbosity                   |
+| ID    | Requirement                                         | Priority | Notes                                    |
+| ----- | --------------------------------------------------- | -------- | ---------------------------------------- |
+| FR-01 | Implement structured JSON logging with context      | Must     | Replace text logs with structured format |
+| FR-02 | Add request correlation IDs for tracing             | Must     | Track requests across frontend/backend   |
+| FR-03 | Collect performance metrics for critical operations | Must     | Analysis time, guidance time, etc.       |
+| FR-04 | Implement error tracking with aggregation           | Must     | Count recurring errors, detect patterns  |
+| FR-05 | Create comprehensive health check system            | Must     | Engine, storage, IPC health              |
+| FR-06 | Add metrics snapshot/export capability              | Should   | Export diagnostics for bug reports       |
+| FR-07 | Implement performance monitoring hooks              | Should   | Instrument critical code paths           |
+| FR-08 | Add log level filtering and configuration           | Should   | Control log verbosity                    |
 
 ### Non-Functional Requirements
 
-| ID     | Requirement            | Criteria                                           |
-| ------ | ---------------------- | -------------------------------------------------- |
-| NFR-01 | Performance            | Logging/metrics overhead <1% of operation time     |
-| NFR-02 | Privacy                | No PII in logs, local storage only                 |
-| NFR-03 | Storage                | Log rotation, configurable retention               |
-| NFR-04 | Usability              | Easy to enable/disable, clear documentation        |
+| ID     | Requirement | Criteria                                       |
+| ------ | ----------- | ---------------------------------------------- |
+| NFR-01 | Performance | Logging/metrics overhead <1% of operation time |
+| NFR-02 | Privacy     | No PII in logs, local storage only             |
+| NFR-03 | Storage     | Log rotation, configurable retention           |
+| NFR-04 | Usability   | Easy to enable/disable, clear documentation    |
 
 ## User Experience
 
@@ -209,12 +211,12 @@ Clear evidence of improvement, can track regressions
 
 ### Edge Cases
 
-| Scenario                              | Expected Behavior                                      |
-| ------------------------------------- | ------------------------------------------------------ |
-| Log file grows too large              | Automatic rotation, keep last N days                   |
-| Metrics collection impacts performance| Disable in production, or sample percentage            |
-| Health check fails during startup     | Clear error message, retry logic                       |
-| Diagnostic export contains PII        | Sanitize automatically, warn user                      |
+| Scenario                               | Expected Behavior                           |
+| -------------------------------------- | ------------------------------------------- |
+| Log file grows too large               | Automatic rotation, keep last N days        |
+| Metrics collection impacts performance | Disable in production, or sample percentage |
+| Health check fails during startup      | Clear error message, retry logic            |
+| Diagnostic export contains PII         | Sanitize automatically, warn user           |
 
 ## Technical Considerations
 
@@ -235,12 +237,12 @@ Clear evidence of improvement, can track regressions
 
 ### Risks
 
-| Risk                                  | Likelihood | Impact | Mitigation                                        |
-| ------------------------------------- | ---------- | ------ | ------------------------------------------------- |
-| Logging overhead impacts performance  | Low        | Medium | Benchmark, make logging optional in production    |
-| Log files consume excessive disk      | Medium     | Low    | Implement rotation, configurable retention        |
-| Structured logs harder to read        | Low        | Low    | Provide log viewer tool, keep human-readable      |
-| Metrics collection adds complexity    | Low        | Low    | Keep simple, well-documented patterns             |
+| Risk                                 | Likelihood | Impact | Mitigation                                     |
+| ------------------------------------ | ---------- | ------ | ---------------------------------------------- |
+| Logging overhead impacts performance | Low        | Medium | Benchmark, make logging optional in production |
+| Log files consume excessive disk     | Medium     | Low    | Implement rotation, configurable retention     |
+| Structured logs harder to read       | Low        | Low    | Provide log viewer tool, keep human-readable   |
+| Metrics collection adds complexity   | Low        | Low    | Keep simple, well-documented patterns          |
 
 ## Alternatives Considered
 
@@ -302,7 +304,8 @@ Clear evidence of improvement, can track regressions
    - Proposal: Both - structured JSON with formatted text for readability
 
 2. **What metrics should be tracked initially?**
-   - Proposal: Analysis duration, guidance latency, IPC call counts, cache hit rates
+   - Proposal: Analysis duration, guidance latency, IPC call counts, cache hit
+     rates
 
 3. **Should metrics be aggregated in-memory or persisted?**
    - Proposal: In-memory for current session, export on demand
@@ -325,6 +328,6 @@ Clear evidence of improvement, can track regressions
 
 ## Revision History
 
-| Version | Date       | Author  | Changes         |
-| ------- | ---------- | ------- | --------------- |
-| 0.1     | 2026-01-08 | Claude  | Initial draft   |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

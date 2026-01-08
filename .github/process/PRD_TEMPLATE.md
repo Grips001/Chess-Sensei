@@ -1,10 +1,13 @@
 # PRD: [Feature Name]
 
-> **Filename:** `NNN-prd-[feature-name].md` (where NNN is chronological order: next number after highest existing PRD)
-> **Status:** Draft | In Review | Approved | Implemented **Author:** [Name]
-> **Created:** YYYY-MM-DD **Last Updated:** YYYY-MM-DD **Related Issues:** #XXX
+> **Filename:** `NNN-prd-[feature-name].md` (where NNN is chronological order:
+> next number after highest existing PRD) **Status:** Draft | In Review |
+> Approved | Implemented **Author:** [Name] **Created:** YYYY-MM-DD **Last
+> Updated:** YYYY-MM-DD **Related Issues:** #XXX
 >
-> **Note:** Numbering is chronological based on creation date. If a tech spec exists for this PRD, use the same number (e.g., `005-prd-feature.md` and `005-tech-feature.md`)
+> **Note:** Numbering is chronological based on creation date. If a tech spec
+> exists for this PRD, use the same number (e.g., `005-prd-feature.md` and
+> `005-tech-feature.md`)
 
 ---
 

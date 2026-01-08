@@ -1,12 +1,9 @@
 # Tech Spec: Code Quality Improvements - Type Safety & Error Handling
 
-> **Filename:** `008-tech-code-quality-improvements.md`
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **PRD:** `008-prd-code-quality-improvements.md`
-> **Related Issues:** N/A
+> **Filename:** `008-tech-code-quality-improvements.md` **Status:** Draft
+> **Author:** Claude (AI Assistant) **Created:** 2026-01-08 **Last Updated:**
+> 2026-01-08 **PRD:** `008-prd-code-quality-improvements.md` **Related Issues:**
+> N/A
 
 ---
 
@@ -14,7 +11,10 @@
 
 ### Summary
 
-Eliminate all TypeScript `any` types (~15 instances), implement standardized error hierarchy with custom error classes, add Zod schema validation for all 45 IPC methods, enable additional TypeScript strict checks, and standardize error response format across the application.
+Eliminate all TypeScript `any` types (~15 instances), implement standardized
+error hierarchy with custom error classes, add Zod schema validation for all 45
+IPC methods, enable additional TypeScript strict checks, and standardize error
+response format across the application.
 
 ### Goals
 
@@ -36,6 +36,7 @@ Eliminate all TypeScript `any` types (~15 instances), implement standardized err
 ### Current Architecture
 
 **`any` Type Usage (~15 instances):**
+
 ```typescript
 // src/backend/handlers/engine-handlers.ts
 async requestBestMoves(params: any) {  // No validation
@@ -56,11 +57,12 @@ private parseUCIResponse(response: string): any {  // Untyped parsing
 ```
 
 **Error Handling (Inconsistent):**
+
 ```typescript
 // Mix of approaches across codebase
-throw new Error('Invalid FEN');  // Generic Error
-return { error: 'Something went wrong' };  // String error
-throw 'Invalid move';  // String throw (anti-pattern)
+throw new Error('Invalid FEN'); // Generic Error
+return { error: 'Something went wrong' }; // String error
+throw 'Invalid move'; // String throw (anti-pattern)
 ```
 
 ### Key Concepts
@@ -146,11 +148,7 @@ export class ChessSenseiError extends Error {
   public readonly details?: Record<string, any>;
   public readonly timestamp: number;
 
-  constructor(
-    code: string,
-    message: string,
-    details?: Record<string, any>
-  ) {
+  constructor(code: string, message: string, details?: Record<string, any>) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
@@ -265,7 +263,8 @@ import { z } from 'zod';
 /**
  * FEN string validation
  */
-const fenSchema = z.string()
+const fenSchema = z
+  .string()
   .min(15)
   .max(100)
   .regex(/^[rnbqkpRNBQKP1-8/]+ [wb] [KQkq-]+ [a-h][1-8]|- \d+ \d+$/);
@@ -273,7 +272,8 @@ const fenSchema = z.string()
 /**
  * Square notation validation (e.g., "e2", "a8")
  */
-const squareSchema = z.string()
+const squareSchema = z
+  .string()
   .length(2)
   .regex(/^[a-h][1-8]$/);
 
@@ -315,7 +315,9 @@ export const InitializeBotOpponentSchema = z.object({
   mode: z.enum(['training', 'punishing']),
 });
 
-export type InitializeBotOpponentParams = z.infer<typeof InitializeBotOpponentSchema>;
+export type InitializeBotOpponentParams = z.infer<
+  typeof InitializeBotOpponentSchema
+>;
 
 export const RequestBotMoveSchema = z.object({
   fen: fenSchema,
@@ -367,6 +369,7 @@ export type AnalyzeGameParams = z.infer<typeof AnalyzeGameSchema>;
 **File:** `src/backend/handlers/engine-handlers.ts`
 
 **Before:**
+
 ```typescript
 async requestBestMoves(params: any) {
   const fen = params.fen;
@@ -377,6 +380,7 @@ async requestBestMoves(params: any) {
 ```
 
 **After:**
+
 ```typescript
 import { RequestBestMovesSchema } from '../../shared/ipc-schemas.js';
 import { ValidationError, toErrorResponse } from '../../shared/errors.js';
@@ -416,11 +420,11 @@ async requestBestMoves(params: unknown) {
 {
   "compilerOptions": {
     "strict": true,
-    "noUncheckedIndexedAccess": true,  // NEW: Array/object access returns T | undefined
-    "noImplicitReturns": true,         // NEW: All code paths must return
+    "noUncheckedIndexedAccess": true, // NEW: Array/object access returns T | undefined
+    "noImplicitReturns": true, // NEW: All code paths must return
     "noFallthroughCasesInSwitch": true, // NEW: Switch statements must have breaks
     "noUncheckedSideEffectImports": true, // NEW: Side-effect imports must be explicit
-    "exactOptionalPropertyTypes": true  // NEW: Optional != undefined union
+    "exactOptionalPropertyTypes": true // NEW: Optional != undefined union
   }
 }
 ```
@@ -429,14 +433,18 @@ async requestBestMoves(params: unknown) {
 
 **Audit Results (15 instances):**
 
-1. `src/backend/handlers/*.ts` - IPC params (8 instances) → Replace with schema types
-2. `src/frontend/websocket-ipc-client.ts` - Generic call method (2 instances) → Add type parameters
-3. `src/engine/stockfish-engine.ts` - UCI parsing (3 instances) → Create UCI response types
+1. `src/backend/handlers/*.ts` - IPC params (8 instances) → Replace with schema
+   types
+2. `src/frontend/websocket-ipc-client.ts` - Generic call method (2 instances) →
+   Add type parameters
+3. `src/engine/stockfish-engine.ts` - UCI parsing (3 instances) → Create UCI
+   response types
 4. `src/shared/utils.ts` - Utility functions (2 instances) → Add proper generics
 
 **Example Fix - IPC Client:**
 
 **Before:**
+
 ```typescript
 class IPCClient {
   async call(method: string, params: any): Promise<any> {
@@ -446,6 +454,7 @@ class IPCClient {
 ```
 
 **After:**
+
 ```typescript
 class IPCClient {
   async call<TParams, TResult>(
@@ -533,18 +542,19 @@ No UI changes - error handling is internal.
 ### State Management
 
 Error state management:
+
 - Errors logged with structured format
 - Error aggregation for tracking recurring issues
 - Error responses follow consistent format
 
 ### Error Handling
 
-| Error Condition | Handling Strategy | User Feedback |
-| --------------- | ----------------- | ------------- |
+| Error Condition        | Handling Strategy                        | User Feedback                             |
+| ---------------------- | ---------------------------------------- | ----------------------------------------- |
 | Zod validation failure | Throw ValidationError with field details | Toast: "Invalid input: [field] [message]" |
-| Storage write failure | Throw StorageError with path | Toast: "Failed to save: [reason]" |
-| Engine timeout | Throw EngineError with timeout info | Toast: "Analysis timed out" |
-| IPC connection loss | Throw IPCError with reconnect info | Toast: "Connection lost, reconnecting..." |
+| Storage write failure  | Throw StorageError with path             | Toast: "Failed to save: [reason]"         |
+| Engine timeout         | Throw EngineError with timeout info      | Toast: "Analysis timed out"               |
+| IPC connection loss    | Throw IPCError with reconnect info       | Toast: "Connection lost, reconnecting..." |
 
 ## Implementation Plan
 
@@ -564,6 +574,7 @@ Error state management:
 **Estimated Effort:** 8-10 hours
 
 **Files Created:**
+
 - `src/shared/errors.ts`
 - `src/shared/error-types.ts`
 - `docs/error-handling-guide.md`
@@ -582,6 +593,7 @@ Error state management:
 **Estimated Effort:** 6-8 hours
 
 **Files Created:**
+
 - `src/shared/ipc-schemas.ts`
 - `src/shared/validation-types.ts`
 
@@ -599,6 +611,7 @@ Error state management:
 **Estimated Effort:** 8-10 hours
 
 **Files Modified:**
+
 - `tsconfig.json`
 - All files with `any` types (~15 files)
 
@@ -616,64 +629,67 @@ Error state management:
 **Estimated Effort:** 6-8 hours
 
 **Files Modified:**
+
 - All IPC handler files (~10 files)
 - `src/frontend/websocket-ipc-client.ts`
 
 ### File Changes Summary
 
-| File | Action | Description |
-| ---- | ------ | ----------- |
-| `src/shared/errors.ts` | Create | Error class hierarchy |
-| `src/shared/error-types.ts` | Create | Error type definitions |
-| `src/shared/ipc-schemas.ts` | Create | Zod schemas for IPC |
-| `src/shared/validation-types.ts` | Create | Validation types |
-| `tsconfig.json` | Modify | Enable strict checks |
-| `package.json` | Modify | Add Zod dependency |
-| All IPC handler files | Modify | Add schema validation |
-| `src/frontend/websocket-ipc-client.ts` | Modify | Type-safe methods |
-| `src/engine/stockfish-engine.ts` | Modify | Remove `any` types |
-| All files with `any` | Modify | Replace with proper types |
-| `tests/unit/error-handling.test.ts` | Create | Error class tests |
-| `tests/unit/schema-validation.test.ts` | Create | Schema validation tests |
+| File                                   | Action | Description               |
+| -------------------------------------- | ------ | ------------------------- |
+| `src/shared/errors.ts`                 | Create | Error class hierarchy     |
+| `src/shared/error-types.ts`            | Create | Error type definitions    |
+| `src/shared/ipc-schemas.ts`            | Create | Zod schemas for IPC       |
+| `src/shared/validation-types.ts`       | Create | Validation types          |
+| `tsconfig.json`                        | Modify | Enable strict checks      |
+| `package.json`                         | Modify | Add Zod dependency        |
+| All IPC handler files                  | Modify | Add schema validation     |
+| `src/frontend/websocket-ipc-client.ts` | Modify | Type-safe methods         |
+| `src/engine/stockfish-engine.ts`       | Modify | Remove `any` types        |
+| All files with `any`                   | Modify | Replace with proper types |
+| `tests/unit/error-handling.test.ts`    | Create | Error class tests         |
+| `tests/unit/schema-validation.test.ts` | Create | Schema validation tests   |
 
 ## Testing Strategy
 
 ### Unit Tests
 
-| Test Case | File | Description |
-| --------- | ---- | ----------- |
-| Error Classes | `tests/unit/error-handling.test.ts` | Test error hierarchy |
-| Error Serialization | `tests/unit/error-handling.test.ts` | Test toJSON() |
-| Schema Validation - Valid | `tests/unit/schema-validation.test.ts` | Valid inputs pass |
+| Test Case                   | File                                   | Description                      |
+| --------------------------- | -------------------------------------- | -------------------------------- |
+| Error Classes               | `tests/unit/error-handling.test.ts`    | Test error hierarchy             |
+| Error Serialization         | `tests/unit/error-handling.test.ts`    | Test toJSON()                    |
+| Schema Validation - Valid   | `tests/unit/schema-validation.test.ts` | Valid inputs pass                |
 | Schema Validation - Invalid | `tests/unit/schema-validation.test.ts` | Invalid inputs fail with details |
-| FEN Validation | `tests/unit/schema-validation.test.ts` | Comprehensive FEN tests |
+| FEN Validation              | `tests/unit/schema-validation.test.ts` | Comprehensive FEN tests          |
 
 ### Integration Tests
 
-| Test Case | Description |
-| --------- | ----------- |
-| IPC Validation | All 45 IPC methods validate params |
-| Error Responses | All errors return standardized format |
-| Type Safety | No runtime type errors after strict checks |
+| Test Case       | Description                                |
+| --------------- | ------------------------------------------ |
+| IPC Validation  | All 45 IPC methods validate params         |
+| Error Responses | All errors return standardized format      |
+| Type Safety     | No runtime type errors after strict checks |
 
 ### Manual Test Cases
 
-| ID | Steps | Expected Result |
-| -- | ----- | --------------- |
-| MT-1 | Send IPC request with invalid params | ValidationError with field details |
-| MT-2 | Trigger storage error | StorageError with consistent format |
-| MT-3 | Run TypeScript compiler | Zero `any` type errors |
-| MT-4 | Review ESLint output | Zero no-explicit-any violations |
+| ID   | Steps                                | Expected Result                     |
+| ---- | ------------------------------------ | ----------------------------------- |
+| MT-1 | Send IPC request with invalid params | ValidationError with field details  |
+| MT-2 | Trigger storage error                | StorageError with consistent format |
+| MT-3 | Run TypeScript compiler              | Zero `any` type errors              |
+| MT-4 | Review ESLint output                 | Zero no-explicit-any violations     |
 
 ## Performance Considerations
 
 ### Expected Impact
 
 **Validation Overhead:**
+
 - Zod validation: ~1-5ms per request (negligible)
 - Total: <5ms per IPC call
 
 **Compile Time:**
+
 - Strict checks may increase compile time by ~10%
 - One-time cost, no runtime impact
 
@@ -698,6 +714,7 @@ No feature flags - internal quality improvements.
 ### Rollback Plan
 
 Changes are isolated and can be rolled back per phase:
+
 1. Error hierarchy: Remove custom errors, use generic Error
 2. Schemas: Remove Zod, validate manually
 3. Strict checks: Disable in tsconfig.json
@@ -739,9 +756,9 @@ Changes are isolated and can be rolled back per phase:
 
 ### External Dependencies
 
-| Dependency | Version | License | Purpose |
-| ---------- | ------- | ------- | ------- |
-| zod | ^3.22.0 | MIT | Schema validation |
+| Dependency | Version | License | Purpose           |
+| ---------- | ------- | ------- | ----------------- |
+| zod        | ^3.22.0 | MIT     | Schema validation |
 
 ### Internal Dependencies
 
@@ -762,25 +779,25 @@ Changes are isolated and can be rolled back per phase:
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| ---- | ---------- | ------ | ---------- |
-| Breaking changes during `any` removal | Medium | High | Thorough testing, incremental approach |
-| Validation overhead impacts perf | Low | Medium | Benchmark validation, optimize if needed |
-| Strict checks reveal hidden bugs | High | Medium | Good! Fix bugs, improve quality |
-| Zod dependency adds bundle size | Low | Low | Zod is small (~12KB gzipped) |
+| Risk                                  | Likelihood | Impact | Mitigation                               |
+| ------------------------------------- | ---------- | ------ | ---------------------------------------- |
+| Breaking changes during `any` removal | Medium     | High   | Thorough testing, incremental approach   |
+| Validation overhead impacts perf      | Low        | Medium | Benchmark validation, optimize if needed |
+| Strict checks reveal hidden bugs      | High       | Medium | Good! Fix bugs, improve quality          |
+| Zod dependency adds bundle size       | Low        | Low    | Zod is small (~12KB gzipped)             |
 
 ---
 
 ## Approval
 
-| Role | Name | Date | Status |
-| ---- | ---- | ---- | ------ |
-| Tech Lead | | | Pending |
-| Reviewer 1 | | | Pending |
-| Reviewer 2 | | | Pending |
+| Role       | Name | Date | Status  |
+| ---------- | ---- | ---- | ------- |
+| Tech Lead  |      |      | Pending |
+| Reviewer 1 |      |      | Pending |
+| Reviewer 2 |      |      | Pending |
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-| ------- | ---- | ------ | ------- |
-| 0.1 | 2026-01-08 | Claude | Initial draft |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

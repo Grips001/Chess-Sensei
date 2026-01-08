@@ -1,16 +1,16 @@
 # PRD: Testing Strategy Enhancement - 90% Coverage Goal
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **Related Issues:** N/A
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-08
+> **Last Updated:** 2026-01-08 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Expand Chess-Sensei's test suite from ~40% coverage to 90%+ through comprehensive unit, integration, and end-to-end tests. Establish robust test infrastructure with helpers, mocks, and fixtures to ensure code quality and prevent regressions.
+Expand Chess-Sensei's test suite from ~40% coverage to 90%+ through
+comprehensive unit, integration, and end-to-end tests. Establish robust test
+infrastructure with helpers, mocks, and fixtures to ensure code quality and
+prevent regressions.
 
 ## Problem Statement
 
@@ -38,7 +38,8 @@ Chess-Sensei v1.1.0 has limited test coverage:
 
 **Affected Users:** Developers, maintainers, and end-users (indirect)
 
-**Severity:** High - Low test coverage leads to bugs, regressions, and development friction
+**Severity:** High - Low test coverage leads to bugs, regressions, and
+development friction
 
 ## Goals
 
@@ -59,14 +60,14 @@ Chess-Sensei v1.1.0 has limited test coverage:
 
 ### Success Metrics
 
-| Metric                     | Current | Target | Measurement Method           |
-| -------------------------- | ------- | ------ | ---------------------------- |
-| Overall test coverage      | ~40%    | 90%+   | Bun test coverage report     |
-| Backend service coverage   | ~20%    | 90%+   | Bun test coverage report     |
-| Frontend component coverage| ~10%    | 80%+   | Bun test coverage report     |
-| Integration test coverage  | ~30%    | 85%+   | Bun test coverage report     |
-| Test file count            | 12      | 100+   | File count                   |
-| Critical paths tested      | 30%     | 100%   | Manual audit                 |
+| Metric                      | Current | Target | Measurement Method       |
+| --------------------------- | ------- | ------ | ------------------------ |
+| Overall test coverage       | ~40%    | 90%+   | Bun test coverage report |
+| Backend service coverage    | ~20%    | 90%+   | Bun test coverage report |
+| Frontend component coverage | ~10%    | 80%+   | Bun test coverage report |
+| Integration test coverage   | ~30%    | 85%+   | Bun test coverage report |
+| Test file count             | 12      | 100+   | File count               |
+| Critical paths tested       | 30%     | 100%   | Manual audit             |
 
 ## User Stories
 
@@ -102,25 +103,25 @@ So that I can focus on improving my chess skills
 
 ### Functional Requirements
 
-| ID    | Requirement                                              | Priority | Notes                                   |
-| ----- | -------------------------------------------------------- | -------- | --------------------------------------- |
-| FR-01 | Unit tests for all backend services                      | Must     | AIOpponent, AnalysisPipeline, etc.      |
-| FR-02 | Unit tests for all frontend components                   | Must     | Board, UI, Game, Analysis modules       |
-| FR-03 | Integration tests for all IPC methods                    | Must     | Full frontend-backend communication     |
-| FR-04 | E2E tests for all game mode flows                        | Must     | Training, Exam, Sandbox                 |
-| FR-05 | Test helpers and utilities library                       | Must     | Reduce test boilerplate                 |
-| FR-06 | Mock implementations for all services                    | Must     | Enable isolated unit testing            |
-| FR-07 | Test fixtures for common scenarios                       | Must     | Standard game states, positions         |
-| FR-08 | Snapshot testing for UI components                       | Should   | Catch unintended UI changes             |
+| ID    | Requirement                            | Priority | Notes                               |
+| ----- | -------------------------------------- | -------- | ----------------------------------- |
+| FR-01 | Unit tests for all backend services    | Must     | AIOpponent, AnalysisPipeline, etc.  |
+| FR-02 | Unit tests for all frontend components | Must     | Board, UI, Game, Analysis modules   |
+| FR-03 | Integration tests for all IPC methods  | Must     | Full frontend-backend communication |
+| FR-04 | E2E tests for all game mode flows      | Must     | Training, Exam, Sandbox             |
+| FR-05 | Test helpers and utilities library     | Must     | Reduce test boilerplate             |
+| FR-06 | Mock implementations for all services  | Must     | Enable isolated unit testing        |
+| FR-07 | Test fixtures for common scenarios     | Must     | Standard game states, positions     |
+| FR-08 | Snapshot testing for UI components     | Should   | Catch unintended UI changes         |
 
 ### Non-Functional Requirements
 
-| ID     | Requirement            | Criteria                                           |
-| ------ | ---------------------- | -------------------------------------------------- |
-| NFR-01 | Test Performance       | Full test suite completes in <60 seconds           |
-| NFR-02 | Test Reliability       | Tests are deterministic, no flakiness              |
-| NFR-03 | Test Maintainability   | Tests are readable, well-organized, documented     |
-| NFR-04 | CI Integration         | All tests run automatically on PRs                 |
+| ID     | Requirement          | Criteria                                       |
+| ------ | -------------------- | ---------------------------------------------- |
+| NFR-01 | Test Performance     | Full test suite completes in <60 seconds       |
+| NFR-02 | Test Reliability     | Tests are deterministic, no flakiness          |
+| NFR-03 | Test Maintainability | Tests are readable, well-organized, documented |
+| NFR-04 | CI Integration       | All tests run automatically on PRs             |
 
 ## User Experience
 
@@ -169,12 +170,12 @@ So that I can focus on improving my chess skills
 
 ### Edge Cases
 
-| Scenario                              | Expected Behavior                                      |
-| ------------------------------------- | ------------------------------------------------------ |
-| Test timeout during long operation    | Test fails with clear timeout message                  |
-| Mock returns unexpected value         | Test fails with type error or assertion failure        |
-| Fixture data becomes outdated         | Tests fail, prompting fixture update                   |
-| Test depends on external state        | Test is isolated, uses mocks for all dependencies      |
+| Scenario                           | Expected Behavior                                 |
+| ---------------------------------- | ------------------------------------------------- |
+| Test timeout during long operation | Test fails with clear timeout message             |
+| Mock returns unexpected value      | Test fails with type error or assertion failure   |
+| Fixture data becomes outdated      | Tests fail, prompting fixture update              |
+| Test depends on external state     | Test is isolated, uses mocks for all dependencies |
 
 ## Technical Considerations
 
@@ -194,12 +195,12 @@ So that I can focus on improving my chess skills
 
 ### Risks
 
-| Risk                                  | Likelihood | Impact | Mitigation                                        |
-| ------------------------------------- | ---------- | ------ | ------------------------------------------------- |
-| Writing tests takes longer than code  | High       | Medium | Invest in helpers/mocks upfront to accelerate     |
-| Tests become brittle over time        | Medium     | Medium | Follow best practices, isolate dependencies       |
-| Test suite becomes too slow           | Low        | Medium | Monitor performance, parallelize, optimize        |
-| False sense of security from coverage | Low        | High   | Focus on meaningful tests, not just coverage %    |
+| Risk                                  | Likelihood | Impact | Mitigation                                     |
+| ------------------------------------- | ---------- | ------ | ---------------------------------------------- |
+| Writing tests takes longer than code  | High       | Medium | Invest in helpers/mocks upfront to accelerate  |
+| Tests become brittle over time        | Medium     | Medium | Follow best practices, isolate dependencies    |
+| Test suite becomes too slow           | Low        | Medium | Monitor performance, parallelize, optimize     |
+| False sense of security from coverage | Low        | High   | Focus on meaningful tests, not just coverage % |
 
 ## Alternatives Considered
 
@@ -207,7 +208,8 @@ So that I can focus on improving my chess skills
 
 - **Pros:** Tests real user flows, catches integration issues
 - **Cons:** Slow, brittle, hard to debug, poor isolation
-- **Why rejected:** Need unit tests for fast feedback and precise failure diagnosis
+- **Why rejected:** Need unit tests for fast feedback and precise failure
+  diagnosis
 
 ### Option 2: Use Jest Instead of Bun Test
 
@@ -284,6 +286,6 @@ So that I can focus on improving my chess skills
 
 ## Revision History
 
-| Version | Date       | Author  | Changes         |
-| ------- | ---------- | ------- | --------------- |
-| 0.1     | 2026-01-08 | Claude  | Initial draft   |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

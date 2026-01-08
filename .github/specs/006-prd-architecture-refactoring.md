@@ -1,22 +1,23 @@
 # PRD: Architecture Refactoring - Dependency Injection & State Management
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **Related Issues:** N/A
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-08
+> **Last Updated:** 2026-01-08 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Refactor Chess-Sensei's architecture to use industry-standard dependency injection and centralized state management patterns. This improves code maintainability, testability, and developer experience while reducing coupling and technical debt.
+Refactor Chess-Sensei's architecture to use industry-standard dependency
+injection and centralized state management patterns. This improves code
+maintainability, testability, and developer experience while reducing coupling
+and technical debt.
 
 ## Problem Statement
 
 ### Current State
 
-Chess-Sensei v1.1.0 uses functional patterns with global state and state accessor functions:
+Chess-Sensei v1.1.0 uses functional patterns with global state and state
+accessor functions:
 
 - **Backend:** Global singleton services with state accessor pattern
 - **Frontend:** Global mutable state scattered across modules
@@ -37,14 +38,17 @@ Chess-Sensei v1.1.0 uses functional patterns with global state and state accesso
 
 **Affected Users:** Developers and maintainers
 
-**Severity:** Medium - Current system works but creates friction for development and increases maintenance cost
+**Severity:** Medium - Current system works but creates friction for development
+and increases maintenance cost
 
 ## Goals
 
 ### Primary Goals
 
-1. **Implement dependency injection container** for explicit dependency management
-2. **Create centralized state management** with immutability and predictable updates
+1. **Implement dependency injection container** for explicit dependency
+   management
+2. **Create centralized state management** with immutability and predictable
+   updates
 3. **Improve testability** through easy dependency mocking
 4. **Reduce coupling** between modules and components
 5. **Establish clear architectural layers** with enforced boundaries
@@ -58,13 +62,13 @@ Chess-Sensei v1.1.0 uses functional patterns with global state and state accesso
 
 ### Success Metrics
 
-| Metric                      | Current | Target   | Measurement Method                |
-| --------------------------- | ------- | -------- | --------------------------------- |
-| Test setup complexity       | High    | Low      | Lines of test setup code          |
-| Circular dependencies       | 3-5     | 0        | Dependency analysis tools         |
-| Global mutable state vars   | ~15     | 0        | Code audit                        |
-| Module coupling score       | Medium  | Low      | Static analysis                   |
-| Test coverage (refactored)  | ~40%    | 60%      | Bun test coverage report          |
+| Metric                     | Current | Target | Measurement Method        |
+| -------------------------- | ------- | ------ | ------------------------- |
+| Test setup complexity      | High    | Low    | Lines of test setup code  |
+| Circular dependencies      | 3-5     | 0      | Dependency analysis tools |
+| Global mutable state vars  | ~15     | 0      | Code audit                |
+| Module coupling score      | Medium  | Low    | Static analysis           |
+| Test coverage (refactored) | ~40%    | 60%    | Bun test coverage report  |
 
 ## User Stories
 
@@ -96,24 +100,24 @@ So that I can understand the codebase and make safe changes
 
 ### Functional Requirements
 
-| ID    | Requirement                                              | Priority | Notes                                   |
-| ----- | -------------------------------------------------------- | -------- | --------------------------------------- |
-| FR-01 | Implement lightweight DI container for backend           | Must     | Service registration and resolution     |
-| FR-02 | Create GameStateManager with immutable state             | Must     | Single source of truth for game state   |
-| FR-03 | Refactor backend services to use DI                      | Must     | Explicit constructor injection          |
-| FR-04 | Refactor frontend to use GameStateManager                | Must     | Replace scattered global state          |
-| FR-05 | Define and enforce layered architecture                  | Should   | ESLint rules for import restrictions    |
-| FR-06 | Update all tests to use new patterns                     | Must     | Tests must pass after refactor          |
-| FR-07 | Document architecture patterns and guidelines            | Should   | ADRs and code comments                  |
+| ID    | Requirement                                    | Priority | Notes                                 |
+| ----- | ---------------------------------------------- | -------- | ------------------------------------- |
+| FR-01 | Implement lightweight DI container for backend | Must     | Service registration and resolution   |
+| FR-02 | Create GameStateManager with immutable state   | Must     | Single source of truth for game state |
+| FR-03 | Refactor backend services to use DI            | Must     | Explicit constructor injection        |
+| FR-04 | Refactor frontend to use GameStateManager      | Must     | Replace scattered global state        |
+| FR-05 | Define and enforce layered architecture        | Should   | ESLint rules for import restrictions  |
+| FR-06 | Update all tests to use new patterns           | Must     | Tests must pass after refactor        |
+| FR-07 | Document architecture patterns and guidelines  | Should   | ADRs and code comments                |
 
 ### Non-Functional Requirements
 
-| ID     | Requirement            | Criteria                                           |
-| ------ | ---------------------- | -------------------------------------------------- |
-| NFR-01 | Backward Compatibility | No changes to IPC contracts or data formats        |
-| NFR-02 | Performance            | No performance regression (within 5%)              |
-| NFR-03 | Testability            | 60%+ test coverage achieved                        |
-| NFR-04 | Maintainability        | Clear separation of concerns, documented patterns  |
+| ID     | Requirement            | Criteria                                          |
+| ------ | ---------------------- | ------------------------------------------------- |
+| NFR-01 | Backward Compatibility | No changes to IPC contracts or data formats       |
+| NFR-02 | Performance            | No performance regression (within 5%)             |
+| NFR-03 | Testability            | 60%+ test coverage achieved                       |
+| NFR-04 | Maintainability        | Clear separation of concerns, documented patterns |
 
 ## User Experience
 
@@ -166,12 +170,12 @@ So that I can understand the codebase and make safe changes
 
 ### Edge Cases
 
-| Scenario                              | Expected Behavior                                      |
-| ------------------------------------- | ------------------------------------------------------ |
-| Service depends on unregistered dep   | Container throws clear error at startup                |
-| Circular service dependencies         | Container detects and throws error at registration     |
-| State mutation attempted directly     | TypeScript error (state is readonly)                   |
-| Multiple state updates in sequence    | Batched notification, single render                    |
+| Scenario                            | Expected Behavior                                  |
+| ----------------------------------- | -------------------------------------------------- |
+| Service depends on unregistered dep | Container throws clear error at startup            |
+| Circular service dependencies       | Container detects and throws error at registration |
+| State mutation attempted directly   | TypeScript error (state is readonly)               |
+| Multiple state updates in sequence  | Batched notification, single render                |
 
 ## Technical Considerations
 
@@ -190,12 +194,12 @@ So that I can understand the codebase and make safe changes
 
 ### Risks
 
-| Risk                                  | Likelihood | Impact | Mitigation                                        |
-| ------------------------------------- | ---------- | ------ | ------------------------------------------------- |
-| Regression during refactor            | Medium     | High   | Incremental approach, comprehensive test suite    |
-| Performance degradation               | Low        | Medium | Benchmark before/after, optimize if needed        |
-| Developer resistance to new patterns  | Low        | Medium | Clear documentation, code examples                |
-| Incomplete refactor leaves mixed code | Medium     | Medium | Complete one subsystem fully before next          |
+| Risk                                  | Likelihood | Impact | Mitigation                                     |
+| ------------------------------------- | ---------- | ------ | ---------------------------------------------- |
+| Regression during refactor            | Medium     | High   | Incremental approach, comprehensive test suite |
+| Performance degradation               | Low        | Medium | Benchmark before/after, optimize if needed     |
+| Developer resistance to new patterns  | Low        | Medium | Clear documentation, code examples             |
+| Incomplete refactor leaves mixed code | Medium     | Medium | Complete one subsystem fully before next       |
 
 ## Alternatives Considered
 
@@ -203,19 +207,22 @@ So that I can understand the codebase and make safe changes
 
 - **Pros:** No refactor needed, current code works
 - **Cons:** Technical debt increases, harder to maintain over time
-- **Why rejected:** Long-term maintainability more important than short-term stability
+- **Why rejected:** Long-term maintainability more important than short-term
+  stability
 
 ### Option 2: Use Full Framework (Redux, MobX, etc.)
 
 - **Pros:** Battle-tested, ecosystem support, devtools
 - **Cons:** Heavy dependency, overkill for our needs, learning curve
-- **Why rejected:** Lightweight custom solution sufficient, avoids framework lock-in
+- **Why rejected:** Lightweight custom solution sufficient, avoids framework
+  lock-in
 
 ### Option 3: InversifyJS for DI
 
 - **Pros:** Full-featured DI framework, decorator support
 - **Cons:** Heavy dependency, complex API, decorator overhead
-- **Why rejected:** Simple custom container meets our needs, no unnecessary complexity
+- **Why rejected:** Simple custom container meets our needs, no unnecessary
+  complexity
 
 ## Implementation Plan
 
@@ -247,7 +254,8 @@ So that I can understand the codebase and make safe changes
 
 ## Open Questions
 
-1. **Should DI container support lifecycle management?** (Singleton, Transient, Scoped)
+1. **Should DI container support lifecycle management?** (Singleton, Transient,
+   Scoped)
    - Proposal: Start with singleton only, add others if needed
 
 2. **Should state changes be logged automatically?** (Time-travel debugging)
@@ -256,7 +264,8 @@ So that I can understand the codebase and make safe changes
 3. **How to handle state persistence?** (Save/restore state for HMR)
    - Proposal: Add serialization support to GameStateManager
 
-4. **Should we generate DI container from TypeScript types?** (Type-safe registration)
+4. **Should we generate DI container from TypeScript types?** (Type-safe
+   registration)
    - Proposal: Manual registration initially, explore codegen later
 
 ---
@@ -271,6 +280,6 @@ So that I can understand the codebase and make safe changes
 
 ## Revision History
 
-| Version | Date       | Author  | Changes         |
-| ------- | ---------- | ------- | --------------- |
-| 0.1     | 2026-01-08 | Claude  | Initial draft   |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

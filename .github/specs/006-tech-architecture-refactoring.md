@@ -1,12 +1,9 @@
 # Tech Spec: Architecture Refactoring - Dependency Injection & State Management
 
-> **Filename:** `006-tech-architecture-refactoring.md`
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **PRD:** `006-prd-architecture-refactoring.md`
-> **Related Issues:** N/A
+> **Filename:** `006-tech-architecture-refactoring.md` **Status:** Draft
+> **Author:** Claude (AI Assistant) **Created:** 2026-01-08 **Last Updated:**
+> 2026-01-08 **PRD:** `006-prd-architecture-refactoring.md` **Related Issues:**
+> N/A
 
 ---
 
@@ -14,7 +11,10 @@
 
 ### Summary
 
-Implement a lightweight dependency injection container for backend services and a centralized GameStateManager for frontend state. Replace global state accessors with explicit constructor injection, establish clear architectural layers, and update all tests to use new patterns.
+Implement a lightweight dependency injection container for backend services and
+a centralized GameStateManager for frontend state. Replace global state
+accessors with explicit constructor injection, establish clear architectural
+layers, and update all tests to use new patterns.
 
 ### Goals
 
@@ -36,16 +36,22 @@ Implement a lightweight dependency injection container for backend services and 
 ### Current Architecture
 
 **Backend State Management:**
+
 ```typescript
 // src/backend/index.ts
 let engine: StockfishEngine | null = null;
 let aiOpponent: AIOpponent | null = null;
 
-export function getEngine() { return engine!; }
-export function getAIOpponent() { return aiOpponent!; }
+export function getEngine() {
+  return engine!;
+}
+export function getAIOpponent() {
+  return aiOpponent!;
+}
 ```
 
 **Frontend State Management:**
+
 ```typescript
 // src/frontend/index.ts
 let currentFen = '';
@@ -62,10 +68,12 @@ function makeMove(move: Move) {
 
 ### Key Concepts
 
-- **Dependency Injection**: Explicit dependency management via constructor parameters
+- **Dependency Injection**: Explicit dependency management via constructor
+  parameters
 - **Inversion of Control**: Container manages object lifecycle and dependencies
 - **State Management**: Centralized, immutable state with predictable updates
-- **Layer Architecture**: Clear separation between presentation, application, domain, and infrastructure
+- **Layer Architecture**: Clear separation between presentation, application,
+  domain, and infrastructure
 
 ## Detailed Design
 
@@ -207,9 +215,15 @@ const container = new DIContainer();
 // Register services
 container.register('engine', () => createStockfishEngine());
 container.register('aiOpponent', (c) => new AIOpponent(c.resolve('engine')));
-container.register('analysisPipeline', (c) => new AnalysisPipeline(c.resolve('engine')));
+container.register(
+  'analysisPipeline',
+  (c) => new AnalysisPipeline(c.resolve('engine'))
+);
 container.register('dataStorage', () => new DataStorage());
-container.register('exportImport', (c) => new ExportImportManager(c.resolve('dataStorage')));
+container.register(
+  'exportImport',
+  (c) => new ExportImportManager(c.resolve('dataStorage'))
+);
 
 // IPC handlers now resolve services from container
 function setupIPCHandlers(ws: WebSocket) {
@@ -231,6 +245,7 @@ function setupIPCHandlers(ws: WebSocket) {
 **File:** `src/backend/ai-opponent.ts`
 
 **Before:**
+
 ```typescript
 import { getEngine } from './index.js';
 
@@ -243,6 +258,7 @@ export class AIOpponent {
 ```
 
 **After:**
+
 ```typescript
 import type { StockfishEngine } from '../engine/stockfish-engine.js';
 
@@ -457,11 +473,13 @@ No visual UI changes - state management is internal to frontend.
 ### State Management
 
 **Before:**
+
 - Global mutable variables scattered across modules
 - Direct state mutations trigger manual UI updates
 - No single source of truth
 
 **After:**
+
 - GameStateManager is single source of truth
 - Immutable state updates via setState()
 - Automatic notification to all subscribers
@@ -469,12 +487,12 @@ No visual UI changes - state management is internal to frontend.
 
 ### Error Handling
 
-| Error Condition | Handling Strategy | User Feedback |
-| --------------- | ----------------- | ------------- |
-| Service not registered | Throw at resolution time | Developer error (caught in tests) |
-| Circular dependency | Detect during resolution | Developer error (caught in tests) |
-| State mutation attempted | TypeScript prevents (readonly) | Compile-time error |
-| Invalid move in state | Validate before setState() | Toast notification |
+| Error Condition          | Handling Strategy              | User Feedback                     |
+| ------------------------ | ------------------------------ | --------------------------------- |
+| Service not registered   | Throw at resolution time       | Developer error (caught in tests) |
+| Circular dependency      | Detect during resolution       | Developer error (caught in tests) |
+| State mutation attempted | TypeScript prevents (readonly) | Compile-time error                |
+| Invalid move in state    | Validate before setState()     | Toast notification                |
 
 ## Implementation Plan
 
@@ -493,6 +511,7 @@ No visual UI changes - state management is internal to frontend.
 **Estimated Effort:** 12-16 hours
 
 **File Changes:**
+
 - Create `src/backend/di-container.ts`
 - Create `src/shared/di-types.ts`
 - Create `tests/unit/di-container.test.ts`
@@ -511,6 +530,7 @@ No visual UI changes - state management is internal to frontend.
 **Estimated Effort:** 12-16 hours
 
 **File Changes:**
+
 - Modify `src/backend/index.ts`
 - Modify `src/backend/ai-opponent.ts`
 - Modify `src/backend/analysis-pipeline.ts`
@@ -530,6 +550,7 @@ No visual UI changes - state management is internal to frontend.
 **Estimated Effort:** 16-20 hours
 
 **File Changes:**
+
 - Create `src/frontend/game/game-state-manager.ts`
 - Create `src/shared/state-types.ts`
 - Create `tests/unit/game-state-manager.test.ts`
@@ -548,6 +569,7 @@ No visual UI changes - state management is internal to frontend.
 **Estimated Effort:** 16-20 hours
 
 **File Changes:**
+
 - Modify `src/frontend/index.ts`
 - Modify `src/frontend/board/board-renderer.ts`
 - Modify `src/frontend/ui/move-history.ts`
@@ -568,71 +590,74 @@ No visual UI changes - state management is internal to frontend.
 **Estimated Effort:** 8-10 hours
 
 **File Changes:**
+
 - Modify `.eslintrc.json`
 - Create `docs/architecture-layers.md`
 - Fix import violations
 
 ### File Changes Summary
 
-| File | Action | Description |
-| ---- | ------ | ----------- |
-| `src/backend/di-container.ts` | Create | DI container implementation |
-| `src/frontend/game/game-state-manager.ts` | Create | Centralized state manager |
-| `src/shared/di-types.ts` | Create | DI type definitions |
-| `src/shared/state-types.ts` | Create | State type definitions |
-| `src/backend/index.ts` | Modify | Service registration |
-| `src/backend/ai-opponent.ts` | Modify | Constructor injection |
-| `src/backend/analysis-pipeline.ts` | Modify | Constructor injection |
-| `src/backend/export-import.ts` | Modify | Constructor injection |
-| `src/frontend/index.ts` | Modify | GameStateManager integration |
-| `src/frontend/board/board-renderer.ts` | Modify | Subscribe to state |
-| `src/frontend/ui/move-history.ts` | Modify | Subscribe to state |
-| `src/frontend/modes/training-mode.ts` | Modify | Use state manager |
-| `src/frontend/modes/exam-mode.ts` | Modify | Use state manager |
-| `.eslintrc.json` | Modify | Import restriction rules |
-| `tests/unit/di-container.test.ts` | Create | DI container tests |
-| `tests/unit/game-state-manager.test.ts` | Create | State manager tests |
-| All existing test files | Modify | Use new patterns |
+| File                                      | Action | Description                  |
+| ----------------------------------------- | ------ | ---------------------------- |
+| `src/backend/di-container.ts`             | Create | DI container implementation  |
+| `src/frontend/game/game-state-manager.ts` | Create | Centralized state manager    |
+| `src/shared/di-types.ts`                  | Create | DI type definitions          |
+| `src/shared/state-types.ts`               | Create | State type definitions       |
+| `src/backend/index.ts`                    | Modify | Service registration         |
+| `src/backend/ai-opponent.ts`              | Modify | Constructor injection        |
+| `src/backend/analysis-pipeline.ts`        | Modify | Constructor injection        |
+| `src/backend/export-import.ts`            | Modify | Constructor injection        |
+| `src/frontend/index.ts`                   | Modify | GameStateManager integration |
+| `src/frontend/board/board-renderer.ts`    | Modify | Subscribe to state           |
+| `src/frontend/ui/move-history.ts`         | Modify | Subscribe to state           |
+| `src/frontend/modes/training-mode.ts`     | Modify | Use state manager            |
+| `src/frontend/modes/exam-mode.ts`         | Modify | Use state manager            |
+| `.eslintrc.json`                          | Modify | Import restriction rules     |
+| `tests/unit/di-container.test.ts`         | Create | DI container tests           |
+| `tests/unit/game-state-manager.test.ts`   | Create | State manager tests          |
+| All existing test files                   | Modify | Use new patterns             |
 
 ## Testing Strategy
 
 ### Unit Tests
 
-| Test Case | File | Description |
-| --------- | ---- | ----------- |
-| DI - Service Registration | `tests/unit/di-container.test.ts` | Test register() method |
-| DI - Service Resolution | `tests/unit/di-container.test.ts` | Test resolve() caching |
-| DI - Circular Dependency | `tests/unit/di-container.test.ts` | Detect circular deps |
-| State - Immutability | `tests/unit/game-state-manager.test.ts` | Verify readonly state |
-| State - Notifications | `tests/unit/game-state-manager.test.ts` | Test subscriber pattern |
-| State - Move History | `tests/unit/game-state-manager.test.ts` | Test undo/redo logic |
+| Test Case                 | File                                    | Description             |
+| ------------------------- | --------------------------------------- | ----------------------- |
+| DI - Service Registration | `tests/unit/di-container.test.ts`       | Test register() method  |
+| DI - Service Resolution   | `tests/unit/di-container.test.ts`       | Test resolve() caching  |
+| DI - Circular Dependency  | `tests/unit/di-container.test.ts`       | Detect circular deps    |
+| State - Immutability      | `tests/unit/game-state-manager.test.ts` | Verify readonly state   |
+| State - Notifications     | `tests/unit/game-state-manager.test.ts` | Test subscriber pattern |
+| State - Move History      | `tests/unit/game-state-manager.test.ts` | Test undo/redo logic    |
 
 ### Integration Tests
 
-| Test Case | Description |
-| --------- | ----------- |
-| Backend Services - DI Resolution | Verify all services resolve correctly |
-| Frontend State - Full Game Flow | Play complete game using state manager |
-| Layer Enforcement - ESLint | Verify no cross-layer violations |
+| Test Case                        | Description                            |
+| -------------------------------- | -------------------------------------- |
+| Backend Services - DI Resolution | Verify all services resolve correctly  |
+| Frontend State - Full Game Flow  | Play complete game using state manager |
+| Layer Enforcement - ESLint       | Verify no cross-layer violations       |
 
 ### Manual Test Cases
 
-| ID | Steps | Expected Result |
-| -- | ----- | --------------- |
-| MT-1 | Play full game with new architecture | Identical behavior to v1.1.0 |
-| MT-2 | Rapidly undo/redo moves | Smooth state updates, no bugs |
-| MT-3 | Switch between game modes | Clean state transitions |
+| ID   | Steps                                | Expected Result               |
+| ---- | ------------------------------------ | ----------------------------- |
+| MT-1 | Play full game with new architecture | Identical behavior to v1.1.0  |
+| MT-2 | Rapidly undo/redo moves              | Smooth state updates, no bugs |
+| MT-3 | Switch between game modes            | Clean state transitions       |
 
 ## Performance Considerations
 
 ### Expected Impact
 
 **Performance:**
+
 - DI container resolution: <1ms (negligible)
 - State immutability overhead: <0.1ms per update (negligible)
 - Overall: No measurable performance regression expected
 
 **Memory:**
+
 - DI container: ~10KB for service registry
 - GameState copies: Minimal (shallow copies with shared references)
 
@@ -657,7 +682,8 @@ No feature flags - internal refactor only.
 
 ### Rollback Plan
 
-Use git to revert changes if critical issues found. All changes are in separate commits per phase for granular rollback.
+Use git to revert changes if critical issues found. All changes are in separate
+commits per phase for granular rollback.
 
 ## Alternatives Considered
 
@@ -716,25 +742,25 @@ None - pure TypeScript implementation
 
 ## Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-| ---- | ---------- | ------ | ---------- |
-| Regression during refactor | Medium | High | Comprehensive test suite, incremental approach |
-| Performance degradation | Low | Medium | Benchmark before/after, optimize if needed |
-| Developer resistance | Low | Medium | Clear documentation, code examples |
-| Incomplete refactor | Medium | Medium | Complete one subsystem fully before next |
+| Risk                       | Likelihood | Impact | Mitigation                                     |
+| -------------------------- | ---------- | ------ | ---------------------------------------------- |
+| Regression during refactor | Medium     | High   | Comprehensive test suite, incremental approach |
+| Performance degradation    | Low        | Medium | Benchmark before/after, optimize if needed     |
+| Developer resistance       | Low        | Medium | Clear documentation, code examples             |
+| Incomplete refactor        | Medium     | Medium | Complete one subsystem fully before next       |
 
 ---
 
 ## Approval
 
-| Role | Name | Date | Status |
-| ---- | ---- | ---- | ------ |
-| Tech Lead | | | Pending |
-| Reviewer 1 | | | Pending |
-| Reviewer 2 | | | Pending |
+| Role       | Name | Date | Status  |
+| ---------- | ---- | ---- | ------- |
+| Tech Lead  |      |      | Pending |
+| Reviewer 1 |      |      | Pending |
+| Reviewer 2 |      |      | Pending |
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-| ------- | ---- | ------ | ------- |
-| 0.1 | 2026-01-08 | Claude | Initial draft |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |

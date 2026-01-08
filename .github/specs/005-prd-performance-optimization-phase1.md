@@ -1,22 +1,23 @@
 # PRD: Performance Optimization - Phase 1 (Critical Path Improvements)
 
-> **Status:** Draft
-> **Author:** Claude (AI Assistant)
-> **Created:** 2026-01-08
-> **Last Updated:** 2026-01-08
-> **Related Issues:** N/A
+> **Status:** Draft **Author:** Claude (AI Assistant) **Created:** 2026-01-08
+> **Last Updated:** 2026-01-08 **Related Issues:** N/A
 
 ---
 
 ## Executive Summary
 
-Improve Chess-Sensei's performance by 30-60% in critical user-facing operations through targeted optimizations in game analysis pipeline, move guidance system, and board rendering. This phase focuses on high-impact, low-risk improvements that directly enhance user experience.
+Improve Chess-Sensei's performance by 30-60% in critical user-facing operations
+through targeted optimizations in game analysis pipeline, move guidance system,
+and board rendering. This phase focuses on high-impact, low-risk improvements
+that directly enhance user experience.
 
 ## Problem Statement
 
 ### Current State
 
-Chess-Sensei v1.1.0 has acceptable but not optimal performance in key operations:
+Chess-Sensei v1.1.0 has acceptable but not optimal performance in key
+operations:
 
 - **Game Analysis:** 5-10 seconds for a 40-move game (sequential processing)
 - **Move Guidance:** ~200ms response time (acceptable but can be improved)
@@ -35,13 +36,15 @@ Chess-Sensei v1.1.0 has acceptable but not optimal performance in key operations
 
 **Affected Users:** All users across all game modes
 
-**Severity:** Medium - functionality works but performance impacts user experience and perceived quality
+**Severity:** Medium - functionality works but performance impacts user
+experience and perceived quality
 
 ## Goals
 
 ### Primary Goals
 
-1. **Reduce game analysis time to <3 seconds** for 40-move games (60% improvement)
+1. **Reduce game analysis time to <3 seconds** for 40-move games (60%
+   improvement)
 2. **Reduce move guidance latency to <100ms** (50% improvement)
 3. **Achieve consistent 60fps board rendering** (16ms frame budget)
 4. **Eliminate redundant engine calculations** through intelligent caching
@@ -55,13 +58,13 @@ Chess-Sensei v1.1.0 has acceptable but not optimal performance in key operations
 
 ### Success Metrics
 
-| Metric                            | Current | Target | Measurement Method                 |
-| --------------------------------- | ------- | ------ | ---------------------------------- |
-| Game analysis (40 moves)          | 5-10s   | <3s    | Automated performance test         |
-| Move guidance response            | 200ms   | <100ms | Performance.now() measurements     |
-| Board render time                 | ~20ms   | <16ms  | requestAnimationFrame timing       |
-| Cache hit rate (repeated pos)     | 0%      | >70%   | Engine cache statistics            |
-| Analysis progress feedback        | None    | Real-time | User testing feedback           |
+| Metric                        | Current | Target    | Measurement Method             |
+| ----------------------------- | ------- | --------- | ------------------------------ |
+| Game analysis (40 moves)      | 5-10s   | <3s       | Automated performance test     |
+| Move guidance response        | 200ms   | <100ms    | Performance.now() measurements |
+| Board render time             | ~20ms   | <16ms     | requestAnimationFrame timing   |
+| Cache hit rate (repeated pos) | 0%      | >70%      | Engine cache statistics        |
+| Analysis progress feedback    | None    | Real-time | User testing feedback          |
 
 ## User Stories
 
@@ -93,24 +96,24 @@ So that I know the app is working and not frozen
 
 ### Functional Requirements
 
-| ID    | Requirement                                           | Priority | Notes                                   |
-| ----- | ----------------------------------------------------- | -------- | --------------------------------------- |
-| FR-01 | Parallelize game analysis across all moves            | Must     | Core performance improvement            |
-| FR-02 | Cache engine evaluations with LRU eviction            | Must     | Prevents redundant calculations         |
-| FR-03 | Debounce guidance requests during rapid move sequences| Must     | Reduces unnecessary engine calls        |
-| FR-04 | Use CSS transforms for piece positioning              | Must     | Hardware acceleration for animations    |
-| FR-05 | Batch DOM updates in board renderer                   | Must     | Reduces layout thrashing                |
-| FR-06 | Stream analysis results as they complete              | Should   | Progressive user feedback               |
-| FR-07 | Display analysis progress indicator                   | Should   | User sees activity during wait          |
+| ID    | Requirement                                            | Priority | Notes                                |
+| ----- | ------------------------------------------------------ | -------- | ------------------------------------ |
+| FR-01 | Parallelize game analysis across all moves             | Must     | Core performance improvement         |
+| FR-02 | Cache engine evaluations with LRU eviction             | Must     | Prevents redundant calculations      |
+| FR-03 | Debounce guidance requests during rapid move sequences | Must     | Reduces unnecessary engine calls     |
+| FR-04 | Use CSS transforms for piece positioning               | Must     | Hardware acceleration for animations |
+| FR-05 | Batch DOM updates in board renderer                    | Must     | Reduces layout thrashing             |
+| FR-06 | Stream analysis results as they complete               | Should   | Progressive user feedback            |
+| FR-07 | Display analysis progress indicator                    | Should   | User sees activity during wait       |
 
 ### Non-Functional Requirements
 
-| ID     | Requirement            | Criteria                                           |
-| ------ | ---------------------- | -------------------------------------------------- |
-| NFR-01 | Performance            | Meet all target metrics in Success Metrics table   |
-| NFR-02 | Reliability            | No regressions in existing functionality           |
-| NFR-03 | Maintainability        | Code changes well-documented and tested            |
-| NFR-04 | Platform Compatibility | Improvements work across Windows, macOS, Linux     |
+| ID     | Requirement            | Criteria                                         |
+| ------ | ---------------------- | ------------------------------------------------ |
+| NFR-01 | Performance            | Meet all target metrics in Success Metrics table |
+| NFR-02 | Reliability            | No regressions in existing functionality         |
+| NFR-03 | Maintainability        | Code changes well-documented and tested          |
+| NFR-04 | Platform Compatibility | Improvements work across Windows, macOS, Linux   |
 
 ## User Experience
 
@@ -138,13 +141,13 @@ So that I know the app is working and not frozen
 
 ### Edge Cases
 
-| Scenario                         | Expected Behavior                                      |
-| -------------------------------- | ------------------------------------------------------ |
-| Very long game (200+ moves)      | Progress indicator updates throughout, completes <6s   |
-| Repeated undo/redo same position | Cache hit, instant response                            |
-| Multiple games analyzed rapidly  | Cache persists across games, maintains performance     |
-| Cache memory limit reached       | LRU eviction, maintains 1000 entry limit               |
-| Analysis interrupted by user     | Graceful cancellation, cleanup of pending promises     |
+| Scenario                         | Expected Behavior                                    |
+| -------------------------------- | ---------------------------------------------------- |
+| Very long game (200+ moves)      | Progress indicator updates throughout, completes <6s |
+| Repeated undo/redo same position | Cache hit, instant response                          |
+| Multiple games analyzed rapidly  | Cache persists across games, maintains performance   |
+| Cache memory limit reached       | LRU eviction, maintains 1000 entry limit             |
+| Analysis interrupted by user     | Graceful cancellation, cleanup of pending promises   |
 
 ## Technical Considerations
 
@@ -164,12 +167,12 @@ So that I know the app is working and not frozen
 
 ### Risks
 
-| Risk                                  | Likelihood | Impact | Mitigation                                        |
-| ------------------------------------- | ---------- | ------ | ------------------------------------------------- |
-| Parallel analysis doesn't scale linearly | Medium  | Medium | Benchmark early, adjust approach if needed        |
-| Cache invalidation bugs              | Low        | High   | Comprehensive testing of cache key generation     |
-| CSS transform browser compatibility  | Low        | Low    | Test on WebView2, WebKit, confirm support         |
-| Debouncing feels laggy to users      | Low        | Medium | User testing, adjust debounce delay if needed     |
+| Risk                                     | Likelihood | Impact | Mitigation                                    |
+| ---------------------------------------- | ---------- | ------ | --------------------------------------------- |
+| Parallel analysis doesn't scale linearly | Medium     | Medium | Benchmark early, adjust approach if needed    |
+| Cache invalidation bugs                  | Low        | High   | Comprehensive testing of cache key generation |
+| CSS transform browser compatibility      | Low        | Low    | Test on WebView2, WebKit, confirm support     |
+| Debouncing feels laggy to users          | Low        | Medium | User testing, adjust debounce delay if needed |
 
 ## Alternatives Considered
 
@@ -177,19 +180,22 @@ So that I know the app is working and not frozen
 
 - **Pros:** True parallel execution, doesn't block main thread
 - **Cons:** Stockfish WASM already in backend, complex message passing
-- **Why rejected:** Backend already isolated, no benefit over promise parallelization
+- **Why rejected:** Backend already isolated, no benefit over promise
+  parallelization
 
 ### Option 2: IndexedDB for Cache
 
 - **Pros:** Persistent cache across sessions
 - **Cons:** Async overhead, cache invalidation complexity, storage quota limits
-- **Why rejected:** In-memory LRU sufficient, faster access, simpler implementation
+- **Why rejected:** In-memory LRU sufficient, faster access, simpler
+  implementation
 
 ### Option 3: Virtual DOM for Board
 
 - **Pros:** Automatic batching, diffing algorithm
 - **Cons:** Framework dependency, overkill for simple board updates
-- **Why rejected:** DocumentFragment sufficient for our use case, no added complexity
+- **Why rejected:** DocumentFragment sufficient for our use case, no added
+  complexity
 
 ## Implementation Plan
 
@@ -218,9 +224,12 @@ So that I know the app is working and not frozen
 
 ## Open Questions
 
-1. **What debounce delay feels natural?** Need user testing to determine optimal value (150ms proposed)
-2. **Should cache persist across app restarts?** Currently in-memory only, discuss persistence value
-3. **What cache size is optimal?** 1000 entries proposed, may need tuning based on memory usage
+1. **What debounce delay feels natural?** Need user testing to determine optimal
+   value (150ms proposed)
+2. **Should cache persist across app restarts?** Currently in-memory only,
+   discuss persistence value
+3. **What cache size is optimal?** 1000 entries proposed, may need tuning based
+   on memory usage
 
 ---
 
@@ -234,6 +243,6 @@ So that I know the app is working and not frozen
 
 ## Revision History
 
-| Version | Date       | Author  | Changes         |
-| ------- | ---------- | ------- | --------------- |
-| 0.1     | 2026-01-08 | Claude  | Initial draft   |
+| Version | Date       | Author | Changes       |
+| ------- | ---------- | ------ | ------------- |
+| 0.1     | 2026-01-08 | Claude | Initial draft |
