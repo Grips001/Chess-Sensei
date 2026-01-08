@@ -1,0 +1,169 @@
+/* ========================================
+   Modal Dialogs
+   Confirmation, Promotion, and other modals
+   ======================================== */
+
+/* Confirmation dialog */
+.confirm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgb(0 0 0 / 50%);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: overlayFadeIn 0.2s ease;
+}
+
+.confirm-dialog-overlay.hidden {
+  display: none;
+}
+
+.confirm-dialog {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--color-porcelain-rgb) / 95%),
+    rgb(240 239 237 / 95%)
+  );
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 25%);
+  max-width: 350px;
+  text-align: center;
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-dialog-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px;
+  color: var(--color-text-primary);
+}
+
+.confirm-dialog-message {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin: 0 0 20px;
+}
+
+.confirm-dialog-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirm-dialog-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.confirm-dialog-button.confirm {
+  background: rgb(220 50 50 / 90%);
+  color: white;
+  box-shadow: 0 2px 6px rgb(220 50 50 / 30%);
+}
+
+.confirm-dialog-button.confirm:hover {
+  background: rgb(220 50 50 / 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgb(220 50 50 / 40%);
+}
+
+.confirm-dialog-button.cancel {
+  background: rgb(200 200 200 / 80%);
+  color: var(--color-text-primary);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
+}
+
+.confirm-dialog-button.cancel:hover {
+  background: rgb(200 200 200 / 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgb(0 0 0 / 15%);
+}
+
+/* Promotion Dialog */
+.promotion-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgb(0 0 0 / 60%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2500;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.promotion-dialog-overlay.hidden {
+  display: none;
+  opacity: 0;
+}
+
+.promotion-dialog {
+  background: linear-gradient(145deg, #f8f8f8, #e8e8e8);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow:
+    0 8px 32px rgb(0 0 0 / 30%),
+    inset 1px 1px 2px rgb(255 255 255 / 80%);
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.promotion-dialog-title {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.promotion-pieces {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.promotion-piece {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgb(var(--color-porcelain-rgb) / 80%);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  box-shadow:
+    inset 1px 1px 3px rgb(0 0 0 / 10%),
+    2px 2px 6px rgb(0 0 0 / 15%);
+}
+
+.promotion-piece:hover {
+  transform: scale(1.1);
+  border-color: #4a90d9;
+  box-shadow:
+    inset 1px 1px 3px rgb(0 0 0 / 10%),
+    0 4px 12px rgb(74 144 217 / 40%);
+}
+
+.promotion-piece:active {
+  transform: scale(1.05);
+}
+
+.promotion-piece svg {
+  width: 44px;
+  height: 44px;
+}

@@ -5,7 +5,7 @@ when working on this project.
 
 ## Project Status
 
-**Version:** v1.0.4 (Stable) **Priority:** Stability over new features
+**Version:** v1.1.0 (Stable) **Priority:** Stability over new features
 
 ## Available Tools
 

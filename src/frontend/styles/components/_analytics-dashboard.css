@@ -1,0 +1,255 @@
+/* ============================================
+   Phase 5: Deep Analytics Dashboard Styles (Task 5.6)
+   ============================================ */
+
+.analytics-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.analytics-card {
+  background: rgb(var(--color-porcelain-rgb) / 90%);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow:
+    0 4px 20px rgb(0 0 0 / 8%),
+    0 0 0 1px rgb(255 255 255 / 50%);
+}
+
+.analytics-card h3 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.analytics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analytics-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
+}
+
+.analytics-stat:last-child {
+  border-bottom: none;
+}
+
+.analytics-stat .stat-note {
+  font-size: 11px;
+  color: #aaaaaa;
+  margin-left: 4px;
+}
+
+/* Bar Chart */
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-label {
+  width: 80px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.bar-container {
+  flex: 1;
+  height: 24px;
+  background: rgb(0 0 0 / 10%);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+  transition: width 0.5s ease;
+}
+
+.bar.excellent {
+  background: linear-gradient(90deg, var(--color-move-excellent), var(--color-move-excellent-dark));
+}
+
+.bar.good {
+  background: linear-gradient(90deg, var(--color-move-good), var(--color-move-good-dark));
+}
+
+.bar.average {
+  background: linear-gradient(
+    90deg,
+    var(--color-move-inaccuracy),
+    var(--color-move-inaccuracy-dark)
+  );
+}
+
+.bar.below-average {
+  background: linear-gradient(90deg, var(--color-move-mistake), var(--color-move-mistake-dark));
+}
+
+.bar.poor {
+  background: linear-gradient(90deg, var(--color-move-blunder), var(--color-move-blunder-dark));
+}
+
+/* Move Distribution Chart */
+.distribution-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.distribution-bars {
+  display: flex;
+  height: 32px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.dist-bar {
+  transition: flex 0.5s ease;
+  min-width: 4px;
+}
+
+.dist-bar.excellent {
+  background: var(--color-move-excellent);
+}
+
+.dist-bar.good {
+  background: var(--color-move-good);
+}
+
+.dist-bar.inaccuracy {
+  background: var(--color-move-inaccuracy);
+}
+
+.dist-bar.mistake {
+  background: var(--color-move-mistake);
+}
+
+.dist-bar.blunder {
+  background: var(--color-move-blunder);
+}
+
+.distribution-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.legend-item {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-item::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-xs-sm);
+}
+
+.legend-item.excellent::before {
+  background: var(--color-move-excellent);
+}
+
+.legend-item.good::before {
+  background: var(--color-move-good);
+}
+
+.legend-item.inaccuracy::before {
+  background: var(--color-move-inaccuracy);
+}
+
+.legend-item.mistake::before {
+  background: var(--color-move-mistake);
+}
+
+.legend-item.blunder::before {
+  background: var(--color-move-blunder);
+}
+
+/* Training Recommendations */
+.recommendations-card {
+  grid-column: 1 / -1;
+}
+
+.recommendations-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recommendation-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgb(70 130 220 / 5%);
+  border-left: 3px solid #4682dc;
+  border-radius: 0 8px 8px 0;
+}
+
+.rec-number {
+  width: 24px;
+  height: 24px;
+  background: #4682dc;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.rec-text {
+  flex: 1;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Responsive adjustments for Analytics */
+@media (width <= 768px) {
+  .analytics-layout {
+    grid-template-columns: 1fr;
+  }
+}

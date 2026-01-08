@@ -1,0 +1,215 @@
+/* ========================================
+   Chessboard Styles
+   Board container, squares, pieces
+   ======================================== */
+
+/* Chessboard container - primary focal point */
+#chess-board-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Chessboard wrapper with coordinates */
+#chess-board-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    '. files .'
+    'ranks board .'
+    '. . .';
+  gap: 8px;
+
+  /* Make board as large as possible - primary focal point */
+
+  /* Account for right panel (350px) + gap (20px) + padding (40px) */
+  width: min(calc(100vh - 60px), calc(100vw - 450px));
+  height: min(calc(100vh - 60px), calc(100vw - 450px));
+}
+
+/* Board coordinates */
+.board-files {
+  grid-area: files;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.board-files span {
+  flex: 1;
+  text-align: center;
+}
+
+.board-ranks {
+  grid-area: ranks;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.board-ranks span {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Chessboard - 8x8 grid with neomorphism */
+#chess-board {
+  grid-area: board;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(145deg, #d8dce0 0%, #c8ccd0 100%);
+  border-radius: var(--radius-md-lg);
+  padding: 5px;
+  gap: 0;
+
+  /* Neomorphism - soft raised surface with modern feel */
+  box-shadow:
+    10px 10px 20px rgb(0 0 0 / 12%),
+    -8px -8px 16px rgb(255 255 255 / 80%),
+    inset 1px 1px 2px rgb(255 255 255 / 30%);
+  position: relative;
+}
+
+/* Individual squares */
+.square {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    filter var(--duration-fast) var(--ease-out-soft),
+    box-shadow var(--duration-normal) var(--ease-out-soft),
+    transform var(--duration-fast) var(--ease-out-soft);
+  user-select: none;
+}
+
+/* Light squares - modern cool gray with subtle texture */
+.square.light {
+  background-color: #e8ecef;
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 40%) 0%, transparent 50%, rgb(0 0 0 / 3%) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23000000' fill-opacity='0.015' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Dark squares - modern slate blue-gray with subtle texture */
+.square.dark {
+  background-color: #7c8ea0;
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 8%) 0%, transparent 50%, rgb(0 0 0 / 8%) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.02' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Square hover effect */
+.square:hover {
+  filter: brightness(1.05);
+  cursor: pointer;
+}
+
+/* Selected square - soft glow with gentle pulse */
+.square.selected {
+  box-shadow:
+    inset 0 0 0 3px rgb(100 150 255 / 60%),
+    0 0 12px rgb(100 150 255 / 40%);
+  animation: selectedPulse 2s var(--ease-in-out-soft) infinite;
+}
+
+@keyframes selectedPulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 3px rgb(100 150 255 / 60%),
+      0 0 12px rgb(100 150 255 / 40%);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 3px rgb(100 150 255 / 70%),
+      0 0 18px rgb(100 150 255 / 50%);
+  }
+}
+
+/* Legal move indicators - soft glowing outlines with fade-in */
+.square.legal-move::after {
+  content: '';
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgb(100 200 100 / 40%);
+  box-shadow: 0 0 8px rgb(100 200 100 / 60%);
+  transition:
+    transform var(--duration-fast) var(--ease-bounce-soft),
+    background var(--duration-fast) var(--ease-out-soft),
+    box-shadow var(--duration-normal) var(--ease-out-soft);
+  animation: legalMoveAppear var(--duration-normal) var(--ease-spring);
+}
+
+@keyframes legalMoveAppear {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.square.legal-move:hover::after {
+  background: rgb(100 200 100 / 60%);
+  box-shadow: 0 0 12px rgb(100 200 100 / 80%);
+  transform: scale(1.2);
+}
+
+/* Legal capture indicators - distinct color with ring animation */
+.square.legal-capture::after {
+  content: '';
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  border: 3px solid rgb(255 100 100 / 50%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgb(255 100 100 / 50%);
+  transition:
+    transform var(--duration-fast) var(--ease-bounce-soft),
+    border-color var(--duration-fast) var(--ease-out-soft),
+    box-shadow var(--duration-normal) var(--ease-out-soft);
+  animation: captureRingAppear var(--duration-normal) var(--ease-spring);
+}
+
+@keyframes captureRingAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.square.legal-capture:hover::after {
+  border-color: rgb(255 100 100 / 70%);
+  box-shadow: 0 0 14px rgb(255 100 100 / 70%);
+  transform: scale(1.05);
+}

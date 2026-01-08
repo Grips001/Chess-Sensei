@@ -2,11 +2,12 @@
  * Chess-Sensei Frontend Entry Point
  *
  * This file initializes the Neutralino.js window and sets up the chess UI.
- * Includes IPC communication with the Bun backend for engine operations.
+ * Orchestrates modules from board/, ui/, game/, and modes/ directories.
  */
 
 import neutralino from '@neutralinojs/lib';
 neutralino.init();
+
 import { ipc, initializeIPC } from './websocket-ipc-client';
 import {
   IPC_METHODS,
@@ -18,379 +19,371 @@ import {
   type EngineStatusResponse,
   type ErrorResponse,
 } from '../shared/ipc-types';
-import type { ExamGameRecord } from './exam-mode';
-import { ChessGame, type Piece, type PieceSymbol, type Square } from '../shared/chess-logic';
-import { parseSanToEnglish } from '../shared/notation-parser';
+import { ChessGame } from '../shared/chess-logic';
 import { SoundManager } from './sound-manager';
-import { createTrainingMode, type TrainingConfig } from './training-mode';
-import { createExamMode, type ExamConfig } from './exam-mode';
-import { createSandboxMode, type SandboxAnalysisResult, type EditorPiece } from './sandbox-mode';
-import { createMoveGuidance, type GuidanceMove } from './move-guidance';
+import { createTrainingMode } from './training-mode';
+import { createExamMode } from './exam-mode';
+import { createSandboxMode, type SandboxAnalysisResult } from './sandbox-mode';
+import { createMoveGuidance } from './move-guidance';
 import { BoardAnnotations } from './board-annotations';
 import { ExplanationModal } from './components/explanation-modal';
 import { ControlToolbar } from './components/control-toolbar';
 import { CollapsibleSection } from './components/collapsible-section';
-import { generateExplanation } from '../shared/explanation-generator';
 import { createAnalysisUI } from './analysis-ui';
 import { createProgressDashboard } from './progress-dashboard';
 import { createDataManagement } from './data-management';
 import { frontendLogger } from './frontend-logger';
 import { initializeNativeMenu, type MenuActionHandlers } from './native-menu';
 
+// Import from extracted modules
+import { renderChessboard as renderBoard, type BoardRenderOptions } from './board/board-renderer';
+import { handleDragStart, handleDragOver, handleDrop, type DragState } from './board/board-events';
+import {
+  clearHighlights,
+  clearSelection as clearSquareSelection,
+  highlightLegalMoves,
+} from './board/board-highlights';
+import { updateTurnIndicator } from './ui/turn-indicator';
+import { updateMoveHistory } from './ui/move-history';
+import { updateCapturedPieces } from './ui/captured-pieces';
+import { updateGameAlert } from './ui/game-alerts';
+import { showConfirmDialog, isPromotionMove, showPromotionDialog } from './ui/dialogs';
+import {
+  executeMove as execMove,
+  handleUndo as doUndo,
+  handleRedo as doRedo,
+  handleFlipBoard as doFlipBoard,
+  updateUndoRedoButtons,
+  handleResign as doResign,
+  type GameControllerDeps,
+} from './game/game-controller';
+import {
+  requestBotMove as reqBotMove,
+  requestExamBotMove as reqExamBotMove,
+  type BotIntegrationDeps,
+} from './game/bot-integration';
+import {
+  showGuidancePanel,
+  handleGuidanceHover as doGuidanceHover,
+  updateGuidanceHighlights as doUpdateGuidanceHighlights,
+  updateGuidance as doUpdateGuidance,
+  type GuidanceControllerDeps,
+} from './game/guidance-controller';
+import { saveAndAnalyzeGame } from './game/save-analyze';
+import {
+  renderSandboxBoard as renderSandbox,
+  updateSandboxValidation,
+  renderSandboxAnalysisResults,
+  type SandboxControllerDeps,
+} from './game/sandbox-controller';
+import { startTrainingGame, startExamGame, type GameMode } from './modes/mode-controller';
+
 console.log('Chess-Sensei Frontend initialized');
 frontendLogger.info('App', 'Chess-Sensei Frontend initializing');
 
-// Initialize chess game state
+// ============================================
+// Global State
+// ============================================
+
 const game = new ChessGame();
-
-// Initialize sound manager
 const soundManager = new SoundManager();
-
-// Initialize training mode
 const { manager: trainingManager, ui: trainingUI } = createTrainingMode();
-
-// Initialize exam mode (Phase 4)
 const { manager: examManager, ui: examUI } = createExamMode();
-
-// Initialize sandbox mode (Phase 7)
 const { manager: sandboxManager, ui: sandboxUI } = createSandboxMode();
-
-// Initialize move guidance
 const guidanceManager = createMoveGuidance();
-
-// Initialize board annotations for bubble icons (Phase 1 - Move Reasoning Explanations)
-let boardAnnotations: BoardAnnotations | null = null;
-
-// Initialize explanation modal (Phase 2 - Move Reasoning Explanations)
-let explanationModal: ExplanationModal | null = null;
-
-// Initialize Control Toolbar (CS-003 - Right Panel Layout Redesign)
 const controlToolbar = new ControlToolbar('bottom');
-
-// Initialize Collapsible Sections (CS-003 - Right Panel Layout Redesign)
-let moveHistorySection: CollapsibleSection | null = null;
-let capturedPiecesSection: CollapsibleSection | null = null;
-
-// Initialize analysis UI (Phase 5)
 const analysisUI = createAnalysisUI();
-
-// Initialize progress dashboard (Phase 6)
 const progressDashboard = createProgressDashboard();
-
-// Initialize data management (Phase 8)
 const dataManagement = createDataManagement();
 
-// Current active game mode
-type GameMode = 'none' | 'training' | 'exam' | 'sandbox';
+let boardAnnotations: BoardAnnotations | null = null;
+let explanationModal: ExplanationModal | null = null;
+let moveHistorySection: CollapsibleSection | null = null;
+let capturedPiecesSection: CollapsibleSection | null = null;
 let currentGameMode: GameMode = 'none';
-
-// Track drag and selection state
-let draggedPiece: { element: HTMLElement; square: string } | null = null;
+let draggedPiece: DragState | null = null;
 let selectedSquare: string | null = null;
 let boardFlipped: boolean = false;
-
-// Track redo stack (for redo functionality)
 let redoStack: string[] = [];
-
-// Track pending game result timeout (to cancel on game reset)
 let gameResultTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
-/**
- * Update the turn indicator display
- * Per Task 2.3.1: Show current turn indicator
- */
-function updateTurnIndicator(): void {
-  const turnText = document.getElementById('turn-text');
-  const turnPieceIcon = document.getElementById('turn-piece-icon');
-  const turnDisplay = document.querySelector('.turn-display') as HTMLElement | null;
+// ============================================
+// State Accessors (for dependency injection)
+// ============================================
 
-  if (!turnText || !turnPieceIcon || !turnDisplay) return;
+const getSelectedSquare = () => selectedSquare;
+const setSelectedSquare = (sq: string | null) => {
+  selectedSquare = sq;
+};
+const getDraggedPiece = () => draggedPiece;
+const setDraggedPiece = (state: DragState | null) => {
+  draggedPiece = state;
+};
+const getBoardFlipped = () => boardFlipped;
+const setBoardFlipped = (flipped: boolean) => {
+  boardFlipped = flipped;
+};
+const getRedoStack = () => redoStack;
+const setRedoStack = (stack: string[]) => {
+  redoStack = stack;
+};
+const setGameResultTimeout = (id: ReturnType<typeof setTimeout> | null) => {
+  gameResultTimeoutId = id;
+};
+const getBoardAnnotations = () => boardAnnotations;
+const setBoardAnnotations = (annotations: BoardAnnotations | null) => {
+  boardAnnotations = annotations;
+};
+const getExplanationModal = () => explanationModal;
+const setExplanationModal = (modal: ExplanationModal | null) => {
+  explanationModal = modal;
+};
+const setCurrentGameMode = (mode: GameMode) => {
+  currentGameMode = mode;
+};
 
-  const currentTurn = game.getTurn();
-  const isWhite = currentTurn === 'w';
+// ============================================
+// Wrapper Functions (bind state to modules)
+// ============================================
 
-  // Update text
-  turnText.textContent = isWhite ? 'White to move' : 'Black to move';
-
-  // Update piece icon (show king of current player)
-  const kingPiece = isWhite ? 'wK' : 'bK';
-  turnPieceIcon.style.backgroundImage = `url('/assets/pieces/${kingPiece}.svg')`;
-
-  // Add animation
-  turnDisplay.classList.remove('animate');
-  // Force reflow to restart animation
-  void turnDisplay.offsetWidth;
-  turnDisplay.classList.add('animate');
-
-  // Remove animation class after animation completes
-  setTimeout(() => {
-    turnDisplay.classList.remove('animate');
-  }, 500);
-}
-
-/**
- * Update the move history display
- * Per Task 2.3.2: Display move history (notation list)
- */
-function updateMoveHistory(): void {
-  const moveListElement = document.getElementById('move-list');
-  if (!moveListElement) return;
-
-  // Clear existing moves
-  moveListElement.innerHTML = '';
-
-  // Get move history from game
-  const history = game.getHistory();
-
-  // Group moves into pairs (White + Black)
-  for (let i = 0; i < history.length; i += 2) {
-    const moveNumber = Math.floor(i / 2) + 1;
-    const whiteMove = history[i];
-    const blackMove = history[i + 1];
-
-    // Create move pair container
-    const movePair = document.createElement('div');
-    movePair.className = 'move-pair';
-
-    // Move number
-    const moveNum = document.createElement('div');
-    moveNum.className = 'move-number';
-    moveNum.textContent = `${moveNumber}.`;
-    movePair.appendChild(moveNum);
-
-    // Move notation container
-    const moveNotation = document.createElement('div');
-    moveNotation.className = 'move-notation';
-
-    // White's move
-    const whiteMoveEl = document.createElement('div');
-    whiteMoveEl.className = 'move-white';
-    whiteMoveEl.textContent = whiteMove.san;
-    if (i === history.length - 1) {
-      whiteMoveEl.classList.add('latest');
-    }
-    moveNotation.appendChild(whiteMoveEl);
-
-    // Black's move (if exists)
-    if (blackMove) {
-      const blackMoveEl = document.createElement('div');
-      blackMoveEl.className = 'move-black';
-      blackMoveEl.textContent = blackMove.san;
-      if (i + 1 === history.length - 1) {
-        blackMoveEl.classList.add('latest');
-      }
-      moveNotation.appendChild(blackMoveEl);
-    }
-
-    movePair.appendChild(moveNotation);
-    moveListElement.appendChild(movePair);
+function renderChessboard(): void {
+  const boardElement = document.getElementById('chess-board');
+  if (!boardElement) {
+    console.error('chess-board element not found');
+    return;
   }
 
-  // Auto-scroll to bottom to show latest move
-  const moveHistory = document.getElementById('move-history');
-  if (moveHistory) {
-    moveHistory.scrollTop = moveHistory.scrollHeight;
-  }
-
-  // Refresh CollapsibleSection height after content update
-  if (moveHistorySection) {
-    moveHistorySection.refreshHeight();
-  }
-}
-
-/**
- * Update game alert display (check, checkmate, stalemate)
- * Per Task 2.3.4: Check/checkmate indicators
- */
-function updateGameAlert(): void {
-  const gameAlert = document.getElementById('game-alert');
-  if (!gameAlert) return;
-
-  // Check game state
-  const isCheck = game.isInCheck();
-  const isCheckmate = game.isCheckmate();
-  const isStalemate = game.isStalemate();
-  const isDraw = game.isDraw();
-
-  // Reset classes
-  gameAlert.className = 'game-alert';
-  gameAlert.innerHTML = '';
-
-  if (isCheckmate) {
-    // Checkmate
-    const winner = game.getTurn() === 'w' ? 'Black' : 'White';
-    gameAlert.classList.add('checkmate');
-    gameAlert.innerHTML = `<span class="game-alert-icon">♔</span><span>Checkmate! ${winner} wins!</span>`;
-  } else if (isStalemate) {
-    // Stalemate
-    gameAlert.classList.add('draw');
-    gameAlert.innerHTML = `<span class="game-alert-icon">⚖</span><span>Stalemate - Draw!</span>`;
-  } else if (isDraw) {
-    // Other draw conditions
-    gameAlert.classList.add('draw');
-    gameAlert.innerHTML = `<span class="game-alert-icon">⚖</span><span>Draw!</span>`;
-  } else if (isCheck) {
-    // Check
-    const player = game.getTurn() === 'w' ? 'White' : 'Black';
-    gameAlert.classList.add('check');
-    gameAlert.innerHTML = `<span class="game-alert-icon">⚠</span><span>${player} King in Check!</span>`;
-  } else {
-    // No alert - hide
-    gameAlert.classList.add('hidden');
-  }
-}
-
-/**
- * Convert frontend ExamGameRecord to backend ExamGameData format
- * The backend expects a different structure for analysis
- */
-function convertToBackendFormat(record: ExamGameRecord): {
-  gameId: string;
-  timestamp: number;
-  playerColor: 'white' | 'black';
-  botPersonality: string;
-  botElo: number;
-  result: '1-0' | '0-1' | '1/2-1/2';
-  termination: string;
-  duration: number;
-  moves: Array<{
-    moveNumber: number;
-    color: 'white' | 'black';
-    san: string;
-    uci: string;
-    fen: string;
-    timestamp: number;
-    timeSpent: number;
-  }>;
-  pgn: string;
-  startingFen?: string;
-} {
-  return {
-    gameId: record.gameId,
-    timestamp: new Date(record.timestamp).getTime(),
-    playerColor: record.metadata.playerColor,
-    botPersonality: record.metadata.botPersonality,
-    botElo: record.metadata.botElo,
-    result: record.metadata.result as '1-0' | '0-1' | '1/2-1/2',
-    termination: record.metadata.termination,
-    duration: record.metadata.duration,
-    moves: record.moves.map((m) => ({
-      moveNumber: m.moveNumber,
-      color: m.color,
-      san: m.san,
-      uci: m.uci,
-      fen: m.fen,
-      timestamp: m.timestamp,
-      timeSpent: m.timeSpent,
-    })),
-    pgn: record.pgn,
+  const options: BoardRenderOptions = {
+    boardElement,
+    fen: game.getFen(),
+    boardFlipped,
+    onSquareClick: handleSquareClick,
+    onDragStart: (e, sq) =>
+      handleDragStart(e, sq, setDraggedPiece, (square) => highlightLegalMoves(square, game)),
+    onDragOver: handleDragOver,
+    onDrop: (e, sq) =>
+      handleDrop(e, sq, getDraggedPiece, setDraggedPiece, attemptMove, clearHighlights),
   };
+
+  renderBoard(options);
 }
 
-/**
- * Save and analyze an Exam Mode game
- * Per Task 5.1: Analysis launch flow
- */
-async function saveAndAnalyzeGame(gameRecord: ExamGameRecord): Promise<boolean> {
-  frontendLogger.separator('SaveAnalyze', 'Starting Game Save and Analysis');
-  frontendLogger.info('SaveAnalyze', 'Starting save and analysis', {
-    gameId: gameRecord.gameId,
-    playerColor: gameRecord.metadata.playerColor,
-    result: gameRecord.metadata.result,
-    totalMoves: gameRecord.moves.length,
-  });
+function clearSelection(): void {
+  clearSquareSelection(getSelectedSquare, setSelectedSquare);
+}
 
-  try {
-    console.log('Starting game save and analysis for:', gameRecord.gameId);
+function updateAllUI(): void {
+  renderChessboard();
+  updateTurnIndicator(game);
+  updateMoveHistory(game, moveHistorySection);
+  updateCapturedPieces(game, capturedPiecesSection);
+  updateGameAlert(game);
+  updateUndoRedoButtons(gameControllerDeps);
+}
 
-    // Convert to backend format
-    const gameData = convertToBackendFormat(gameRecord);
-    frontendLogger.debug('SaveAnalyze', 'Converted to backend format', {
-      gameId: gameData.gameId,
-      moveCount: gameData.moves.length,
-    });
+// ============================================
+// Game Controller Dependencies
+// ============================================
 
-    // Step 1: Analyze the game
-    console.log('Analyzing game...');
-    frontendLogger.info('SaveAnalyze', 'Step 1: Calling ANALYZE_GAME IPC');
-    const analysisResponse = await ipc.call(IPC_METHODS.ANALYZE_GAME, {
-      gameData,
-      deepAnalysis: false, // Quick analysis for now
-    });
+const gameControllerDeps: GameControllerDeps = {
+  game,
+  soundManager,
+  controlToolbar,
+  getRedoStack,
+  setRedoStack,
+  renderChessboard,
+  updateTurnIndicator: () => updateTurnIndicator(game),
+  updateMoveHistory: () => updateMoveHistory(game, moveHistorySection),
+  updateCapturedPieces: () => updateCapturedPieces(game, capturedPiecesSection),
+  updateGameAlert: () => updateGameAlert(game),
+  clearSelection,
+  showGameResult,
+  getBoardFlipped,
+  setBoardFlipped,
+  setGameResultTimeout,
+};
 
-    if (isErrorResponse(analysisResponse)) {
-      frontendLogger.error('SaveAnalyze', 'Analysis failed', undefined, {
-        error: analysisResponse.error,
-        code: analysisResponse.code,
-      });
-      console.error('Analysis failed:', analysisResponse.error);
-      return false;
+const botIntegrationDeps: BotIntegrationDeps = {
+  game,
+  soundManager,
+  renderChessboard,
+  updateTurnIndicator: () => updateTurnIndicator(game),
+  updateMoveHistory: () => updateMoveHistory(game, moveHistorySection),
+  updateCapturedPieces: () => updateCapturedPieces(game, capturedPiecesSection),
+  updateGameAlert: () => updateGameAlert(game),
+  showGameResult,
+  setGameResultTimeout,
+};
+
+const guidanceControllerDeps: GuidanceControllerDeps = {
+  game,
+  guidanceManager,
+  trainingManager,
+  getBoardAnnotations,
+  setBoardAnnotations,
+  getExplanationModal,
+  setExplanationModal,
+  ExplanationModalClass: ExplanationModal,
+};
+
+const sandboxControllerDeps: SandboxControllerDeps = {
+  sandboxManager,
+};
+
+// ============================================
+// Core Game Functions
+// ============================================
+
+function handleSquareClick(squareName: string): void {
+  const clickedSquare = document.querySelector(`[data-square="${squareName}"]`) as HTMLElement;
+  if (!clickedSquare) return;
+
+  const hasPiece = clickedSquare.querySelector('.piece');
+  const currentTurn = game.getTurn();
+
+  if (!selectedSquare) {
+    if (hasPiece) {
+      const piece = clickedSquare.querySelector('.piece') as HTMLElement;
+      const alt = piece.getAttribute('alt') || '';
+      const isWhitePiece = alt.includes('White');
+
+      if ((currentTurn === 'w' && isWhitePiece) || (currentTurn === 'b' && !isWhitePiece)) {
+        selectedSquare = squareName;
+        clickedSquare.classList.add('selected');
+        highlightLegalMoves(squareName, game);
+      }
     }
+  } else {
+    if (selectedSquare === squareName) {
+      clearSelection();
+    } else if (hasPiece) {
+      const piece = clickedSquare.querySelector('.piece') as HTMLElement;
+      const alt = piece.getAttribute('alt') || '';
+      const isWhitePiece = alt.includes('White');
 
-    const analysis = (analysisResponse as { analysis: unknown; success: true }).analysis;
-    frontendLogger.info('SaveAnalyze', 'Analysis complete', {
-      gameId: gameRecord.gameId,
-    });
-    console.log('Analysis complete');
-
-    // Step 2: Save the game data
-    console.log('Saving game data...');
-    frontendLogger.info('SaveAnalyze', 'Step 2: Calling SAVE_GAME IPC');
-    const saveGameResponse = await ipc.call(IPC_METHODS.SAVE_GAME, {
-      gameData,
-    });
-
-    if (isErrorResponse(saveGameResponse)) {
-      frontendLogger.error('SaveAnalyze', 'Save game failed', undefined, {
-        error: saveGameResponse.error,
-        code: saveGameResponse.code,
-      });
-      console.error('Save game failed:', saveGameResponse.error);
-      return false;
+      if ((currentTurn === 'w' && isWhitePiece) || (currentTurn === 'b' && !isWhitePiece)) {
+        clearSelection();
+        selectedSquare = squareName;
+        clickedSquare.classList.add('selected');
+        highlightLegalMoves(squareName, game);
+      } else {
+        attemptMove(selectedSquare, squareName);
+      }
+    } else {
+      attemptMove(selectedSquare, squareName);
     }
-    const gamePath = (saveGameResponse as { path: string }).path;
-    frontendLogger.info('SaveAnalyze', 'Game saved', { path: gamePath });
-    console.log('Game saved to:', gamePath);
-
-    // Step 3: Save the analysis
-    console.log('Saving analysis...');
-    frontendLogger.info('SaveAnalyze', 'Step 3: Calling SAVE_ANALYSIS IPC');
-    const saveAnalysisResponse = await ipc.call(IPC_METHODS.SAVE_ANALYSIS, {
-      analysis,
-    });
-
-    if (isErrorResponse(saveAnalysisResponse)) {
-      frontendLogger.error('SaveAnalyze', 'Save analysis failed', undefined, {
-        error: saveAnalysisResponse.error,
-        code: saveAnalysisResponse.code,
-      });
-      console.error('Save analysis failed:', saveAnalysisResponse.error);
-      return false;
-    }
-    const analysisPath = (saveAnalysisResponse as { path: string }).path;
-    frontendLogger.info('SaveAnalyze', 'Analysis saved', { path: analysisPath });
-    console.log('Analysis saved to:', analysisPath);
-
-    frontendLogger.info('SaveAnalyze', 'Game save and analysis complete', {
-      gameId: gameRecord.gameId,
-      gamePath,
-      analysisPath,
-    });
-    console.log('Game save and analysis complete');
-    return true;
-  } catch (error) {
-    frontendLogger.error('SaveAnalyze', 'Error in saveAndAnalyzeGame', error as Error);
-    console.error('Error in saveAndAnalyzeGame:', error);
-    return false;
   }
 }
 
-/**
- * Show game result modal
- * Per Task 2.3.5: Game result display
- * Per Task 4.1.6: Generate PGN on game completion (Exam Mode)
- * Per Task 5.1.1: Enhanced game over screen with quick stats
- */
+function attemptMove(from: string, to: string): void {
+  if (
+    currentGameMode === 'training' &&
+    trainingManager.isActive() &&
+    !trainingManager.isPlayerTurn()
+  ) {
+    console.log('Not your turn - waiting for bot');
+    return;
+  }
+
+  if (currentGameMode === 'exam' && examManager.isActive() && !examManager.isPlayerTurn()) {
+    console.log('Not your turn - waiting for bot');
+    return;
+  }
+
+  if (isPromotionMove(game, from, to)) {
+    showPromotionDialog(game, from, to, executeMove);
+    return;
+  }
+
+  executeMove(from, to);
+}
+
+function executeMove(from: string, to: string, promotion?: string): void {
+  const recordMove =
+    currentGameMode === 'exam' && examManager.isActive()
+      ? (san: string, uci: string, fen: string) => {
+          const playerColor = examManager.getPlayerColor();
+          examManager.recordMove(san, uci, fen, playerColor);
+        }
+      : undefined;
+
+  execMove(gameControllerDeps, from, to, promotion, handlePostMoveUpdates, recordMove);
+}
+
+async function handlePostMoveUpdates(): Promise<void> {
+  clearSelection();
+  updateAllUI();
+
+  if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
+    showGuidancePanel(false);
+    guidanceManager.clearGuidance();
+    updateGuidanceHighlights();
+    gameResultTimeoutId = setTimeout(() => {
+      showGameResult();
+    }, 1000);
+    return;
+  }
+
+  if (currentGameMode === 'training' && trainingManager.isActive()) {
+    const shouldBotMove = trainingManager.updatePosition(game.getFen());
+    if (shouldBotMove) {
+      showGuidancePanel(false);
+      await requestBotMove();
+      await updateGuidance();
+    } else {
+      await updateGuidance();
+    }
+  }
+
+  if (currentGameMode === 'exam' && examManager.isActive()) {
+    const shouldBotMove = examManager.updatePosition(game.getFen());
+    if (shouldBotMove) {
+      await requestExamBotMove();
+    }
+    showGuidancePanel(false);
+  }
+}
+
+async function requestBotMove(): Promise<void> {
+  await reqBotMove(botIntegrationDeps, trainingManager);
+}
+
+async function requestExamBotMove(): Promise<void> {
+  await reqExamBotMove(botIntegrationDeps, examManager);
+}
+
+function updateGuidanceHighlights(): void {
+  doUpdateGuidanceHighlights(guidanceControllerDeps);
+}
+
+async function updateGuidance(): Promise<void> {
+  await doUpdateGuidance(guidanceControllerDeps, updateGuidanceHighlights, handleGuidanceHover);
+}
+
+function handleGuidanceHover(index: number): void {
+  doGuidanceHover(guidanceControllerDeps, index, updateGuidanceHighlights);
+}
+
+function handleUndo(): void {
+  doUndo(gameControllerDeps);
+}
+
+function handleRedo(): void {
+  doRedo(gameControllerDeps);
+}
+
+function handleFlipBoard(): void {
+  doFlipBoard(gameControllerDeps);
+}
+
+function handleResign(): void {
+  doResign(gameControllerDeps, showConfirmDialog);
+}
+
+// ============================================
+// Game Result Handling
+// ============================================
+
 function showGameResult(): void {
   frontendLogger.separator('GameResult', 'Game Result Processing');
   frontendLogger.enter('GameResult', 'showGameResult');
@@ -407,62 +400,46 @@ function showGameResult(): void {
     return;
   }
 
-  // Hide View Analysis button and stats initially (will be shown after save completes)
   frontendLogger.debug('GameResult', 'Hiding View Analysis button and stats initially');
-  if (viewAnalysisBtn) {
-    viewAnalysisBtn.classList.add('hidden');
-  }
-  if (statsContainer) {
-    statsContainer.classList.add('hidden');
-  }
+  if (viewAnalysisBtn) viewAnalysisBtn.classList.add('hidden');
+  if (statsContainer) statsContainer.classList.add('hidden');
 
-  // Check game state
   const isCheckmate = game.isCheckmate();
   const isStalemate = game.isStalemate();
   const isDraw = game.isDraw();
   frontendLogger.debug('GameResult', 'Game state', { isCheckmate, isStalemate, isDraw });
 
-  // Determine result and termination for Exam Mode record
   let gameResult = '';
   let termination: 'checkmate' | 'stalemate' | 'resignation' | 'draw' | 'timeout' = 'draw';
 
   if (isCheckmate) {
-    // Checkmate
     const winner = game.getTurn() === 'w' ? 'Black' : 'White';
     const loser = game.getTurn() === 'w' ? 'White' : 'Black';
     title.textContent = `${winner} Wins!`;
     subtitle.textContent = 'Checkmate';
     reason.textContent = `${loser} king has no legal moves`;
     overlay.classList.remove('hidden');
-
-    // Set result for Exam Mode
     gameResult = game.getTurn() === 'w' ? '0-1' : '1-0';
     termination = 'checkmate';
   } else if (isStalemate) {
-    // Stalemate
     title.textContent = 'Draw';
     subtitle.textContent = 'Stalemate';
     reason.textContent = 'No legal moves available';
     overlay.classList.remove('hidden');
-
     gameResult = '1/2-1/2';
     termination = 'stalemate';
   } else if (isDraw) {
-    // Other draw conditions
     title.textContent = 'Draw';
     subtitle.textContent = 'Game Drawn';
     reason.textContent = 'By repetition, 50-move rule, or insufficient material';
     overlay.classList.remove('hidden');
-
     gameResult = '1/2-1/2';
     termination = 'draw';
   } else {
-    // No game over - hide modal
     overlay.classList.add('hidden');
     return;
   }
 
-  // Generate Exam Mode game record if in Exam Mode
   if (currentGameMode === 'exam' && examManager.isActive()) {
     frontendLogger.info('GameResult', 'Processing Exam Mode game completion');
     const pgn = game.getPgn();
@@ -470,7 +447,7 @@ function showGameResult(): void {
       gameResult,
       termination,
       pgn,
-      'Unknown Opening' // Opening detection will be added in Phase 4.2
+      'Unknown Opening'
     );
 
     frontendLogger.info('GameResult', 'Exam Mode game record generated', {
@@ -480,1615 +457,86 @@ function showGameResult(): void {
       duration: gameRecord.metadata.duration,
       totalMoves: gameRecord.metadata.totalMoves,
     });
-    console.log('Exam Mode game completed:', {
-      gameId: gameRecord.gameId,
-      result: gameRecord.metadata.result,
-      termination: gameRecord.metadata.termination,
-      duration: gameRecord.metadata.duration,
-      totalMoves: gameRecord.metadata.totalMoves,
-    });
-    console.log('PGN:', pgn);
 
-    // Emit game end callback
     examManager.onGameEnd?.(gameRecord);
-
-    // Phase 5: Save game and run analysis, then show stats
     const playerColor = examManager.getPlayerColor();
     frontendLogger.info('GameResult', 'Starting async save and analysis', { playerColor });
 
-    // Save and analyze the game (async operation)
     saveAndAnalyzeGame(gameRecord).then((success) => {
       frontendLogger.info('GameResult', 'Save and analysis completed', { success });
       if (success) {
-        console.log('Game saved and analyzed successfully');
-        frontendLogger.info('GameResult', 'Showing View Analysis button');
-        // Show View Analysis button
-        if (viewAnalysisBtn) {
-          viewAnalysisBtn.classList.remove('hidden');
-        }
-        // Load and display quick stats from the saved analysis
-        frontendLogger.info('GameResult', 'Calling showGameOverWithStats', {
-          gameId: gameRecord.gameId,
-          gameResult,
-          termination,
-          playerColor,
-        });
+        if (viewAnalysisBtn) viewAnalysisBtn.classList.remove('hidden');
         analysisUI.showGameOverWithStats(gameRecord.gameId, gameResult, termination, playerColor);
       } else {
-        frontendLogger.error(
-          'GameResult',
-          'Failed to save/analyze game - analysis will not be available'
-        );
-        console.error('Failed to save/analyze game - analysis will not be available');
-        // Hide View Analysis button since we couldn't save
-        if (viewAnalysisBtn) {
-          viewAnalysisBtn.classList.add('hidden');
-        }
-        if (statsContainer) {
-          statsContainer.classList.add('hidden');
-        }
+        frontendLogger.error('GameResult', 'Failed to save/analyze game');
+        if (viewAnalysisBtn) viewAnalysisBtn.classList.add('hidden');
+        if (statsContainer) statsContainer.classList.add('hidden');
       }
     });
   } else {
-    // Hide analysis button for non-Exam Mode games
-    if (viewAnalysisBtn) {
-      viewAnalysisBtn.classList.add('hidden');
-    }
-    if (statsContainer) {
-      statsContainer.classList.add('hidden');
-    }
+    if (viewAnalysisBtn) viewAnalysisBtn.classList.add('hidden');
+    if (statsContainer) statsContainer.classList.add('hidden');
   }
 }
 
-/**
- * Show confirmation dialog
- * Per Task 2.4.1: Confirm if game in progress
- */
-function showConfirmDialog(title: string, message: string, onConfirm: () => void): void {
-  const overlay = document.getElementById('confirm-dialog-overlay');
-  const titleEl = document.getElementById('confirm-title');
-  const messageEl = document.getElementById('confirm-message');
-  const yesBtn = document.getElementById('confirm-yes');
-  const cancelBtn = document.getElementById('confirm-cancel');
+// ============================================
+// Sandbox Mode Functions
+// ============================================
 
-  if (!overlay || !titleEl || !messageEl || !yesBtn || !cancelBtn) return;
-
-  titleEl.textContent = title;
-  messageEl.textContent = message;
-
-  // Show overlay
-  overlay.classList.remove('hidden');
-
-  // Handle confirmation
-  const handleYes = () => {
-    overlay.classList.add('hidden');
-    onConfirm();
-    yesBtn.removeEventListener('click', handleYes);
-    cancelBtn.removeEventListener('click', handleCancel);
-  };
-
-  const handleCancel = () => {
-    overlay.classList.add('hidden');
-    yesBtn.removeEventListener('click', handleYes);
-    cancelBtn.removeEventListener('click', handleCancel);
-  };
-
-  yesBtn.addEventListener('click', handleYes);
-  cancelBtn.addEventListener('click', handleCancel);
-}
-
-// Pending promotion move state
-let pendingPromotion: { from: string; to: string } | null = null;
-
-/**
- * Check if a move is a pawn promotion
- * A pawn promotes when it reaches the last rank (rank 8 for white, rank 1 for black)
- */
-function isPromotionMove(from: string, to: string): boolean {
-  const piece = game.getPiece(from as Square);
-  if (!piece || piece.type !== 'p') return false;
-
-  const toRank = to[1];
-  // White pawn promotes on rank 8, black pawn promotes on rank 1
-  return (piece.color === 'w' && toRank === '8') || (piece.color === 'b' && toRank === '1');
-}
-
-/**
- * Show promotion dialog for piece selection
- */
-function showPromotionDialog(from: string, to: string): void {
-  const overlay = document.getElementById('promotion-dialog-overlay');
-  const piecesContainer = document.getElementById('promotion-pieces');
-
-  if (!overlay || !piecesContainer) return;
-
-  // Store pending promotion
-  pendingPromotion = { from, to };
-
-  // Determine piece color
-  const piece = game.getPiece(from as Square);
-  const colorPrefix = piece?.color === 'w' ? 'w' : 'b';
-
-  // Promotion options: Queen, Rook, Bishop, Knight
-  const promotionPieces = [
-    { symbol: 'q', name: 'Queen' },
-    { symbol: 'r', name: 'Rook' },
-    { symbol: 'b', name: 'Bishop' },
-    { symbol: 'n', name: 'Knight' },
-  ];
-
-  // Clear and populate pieces
-  piecesContainer.innerHTML = '';
-  for (const promo of promotionPieces) {
-    const pieceBtn = document.createElement('button');
-    pieceBtn.className = 'promotion-piece';
-    pieceBtn.title = promo.name;
-    pieceBtn.dataset.piece = promo.symbol;
-
-    // Create piece image
-    const img = document.createElement('img');
-    img.src = `/assets/pieces/${colorPrefix}${promo.symbol.toUpperCase()}.svg`;
-    img.alt = promo.name;
-    img.style.width = '44px';
-    img.style.height = '44px';
-    pieceBtn.appendChild(img);
-
-    pieceBtn.addEventListener('click', () => handlePromotionChoice(promo.symbol));
-    piecesContainer.appendChild(pieceBtn);
-  }
-
-  // Show dialog
-  overlay.classList.remove('hidden');
-}
-
-/**
- * Handle promotion piece selection
- */
-function handlePromotionChoice(piece: string): void {
-  const overlay = document.getElementById('promotion-dialog-overlay');
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
-
-  if (!pendingPromotion) return;
-
-  const { from, to } = pendingPromotion;
-  pendingPromotion = null;
-
-  // Execute the promotion move with the selected piece
-  executeMove(from, to, piece);
-}
-
-/**
- * Execute a move (with optional promotion piece)
- * Per Task 4.1.4: Full game recording for Exam Mode
- */
-function executeMove(from: string, to: string, promotion?: string): void {
-  try {
-    const moveStr = promotion ? `${from}${to}${promotion}` : `${from}${to}`;
-    const move = game.makeMove(moveStr);
-    if (move) {
-      console.log('Move made:', move.san);
-
-      // Record move in Exam Mode
-      if (currentGameMode === 'exam' && examManager.isActive()) {
-        const playerColor = examManager.getPlayerColor();
-        examManager.recordMove(move.san, moveStr, game.getFen(), playerColor);
-      }
-
-      // Clear redo stack on new move (can't redo after making a new move)
-      redoStack = [];
-
-      // Play appropriate sound
-      if (move.isCheckmate) {
-        soundManager.play('checkmate');
-      } else if (move.isCheck) {
-        soundManager.play('check');
-      } else if (move.isCastling) {
-        soundManager.play('castle');
-      } else if (move.promotion) {
-        soundManager.play('promotion');
-      } else if (move.captured) {
-        soundManager.play('capture');
-      } else {
-        soundManager.play('move');
-      }
-
-      // Check for stalemate or draw
-      if (game.isStalemate() || game.isDraw()) {
-        soundManager.play('stalemate');
-      }
-
-      // Add animation to moving piece
-      const toSquare = document.querySelector(`[data-square="${to}"]`);
-      const fromSquare = document.querySelector(`[data-square="${from}"]`);
-
-      if (toSquare && fromSquare) {
-        const piece = fromSquare.querySelector('.piece') as HTMLElement;
-
-        // If capture, animate the captured piece
-        if (move.captured) {
-          const capturedPiece = toSquare.querySelector('.piece') as HTMLElement;
-          if (capturedPiece) {
-            capturedPiece.classList.add('captured');
-          }
-        }
-
-        // Animate the moving piece
-        if (piece) {
-          piece.classList.add('moving');
-        }
-      }
-
-      // Render board after animation and handle Training Mode
-      setTimeout(
-        async () => {
-          await handlePostMoveUpdates();
-        },
-        move.captured ? 250 : 300
-      );
-    }
-  } catch (error) {
-    console.error('Invalid move:', error);
-    clearSelection();
-  }
-}
-
-// Note: startNewGame() and handleNewGameControl() removed in favor of showModeSelection()
-// which provides a complete "hard reset" when starting a new game (see line ~1965)
-
-/**
- * Handle "Resign" button
- * Per Task 2.4.3: Resign button with confirmation
- */
-function handleResign(): void {
-  const history = game.getHistory();
-
-  // Only allow resignation if game is in progress
-  if (history.length === 0) {
-    return;
-  }
-
-  // Check if game is already over
-  if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-    return;
-  }
-
-  showConfirmDialog('Resign Game?', 'You will lose this game. Are you sure?', () => {
-    // Show game result as if opponent won
-    const overlay = document.getElementById('game-result-overlay');
-    const title = document.getElementById('result-title');
-    const subtitle = document.getElementById('result-subtitle');
-    const reason = document.getElementById('result-reason');
-
-    if (!overlay || !title || !subtitle || !reason) return;
-
-    const currentTurn = game.getTurn();
-    const winner = currentTurn === 'w' ? 'Black' : 'White';
-    const resigner = currentTurn === 'w' ? 'White' : 'Black';
-
-    title.textContent = `${winner} Wins!`;
-    subtitle.textContent = 'Resignation';
-    reason.textContent = `${resigner} resigned`;
-    overlay.classList.remove('hidden');
-  });
-}
-
-/**
- * Handle "Flip Board" button
- * Per Task 2.4.4: Flip board 180 degrees
- */
-function handleFlipBoard(): void {
-  boardFlipped = !boardFlipped;
-  renderChessboard();
-}
-
-/**
- * Update undo/redo button states
- * Per Task 2.4.2: Enable/disable based on available history
- */
-function updateUndoRedoButtons(): void {
-  const history = game.getHistory();
-  const canUndo = history.length > 0;
-  const canRedo = redoStack.length > 0;
-
-  // Update toolbar buttons (CS-003)
-  controlToolbar.updateButtonStates(canUndo, canRedo);
-
-  // Legacy: Also update any standalone buttons (for backward compatibility)
-  const undoButton = document.getElementById('undo-button') as HTMLButtonElement;
-  const redoButton = document.getElementById('redo-button') as HTMLButtonElement;
-
-  if (undoButton) {
-    undoButton.disabled = !canUndo;
-  }
-
-  if (redoButton) {
-    redoButton.disabled = !canRedo;
-  }
-}
-
-/**
- * Handle "Undo" button
- * Per Task 2.4.2: Undo last move
- */
-function handleUndo(): void {
-  const history = game.getHistory();
-  if (history.length === 0) return;
-
-  // Get the last move before undoing
-  const lastMove = history[history.length - 1];
-
-  // Store move in redo stack (in SAN format for easy replay)
-  redoStack.push(lastMove.san);
-
-  // Undo the move
-  game.undoMove();
-
-  // Re-render everything
-  renderChessboard();
-  updateTurnIndicator();
-  updateMoveHistory();
-  updateCapturedPieces();
-  updateGameAlert();
-  updateUndoRedoButtons();
-
-  console.log('Move undone:', lastMove.san);
-}
-
-/**
- * Handle "Redo" button
- * Per Task 2.4.2: Redo undone move
- */
-function handleRedo(): void {
-  if (redoStack.length === 0) return;
-
-  // Get the move from redo stack
-  const moveToRedo = redoStack.pop()!;
-
-  try {
-    // Make the move again
-    const move = game.makeMove(moveToRedo);
-
-    if (move) {
-      // Play appropriate sound
-      if (move.isCheckmate) {
-        soundManager.play('checkmate');
-      } else if (move.isCheck) {
-        soundManager.play('check');
-      } else if (move.isCastling) {
-        soundManager.play('castle');
-      } else if (move.promotion) {
-        soundManager.play('promotion');
-      } else if (move.captured) {
-        soundManager.play('capture');
-      } else {
-        soundManager.play('move');
-      }
-
-      // Check for stalemate or draw
-      if (game.isStalemate() || game.isDraw()) {
-        soundManager.play('stalemate');
-      }
-
-      // Re-render everything
-      renderChessboard();
-      updateTurnIndicator();
-      updateMoveHistory();
-      updateCapturedPieces();
-      updateGameAlert();
-      updateUndoRedoButtons();
-
-      // Show game result modal if game is over
-      if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-        gameResultTimeoutId = setTimeout(() => {
-          showGameResult();
-        }, 1000);
-      }
-
-      console.log('Move redone:', moveToRedo);
-    }
-  } catch (error) {
-    console.error('Failed to redo move:', error);
-    // Put move back in redo stack if it failed
-    redoStack.push(moveToRedo);
-  }
-}
-
-/**
- * Update captured pieces display
- * Per Task 2.3.3: Show captured pieces
- */
-function updateCapturedPieces(): void {
-  const capturedByWhite = document.getElementById('captured-by-white');
-  const capturedByBlack = document.getElementById('captured-by-black');
-  const whiteAdvantage = document.getElementById('white-advantage');
-  const blackAdvantage = document.getElementById('black-advantage');
-
-  if (!capturedByWhite || !capturedByBlack || !whiteAdvantage || !blackAdvantage) return;
-
-  // Clear existing captured pieces
-  capturedByWhite.innerHTML = '';
-  capturedByBlack.innerHTML = '';
-
-  // Piece values for material calculation
-  const pieceValues: Record<string, number> = {
-    p: 1,
-    n: 3,
-    b: 3,
-    r: 5,
-    q: 9,
-  };
-
-  // Track captured pieces from move history
-  const history = game.getHistory();
-  const whiteCaptured: string[] = [];
-  const blackCaptured: string[] = [];
-
-  for (const move of history) {
-    if (move.captured) {
-      const capturedPieceType = move.captured;
-      if (move.color === 'w') {
-        // White captured a black piece
-        whiteCaptured.push(capturedPieceType);
-      } else {
-        // Black captured a white piece
-        blackCaptured.push(capturedPieceType);
-      }
-    }
-  }
-
-  // Render captured pieces for White
-  whiteCaptured.forEach((pieceType) => {
-    const pieceEl = document.createElement('div');
-    pieceEl.className = 'captured-piece';
-    pieceEl.style.backgroundImage = `url('/assets/pieces/b${pieceType.toUpperCase()}.svg')`;
-    capturedByWhite.appendChild(pieceEl);
-  });
-
-  // Render captured pieces for Black
-  blackCaptured.forEach((pieceType) => {
-    const pieceEl = document.createElement('div');
-    pieceEl.className = 'captured-piece';
-    pieceEl.style.backgroundImage = `url('/assets/pieces/w${pieceType.toUpperCase()}.svg')`;
-    capturedByBlack.appendChild(pieceEl);
-  });
-
-  // Calculate material advantage
-  const whiteMaterial = whiteCaptured.reduce((sum, p) => sum + pieceValues[p], 0);
-  const blackMaterial = blackCaptured.reduce((sum, p) => sum + pieceValues[p], 0);
-  const materialDiff = whiteMaterial - blackMaterial;
-
-  // Update advantage indicators
-  whiteAdvantage.textContent = '';
-  blackAdvantage.textContent = '';
-  whiteAdvantage.className = 'material-advantage';
-  blackAdvantage.className = 'material-advantage';
-
-  if (materialDiff > 0) {
-    whiteAdvantage.textContent = `+${materialDiff}`;
-    whiteAdvantage.classList.add('positive');
-  } else if (materialDiff < 0) {
-    blackAdvantage.textContent = `+${Math.abs(materialDiff)}`;
-    blackAdvantage.classList.add('positive');
-  }
-
-  // Refresh CollapsibleSection height after content update
-  if (capturedPiecesSection) {
-    capturedPiecesSection.refreshHeight();
-  }
-}
-
-/**
- * Get piece image path for a given piece
- * Per Task 2.1.2: Render chess pieces using SVG assets
- */
-function getPieceImagePath(piece: Piece): string {
-  const colorPrefix = piece.color === 'w' ? 'w' : 'b';
-  const pieceSymbol = piece.type.toUpperCase();
-  return `/assets/pieces/${colorPrefix}${pieceSymbol}.svg`;
-}
-
-/**
- * Parse FEN to create a 2D array of pieces
- */
-function parseFenToBoard(fen: string): (Piece | null)[][] {
-  const fenParts = fen.split(' ');
-  const boardFen = fenParts[0];
-  const ranks = boardFen.split('/');
-  const board: (Piece | null)[][] = [];
-
-  for (const rankString of ranks) {
-    const rank: (Piece | null)[] = [];
-    for (const char of rankString) {
-      if (/\d/.test(char)) {
-        // Empty squares
-        const emptyCount = parseInt(char, 10);
-        for (let i = 0; i < emptyCount; i++) {
-          rank.push(null);
-        }
-      } else if (/[rnbqkpRNBQKP]/.test(char)) {
-        // Piece
-        const isWhite = char === char.toUpperCase();
-        rank.push({
-          color: isWhite ? 'w' : 'b',
-          type: char.toLowerCase() as PieceSymbol,
-        });
-      }
-    }
-    board.push(rank);
-  }
-
-  return board;
-}
-
-/**
- * Handle square click for click-to-move
- * Per Task 2.2.2: Click-to-move alternative
- */
-function handleSquareClick(squareName: string): void {
-  const clickedSquare = document.querySelector(`[data-square="${squareName}"]`) as HTMLElement;
-  if (!clickedSquare) return;
-
-  const hasPiece = clickedSquare.querySelector('.piece');
-  const currentTurn = game.getTurn();
-
-  // If no square is selected
-  if (!selectedSquare) {
-    // Only allow selecting pieces of the current player
-    if (hasPiece) {
-      const piece = clickedSquare.querySelector('.piece') as HTMLElement;
-      const alt = piece.getAttribute('alt') || '';
-      const isWhitePiece = alt.includes('White');
-
-      if ((currentTurn === 'w' && isWhitePiece) || (currentTurn === 'b' && !isWhitePiece)) {
-        selectedSquare = squareName;
-        clickedSquare.classList.add('selected');
-        highlightLegalMoves(squareName);
-      }
-    }
-  } else {
-    // Square already selected - try to move or reselect
-    if (selectedSquare === squareName) {
-      // Clicking same square - deselect
-      clearSelection();
-    } else if (hasPiece) {
-      // Clicking another piece of same color - reselect
-      const piece = clickedSquare.querySelector('.piece') as HTMLElement;
-      const alt = piece.getAttribute('alt') || '';
-      const isWhitePiece = alt.includes('White');
-
-      if ((currentTurn === 'w' && isWhitePiece) || (currentTurn === 'b' && !isWhitePiece)) {
-        // Same color piece - reselect
-        clearSelection();
-        selectedSquare = squareName;
-        clickedSquare.classList.add('selected');
-        highlightLegalMoves(squareName);
-      } else {
-        // Opponent's piece - try to capture
-        attemptMove(selectedSquare, squareName);
-      }
-    } else {
-      // Empty square - try to move
-      attemptMove(selectedSquare, squareName);
-    }
-  }
-}
-
-/**
- * Clear square selection and highlights
- */
-function clearSelection(): void {
-  if (selectedSquare) {
-    const square = document.querySelector(`[data-square="${selectedSquare}"]`);
-    square?.classList.remove('selected');
-    selectedSquare = null;
-  }
-  clearHighlights();
-}
-
-/**
- * Clear all legal move highlights
- */
-function clearHighlights(): void {
-  document.querySelectorAll('.square.legal-move, .square.legal-capture').forEach((sq) => {
-    sq.classList.remove('legal-move', 'legal-capture');
-  });
-}
-
-/**
- * Highlight legal moves for a piece
- * Per Task 2.2.3: Legal move highlighting
- */
-function highlightLegalMoves(fromSquare: string): void {
-  clearHighlights();
-
-  const legalMoves = game.getLegalMoves({ square: fromSquare as Square });
-
-  legalMoves.forEach((move) => {
-    const targetSquare = document.querySelector(`[data-square="${move.to}"]`);
-    if (targetSquare) {
-      if (move.captured) {
-        targetSquare.classList.add('legal-capture');
-      } else {
-        targetSquare.classList.add('legal-move');
-      }
-    }
-  });
-}
-
-/**
- * Handle post-move updates and check if bot should play
- * Per Task 3.2.5: Training Mode state management
- * Per Task 4.1: Exam Mode state management (no guidance)
- */
-async function handlePostMoveUpdates(): Promise<void> {
-  clearSelection();
-  renderChessboard();
-  updateTurnIndicator();
-  updateMoveHistory();
-  updateCapturedPieces();
-  updateGameAlert();
-  updateUndoRedoButtons();
-
-  // Show game result modal if game is over
-  if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-    // Hide guidance on game over
-    showGuidancePanel(false);
-    guidanceManager.clearGuidance();
-    updateGuidanceHighlights();
-    gameResultTimeoutId = setTimeout(() => {
-      showGameResult();
-    }, 1000);
-    return;
-  }
-
-  // Handle Training Mode
-  if (currentGameMode === 'training' && trainingManager.isActive()) {
-    const shouldBotMove = trainingManager.updatePosition(game.getFen());
-    if (shouldBotMove) {
-      // Hide guidance during bot's turn
-      showGuidancePanel(false);
-      await requestBotMove();
-      // Update guidance after bot move (it will now be player's turn)
-      await updateGuidance();
-    } else {
-      // It's player's turn, update guidance
-      await updateGuidance();
-    }
-  }
-
-  // Handle Exam Mode (NO guidance - per game-modes.md)
-  if (currentGameMode === 'exam' && examManager.isActive()) {
-    const shouldBotMove = examManager.updatePosition(game.getFen());
-    if (shouldBotMove) {
-      await requestExamBotMove();
-    }
-    // Guidance is NEVER shown in Exam Mode
-    showGuidancePanel(false);
-  }
-}
-
-/**
- * Request and execute a bot move in Exam Mode
- * Per Task 4.1: Exam Mode bot integration
- */
-async function requestExamBotMove(): Promise<void> {
-  if (!examManager.isActive() || examManager.isPlayerTurn()) {
-    return;
-  }
-
-  // Show thinking indicator
-  showBotThinking(true);
-
-  try {
-    const botMove = await examManager.requestBotMove(game.getFen());
-    if (botMove) {
-      // Execute the bot's move
-      const move = game.makeMove(botMove);
-      if (move) {
-        console.log('Exam Bot move:', move.san);
-
-        // Record move for Exam Mode tracking
-        const botColor = examManager.isPlayerWhite() ? 'black' : 'white';
-        examManager.recordMove(move.san, botMove, game.getFen(), botColor);
-
-        // Play appropriate sound
-        if (move.isCheckmate) {
-          soundManager.play('checkmate');
-        } else if (move.isCheck) {
-          soundManager.play('check');
-        } else if (move.isCastling) {
-          soundManager.play('castle');
-        } else if (move.captured) {
-          soundManager.play('capture');
-        } else {
-          soundManager.play('move');
-        }
-
-        // Update UI
-        renderChessboard();
-        updateTurnIndicator();
-        updateMoveHistory();
-        updateCapturedPieces();
-        updateGameAlert();
-
-        // Show game result if game is over
-        if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-          gameResultTimeoutId = setTimeout(() => {
-            showGameResult();
-          }, 1000);
-        }
-
-        // Update exam mode state
-        examManager.updatePosition(game.getFen());
-      }
-    }
-  } catch (error) {
-    console.error('Error getting exam bot move:', error);
-  } finally {
-    showBotThinking(false);
-  }
-}
-
-/**
- * Request and execute a bot move
- * Per Task 3.2.5: Training Mode state management
- */
-async function requestBotMove(): Promise<void> {
-  if (!trainingManager.isActive() || trainingManager.isPlayerTurn()) {
-    return;
-  }
-
-  // Show thinking indicator
-  showBotThinking(true);
-
-  try {
-    const botMove = await trainingManager.requestBotMove(game.getFen());
-    if (botMove) {
-      // Execute the bot's move
-      const move = game.makeMove(botMove);
-      if (move) {
-        console.log('Bot move:', move.san);
-
-        // Play appropriate sound
-        if (move.isCheckmate) {
-          soundManager.play('checkmate');
-        } else if (move.isCheck) {
-          soundManager.play('check');
-        } else if (move.isCastling) {
-          soundManager.play('castle');
-        } else if (move.captured) {
-          soundManager.play('capture');
-        } else {
-          soundManager.play('move');
-        }
-
-        // Update UI
-        renderChessboard();
-        updateTurnIndicator();
-        updateMoveHistory();
-        updateCapturedPieces();
-        updateGameAlert();
-
-        // Show game result if game is over
-        if (game.isCheckmate() || game.isStalemate() || game.isDraw()) {
-          gameResultTimeoutId = setTimeout(() => {
-            showGameResult();
-          }, 1000);
-        }
-
-        // Update training mode state
-        trainingManager.updatePosition(game.getFen());
-      }
-    }
-  } catch (error) {
-    console.error('Error getting bot move:', error);
-  } finally {
-    showBotThinking(false);
-  }
-}
-
-/**
- * Show/hide bot thinking indicator
- */
-function showBotThinking(show: boolean): void {
-  const indicator = document.getElementById('bot-thinking-indicator');
-  if (indicator) {
-    indicator.classList.toggle('hidden', !show);
-  }
-}
-
-// ========================================
-// Move Guidance UI Functions
-// Per Task 3.3: Best-Move Guidance System
-// ========================================
-
-/**
- * Show/hide guidance panel
- * Per Task 3.3.6: Guidance timing (player's turn only)
- */
-function showGuidancePanel(show: boolean): void {
-  const panel = document.getElementById('guidance-panel');
-  if (panel) {
-    panel.classList.toggle('hidden', !show);
-  }
-}
-
-/**
- * Update guidance loading state
- */
-function showGuidanceLoading(show: boolean): void {
-  const loading = document.getElementById('guidance-loading');
-  const moveList = document.getElementById('guidance-move-list');
-  const empty = document.getElementById('guidance-empty');
-
-  if (loading) loading.classList.toggle('hidden', !show);
-  if (moveList) moveList.classList.toggle('hidden', show);
-  if (empty) empty.classList.add('hidden');
-}
-
-/**
- * Render guidance moves in the panel
- * Per Task 3.4.2: Add best-move notation display
- */
-function renderGuidanceMoves(moves: GuidanceMove[]): void {
-  const moveList = document.getElementById('guidance-move-list');
-  const empty = document.getElementById('guidance-empty');
-
-  if (!moveList) return;
-
-  if (moves.length === 0) {
-    moveList.innerHTML = '';
-    if (empty) empty.classList.remove('hidden');
-    return;
-  }
-
-  if (empty) empty.classList.add('hidden');
-
-  moveList.innerHTML = moves
-    .map((move, index) => {
-      // Convert UCI to SAN for display
-      const san = ChessGame.uciToSan(game.getFen(), move.uci) || move.uci;
-
-      // Generate English description
-      const englishDescription = parseSanToEnglish(san);
-
-      const colorClass = `move-${move.color}`;
-      const rankClass = `rank-${index + 1}`;
-
-      return `
-        <div class="guidance-move-entry"
-             data-index="${index}"
-             data-from="${move.from}"
-             data-to="${move.to}">
-          <div class="guidance-move-rank ${rankClass}">${index + 1}</div>
-          <div class="guidance-move-content">
-            <span class="guidance-move-notation ${colorClass}">${san}</span>
-            <span class="guidance-move-description"> — ${englishDescription}</span>
-          </div>
-          <div class="guidance-move-eval">${move.formattedScore}</div>
-        </div>
-      `;
-    })
-    .join('');
-
-  // Add hover listeners for guidance moves
-  const entries = moveList.querySelectorAll('.guidance-move-entry');
-  entries.forEach((entry) => {
-    entry.addEventListener('mouseenter', () => {
-      const index = parseInt(entry.getAttribute('data-index') || '-1');
-      handleGuidanceHover(index);
-    });
-    entry.addEventListener('mouseleave', () => {
-      handleGuidanceHover(-1);
-    });
-  });
-}
-
-/**
- * Handle hover on guidance move
- * Per Task 3.3.4: Implement hover interactions
- */
-function handleGuidanceHover(index: number): void {
-  guidanceManager.setHoveredMove(index);
-  updateGuidanceHighlights();
-
-  // Update hover state in panel
-  const entries = document.querySelectorAll('.guidance-move-entry');
-  entries.forEach((entry, i) => {
-    entry.classList.toggle('hovered', i === index);
-  });
-}
-
-/**
- * Handle bubble icon click - show explanation modal
- * Move Reasoning Explanations Feature - Phase 3
- */
-function handleBubbleClick(square: string, move: GuidanceMove): void {
-  // Initialize modal on first use
-  if (!explanationModal) {
-    explanationModal = new ExplanationModal();
-  }
-
-  // Get move rank
-  const moves = guidanceManager.getMoves();
-  const rank = moves.findIndex((m) => m.to === square) + 1;
-
-  // Generate real explanation using chess analysis
-  const explanation = generateExplanation(game.getFen(), move, rank, moves);
-
-  explanationModal.show(explanation);
-}
-
-/**
- * Update guidance highlights on the board
- * Per Task 3.3.2: Implement color-coded highlighting
- * Per Task 3.3.3: Implement three-way visual sync
- * Supports multiple colors on same square (nested highlights)
- */
-function updateGuidanceHighlights(): void {
-  // Remove all existing guidance highlights
-  const squares = document.querySelectorAll('.square');
-  squares.forEach((square) => {
-    square.classList.remove(
-      'guidance-highlight',
-      'guidance-blue',
-      'guidance-green',
-      'guidance-yellow',
-      'guidance-secondary-blue',
-      'guidance-secondary-green',
-      'guidance-secondary-yellow',
-      'guidance-source',
-      'guidance-hovered'
-    );
-    // Remove any tertiary highlight elements
-    const tertiary = square.querySelector('.guidance-tertiary');
-    if (tertiary) tertiary.remove();
-  });
-
-  // Remove guidance classes from pieces
-  const pieces = document.querySelectorAll('.piece');
-  pieces.forEach((piece) => {
-    piece.classList.remove(
-      'guidance-piece',
-      'guidance-piece-blue',
-      'guidance-piece-green',
-      'guidance-piece-yellow',
-      'guidance-emphasized'
-    );
-  });
-
-  if (!guidanceManager.isActive()) return;
-
-  const moves = guidanceManager.getMoves();
-  const state = guidanceManager.getState();
-
-  // Track colors per square for multi-color support
-  const squareColors: Map<string, string[]> = new Map();
-
-  // First pass: collect all colors for each square
-  moves.forEach((move) => {
-    // Source squares
-    if (!squareColors.has(move.from)) {
-      squareColors.set(move.from, []);
-    }
-    squareColors.get(move.from)!.push(move.color);
-
-    // Destination squares
-    if (!squareColors.has(move.to)) {
-      squareColors.set(move.to, []);
-    }
-    squareColors.get(move.to)!.push(move.color);
-  });
-
-  // Second pass: apply highlights with multi-color support
-  moves.forEach((move) => {
-    // Highlight source square (piece location)
-    const sourceSquare = document.querySelector(`.square[data-square="${move.from}"]`);
-    if (sourceSquare) {
-      const colors = squareColors.get(move.from) || [];
-      applyMultiColorHighlight(sourceSquare, colors, true);
-
-      if (state.hoveredIndex >= 0 && moves[state.hoveredIndex]?.from === move.from) {
-        sourceSquare.classList.add('guidance-hovered');
-      }
-
-      // Highlight the piece itself (use primary color)
-      const piece = sourceSquare.querySelector('.piece');
-      if (piece) {
-        piece.classList.add('guidance-piece', `guidance-piece-${colors[0]}`);
-        if (state.hoveredIndex >= 0 && moves[state.hoveredIndex]?.from === move.from) {
-          piece.classList.add('guidance-emphasized');
-        }
-      }
-    }
-
-    // Highlight destination square
-    const destSquare = document.querySelector(`.square[data-square="${move.to}"]`);
-    if (destSquare) {
-      const colors = squareColors.get(move.to) || [];
-      applyMultiColorHighlight(destSquare, colors, false);
-
-      if (state.hoveredIndex >= 0 && moves[state.hoveredIndex]?.to === move.to) {
-        destSquare.classList.add('guidance-hovered');
-      }
-    }
-  });
-
-  // Render bubble icons for Training Mode (Move Reasoning Explanations Feature - Phase 1)
-  // Skip bubble rendering if explanation modal is currently open to prevent interference
-  if (trainingManager.isActive() && moves.length > 0) {
-    if (!boardAnnotations) {
-      const boardElement = document.getElementById('chess-board');
-      if (boardElement) {
-        boardAnnotations = new BoardAnnotations(boardElement, handleBubbleClick);
-      }
-    }
-
-    if (boardAnnotations && !explanationModal?.isOpen()) {
-      boardAnnotations.renderBubbles(moves);
-    }
-  } else {
-    // Clear bubbles when guidance is not active or in other modes (but not if modal is open)
-    if (!explanationModal?.isOpen()) {
-      boardAnnotations?.clearBubbles();
-    }
-  }
-}
-
-/**
- * Apply multi-color highlight to a square
- * Uses nested rings: outer (::before), middle (::after), inner (injected element)
- */
-function applyMultiColorHighlight(square: Element, colors: string[], isSource: boolean): void {
-  // Always add base highlight class
-  square.classList.add('guidance-highlight');
-
-  if (isSource) {
-    square.classList.add('guidance-source');
-  }
-
-  // Deduplicate colors while preserving order (first occurrence wins)
-  const uniqueColors = [...new Set(colors)];
-
-  // Primary color (outermost ring via ::before)
-  if (uniqueColors.length >= 1) {
-    square.classList.add(`guidance-${uniqueColors[0]}`);
-  }
-
-  // Secondary color (middle ring via ::after)
-  if (uniqueColors.length >= 2) {
-    square.classList.add(`guidance-secondary-${uniqueColors[1]}`);
-  }
-
-  // Tertiary color (innermost ring via injected element)
-  if (uniqueColors.length >= 3) {
-    const tertiary = document.createElement('div');
-    tertiary.className = `guidance-tertiary tertiary-${uniqueColors[2]}`;
-    square.appendChild(tertiary);
-  }
-}
-
-/**
- * Request and update guidance for current position
- * Per Task 3.3.1: Calculate top 3 moves in real-time
- * Per Task 3.3.8: Optimize performance
- */
-async function updateGuidance(): Promise<void> {
-  // Only show guidance in Training Mode when guidance is enabled
-  const config = trainingManager.getConfig();
-  if (!trainingManager.isActive() || !config.guidanceEnabled) {
-    showGuidancePanel(false);
-    guidanceManager.deactivate();
-    return;
-  }
-
-  // Hide guidance on opponent's turn or game over
-  if (!trainingManager.isPlayerTurn() || game.isGameOver()) {
-    showGuidancePanel(false);
-    guidanceManager.clearGuidance();
-    updateGuidanceHighlights();
-    return;
-  }
-
-  // Activate and show guidance
-  guidanceManager.activate();
-  showGuidancePanel(true);
-  showGuidanceLoading(true);
-
-  // Request guidance moves
-  await guidanceManager.requestGuidance(game.getFen());
-
-  // Update UI
-  showGuidanceLoading(false);
-  renderGuidanceMoves(guidanceManager.getMoves());
-  updateGuidanceHighlights();
-}
-
-/**
- * Attempt to make a move
- * Per Task 2.2.4: Piece animation on move
- * Per Task 2.2.5: Move sound effects
- * Per Task 3.2.5: Training Mode integration
- * Per Task 4.1: Exam Mode integration (move recording, no guidance)
- */
-function attemptMove(from: string, to: string): void {
-  // In Training Mode, only allow moves on player's turn
-  if (
-    currentGameMode === 'training' &&
-    trainingManager.isActive() &&
-    !trainingManager.isPlayerTurn()
-  ) {
-    console.log('Not your turn - waiting for bot');
-    return;
-  }
-
-  // In Exam Mode, only allow moves on player's turn
-  if (currentGameMode === 'exam' && examManager.isActive() && !examManager.isPlayerTurn()) {
-    console.log('Not your turn - waiting for bot');
-    return;
-  }
-
-  // Check if this is a pawn promotion - show dialog to let user choose piece
-  if (isPromotionMove(from, to)) {
-    showPromotionDialog(from, to);
-    return;
-  }
-
-  // Execute the move normally
-  executeMove(from, to);
-}
-
-/**
- * Handle drag start
- * Per Task 2.2.1: Drag-and-drop piece movement
- */
-function handleDragStart(e: DragEvent, squareName: string): void {
-  const target = e.target as HTMLElement;
-  draggedPiece = { element: target, square: squareName };
-
-  // Set drag image
-  if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', squareName);
-  }
-
-  // Add visual feedback
-  setTimeout(() => {
-    target.style.opacity = '0.5';
-  }, 0);
-
-  // Highlight legal moves
-  highlightLegalMoves(squareName);
-}
-
-/**
- * Handle drag over
- */
-function handleDragOver(e: DragEvent): void {
-  e.preventDefault();
-  if (e.dataTransfer) {
-    e.dataTransfer.dropEffect = 'move';
-  }
-}
-
-/**
- * Handle drop
- * Per Task 2.2.1: Drag-and-drop piece movement
- */
-function handleDrop(e: DragEvent, targetSquare: string): void {
-  e.preventDefault();
-
-  if (!draggedPiece) return;
-
-  const fromSquare = draggedPiece.square;
-
-  // Reset opacity
-  draggedPiece.element.style.opacity = '1';
-
-  // Try to make the move
-  attemptMove(fromSquare, targetSquare);
-
-  draggedPiece = null;
-  clearHighlights();
-}
-
-/**
- * Render the 8x8 chessboard grid with pieces
- * Per Task 2.1.1: Implement responsive chessboard layout
- * Per Task 2.1.2: Render chess pieces using SVG assets
- * Per Task 2.2.1: Drag-and-drop piece movement
- * Per Task 2.2.2: Click-to-move alternative
- */
-function renderChessboard(): void {
-  const boardElement = document.getElementById('chess-board');
-  if (!boardElement) {
-    console.error('chess-board element not found');
-    return;
-  }
-
-  // Clear any existing squares
-  boardElement.innerHTML = '';
-
-  // Get current position from game
-  const fen = game.getFen();
-  const position = parseFenToBoard(fen);
-
-  console.log('Position:', position);
-
-  // Create 8x8 grid of squares (64 total)
-  // Rows are numbered 8-1 (top to bottom)
-  // Columns are a-h (left to right)
-  // When flipped, iterate in reverse
-  let squareCount = 0;
-  const rankStart = boardFlipped ? 1 : 8;
-  const rankEnd = boardFlipped ? 8 : 1;
-  const rankStep = boardFlipped ? 1 : -1;
-  const fileStart = boardFlipped ? 7 : 0;
-  const fileEnd = boardFlipped ? -1 : 8;
-  const fileStep = boardFlipped ? -1 : 1;
-
-  for (let rank = rankStart; boardFlipped ? rank <= rankEnd : rank >= rankEnd; rank += rankStep) {
-    for (let file = fileStart; boardFlipped ? file > fileEnd : file < fileEnd; file += fileStep) {
-      const square = document.createElement('div');
-      square.className = 'square';
-
-      // Determine if square is light or dark
-      // Light squares: even sum of rank + file
-      const isLight = (rank + file) % 2 === 0;
-      square.classList.add(isLight ? 'light' : 'dark');
-
-      // Set data attributes for square identification
-      const fileChar = String.fromCharCode(97 + file); // 'a' = 97
-      const squareName = `${fileChar}${rank}`;
-      square.dataset.square = squareName;
-
-      // Add click handler for click-to-move
-      square.addEventListener('click', () => handleSquareClick(squareName));
-
-      // Get piece at this position
-      const rankIndex = 8 - rank; // Array index: rank 8 = index 0
-      const piece = position[rankIndex][file];
-
-      // Add piece if one exists on this square
-      if (piece) {
-        const pieceImg = document.createElement('img');
-        pieceImg.src = getPieceImagePath(piece);
-        pieceImg.className = 'piece';
-        pieceImg.alt = `${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}`;
-        pieceImg.draggable = true;
-
-        // Drag-and-drop handlers
-        pieceImg.addEventListener('dragstart', (e) => handleDragStart(e, squareName));
-
-        square.appendChild(pieceImg);
-      }
-
-      // Drop handlers for all squares
-      square.addEventListener('dragover', handleDragOver);
-      square.addEventListener('drop', (e) => handleDrop(e, squareName));
-
-      boardElement.appendChild(square);
-      squareCount++;
-    }
-  }
-
-  console.log(`Chessboard rendered: ${squareCount} squares with pieces at starting position`);
-}
-
-/**
- * Render the Sandbox Mode board editor
- * Phase 7: Board editor for custom positions
- *
- * Click behavior:
- * - Left-click with palette piece selected: Place piece
- * - Left-click with no palette piece: Show legal moves for piece (if any)
- * - Right-click: Remove piece
- * - Drag: Move piece on board or from palette
- */
 function renderSandboxBoard(): void {
-  const boardElement = document.getElementById('sandbox-board');
-  if (!boardElement) {
-    console.error('sandbox-board element not found');
-    return;
-  }
-
-  boardElement.innerHTML = '';
-
-  const position = sandboxManager.getPosition();
-  const analysisResult = sandboxManager.getAnalysisResult();
-
-  // Create 8x8 grid of squares
-  for (let rank = 8; rank >= 1; rank--) {
-    for (let file = 0; file < 8; file++) {
-      const square = document.createElement('div');
-      square.className = 'square';
-
-      // Determine if square is light or dark
-      const isLight = (rank + file) % 2 === 0;
-      square.classList.add(isLight ? 'light' : 'dark');
-
-      // Set data attributes
-      const fileChar = String.fromCharCode(97 + file);
-      const squareName = `${fileChar}${rank}`;
-      square.dataset.square = squareName;
-
-      // Add analysis highlights if analysis is complete (always show top 3)
-      if (analysisResult) {
-        analysisResult.topMoves.forEach((move, idx) => {
-          if (move.from === squareName) {
-            square.classList.add(
-              idx === 0 ? 'best-move-from' : idx === 1 ? 'second-move-from' : 'third-move-from'
-            );
-          }
-          if (move.to === squareName) {
-            square.classList.add(
-              idx === 0 ? 'best-move-to' : idx === 1 ? 'second-move-to' : 'third-move-to'
-            );
-          }
-        });
-      }
-
-      // Get piece at this square
-      const piece = position.get(squareName);
-
-      if (piece) {
-        const pieceImg = document.createElement('img');
-        pieceImg.src = `/assets/pieces/${piece.color}${piece.type}.svg`;
-        pieceImg.className = 'piece';
-        pieceImg.alt = `${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}`;
-
-        // Always allow dragging pieces
-        pieceImg.draggable = true;
-        pieceImg.addEventListener('dragstart', (e) => {
-          e.dataTransfer?.setData('fromSquare', squareName);
-          e.dataTransfer?.setData('pieceType', piece.type);
-          e.dataTransfer?.setData('pieceColor', piece.color);
-          pieceImg.classList.add('dragging');
-        });
-        pieceImg.addEventListener('dragend', () => {
-          pieceImg.classList.remove('dragging');
-        });
-
-        square.appendChild(pieceImg);
-      }
-
-      // Left-click handler
-      square.addEventListener('click', () => {
-        const selectedPiece = sandboxManager.getSelectedPalettePiece();
-        if (selectedPiece) {
-          // Palette piece selected - place it on this square
-          sandboxManager.placePiece(squareName, selectedPiece);
-        } else if (piece) {
-          // No palette piece selected and there's a piece here - show legal moves
-          showSandboxLegalMoves(squareName, piece);
-        }
-        // If no palette piece and no piece on square, do nothing
-      });
-
-      // Right-click to remove piece
-      square.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        sandboxManager.removePiece(squareName);
-      });
-
-      // Drop handlers for drag and drop
-      square.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        square.classList.add('drop-target');
-      });
-
-      square.addEventListener('dragleave', () => {
-        square.classList.remove('drop-target');
-      });
-
-      square.addEventListener('drop', (e) => {
-        e.preventDefault();
-        square.classList.remove('drop-target');
-
-        const fromPalette = e.dataTransfer?.getData('fromPalette');
-        const fromSquare = e.dataTransfer?.getData('fromSquare');
-        const pieceType = e.dataTransfer?.getData('pieceType') as EditorPiece['type'];
-        const pieceColor = e.dataTransfer?.getData('pieceColor') as EditorPiece['color'];
-
-        if (fromPalette === 'true' && pieceType && pieceColor) {
-          // Dropped from palette - place new piece
-          sandboxManager.placePiece(squareName, { type: pieceType, color: pieceColor });
-        } else if (fromSquare && fromSquare !== squareName) {
-          // Dropped from another square - move piece
-          sandboxManager.movePiece(fromSquare, squareName);
-        }
-      });
-
-      boardElement.appendChild(square);
-    }
-  }
+  renderSandbox(sandboxControllerDeps);
 }
 
-/**
- * Show legal moves for a piece in Sandbox Mode
- * Uses chess.js to calculate legal moves from the current FEN
- */
-function showSandboxLegalMoves(square: string, _piece: EditorPiece): void {
-  // Clear any existing highlights first
-  const boardElement = document.getElementById('sandbox-board');
-  if (!boardElement) return;
+// ============================================
+// Mode Selection Helper
+// ============================================
 
-  // Remove previous legal move highlights
-  boardElement.querySelectorAll('.legal-move, .legal-capture, .sandbox-selected').forEach((el) => {
-    el.classList.remove('legal-move', 'legal-capture', 'sandbox-selected');
-  });
-
-  // Mark the selected square
-  const selectedSquare = boardElement.querySelector(`[data-square="${square}"]`);
-  if (selectedSquare) {
-    selectedSquare.classList.add('sandbox-selected');
+function showModeSelection(): void {
+  if (gameResultTimeoutId !== null) {
+    clearTimeout(gameResultTimeoutId);
+    gameResultTimeoutId = null;
   }
 
-  // Get FEN and use chess-logic to find legal moves
-  const fen = sandboxManager.getFen();
-  try {
-    // Create a temporary chess instance to check legal moves
-    const tempGame = new ChessGame(fen);
-    const moves = tempGame.getLegalMoves({ square: square as Square, verbose: true });
+  if (trainingManager.isActive()) trainingManager.stop();
+  if (examManager.isActive()) examManager.stop();
+  if (sandboxManager.isActive()) sandboxManager.stop();
+  currentGameMode = 'none';
 
-    // Highlight legal moves
-    moves.forEach((move: { to: string; captured?: string }) => {
-      const targetSquare = boardElement.querySelector(`[data-square="${move.to}"]`);
-      if (targetSquare) {
-        if (move.captured) {
-          targetSquare.classList.add('legal-capture');
-        } else {
-          targetSquare.classList.add('legal-move');
-        }
-      }
-    });
-  } catch {
-    // Invalid position or piece can't move - that's OK in sandbox mode
-    console.debug('Could not calculate legal moves for sandbox position');
-  }
+  game.reset();
+  redoStack = [];
+  boardFlipped = false;
+
+  const resultOverlay = document.getElementById('game-result-overlay');
+  if (resultOverlay) resultOverlay.classList.add('hidden');
+  const confirmOverlay = document.getElementById('confirm-dialog-overlay');
+  if (confirmOverlay) confirmOverlay.classList.add('hidden');
+
+  showGuidancePanel(false);
+  guidanceManager.deactivate();
+
+  updateAllUI();
+  trainingUI.show();
 }
 
-/**
- * Update sandbox validation display
- */
-function updateSandboxValidation(): void {
-  const validation = sandboxManager.getValidation();
-  const statusDiv = document.getElementById('sandbox-validation');
-  const errorsDiv = document.getElementById('sandbox-validation-errors');
-  const analyzeBtn = document.getElementById('sandbox-analyze-button') as HTMLButtonElement;
+// ============================================
+// IPC Test Function (for debugging)
+// ============================================
 
-  if (statusDiv) {
-    statusDiv.classList.remove('valid', 'invalid', 'warning');
-
-    if (!validation.isValid) {
-      statusDiv.classList.add('invalid');
-      statusDiv.innerHTML = `
-        <span class="validation-icon">✗</span>
-        <span class="validation-text">Position is invalid</span>
-      `;
-    } else if (validation.warnings.length > 0) {
-      statusDiv.classList.add('warning');
-      statusDiv.innerHTML = `
-        <span class="validation-icon">⚠</span>
-        <span class="validation-text">Position has warnings</span>
-      `;
-    } else {
-      statusDiv.classList.add('valid');
-      statusDiv.innerHTML = `
-        <span class="validation-icon">✓</span>
-        <span class="validation-text">Position is valid</span>
-      `;
-    }
-  }
-
-  if (errorsDiv) {
-    const issues = [...validation.errors, ...validation.warnings];
-    if (issues.length > 0) {
-      errorsDiv.classList.remove('hidden');
-      errorsDiv.innerHTML = `<ul>${issues.map((e) => `<li>${e}</li>`).join('')}</ul>`;
-    } else {
-      errorsDiv.classList.add('hidden');
-    }
-  }
-
-  if (analyzeBtn) {
-    analyzeBtn.disabled = !validation.isValid;
-  }
-}
-
-/**
- * Render sandbox analysis results
- */
-function renderSandboxAnalysisResults(result: SandboxAnalysisResult): void {
-  const resultsDiv = document.getElementById('sandbox-analysis-results');
-  const scoreDiv = document.getElementById('sandbox-eval-score');
-  const barDiv = document.getElementById('sandbox-eval-bar');
-  const movesDiv = document.getElementById('sandbox-best-moves');
-
-  if (!resultsDiv) return;
-
-  resultsDiv.classList.remove('hidden');
-
-  // Update score display
-  if (scoreDiv) {
-    scoreDiv.textContent = result.formattedScore;
-  }
-
-  // Update eval bar (50% = equal, more = white advantage)
-  if (barDiv) {
-    // Convert centipawn score to percentage (sigmoid-like scaling)
-    const score = result.score;
-    const maxAdvantage = 400; // centipawns for ~95% bar
-    const normalized = Math.max(-maxAdvantage, Math.min(maxAdvantage, score));
-    const percentage = 50 + (normalized / maxAdvantage) * 45;
-    barDiv.style.width = `${percentage}%`;
-  }
-
-  // Render best moves list (always show all 3)
-  if (movesDiv) {
-    movesDiv.innerHTML = result.topMoves
-      .map(
-        (move, idx) => `
-      <div class="best-move-item rank-${idx + 1}">
-        <div class="move-rank">${idx + 1}</div>
-        <div class="best-move-notation">${move.move}</div>
-        <div class="move-score">${move.formattedScore}</div>
-      </div>
-    `
-      )
-      .join('');
-  }
-}
-
-// Results display element
-const resultsDiv: HTMLDivElement | null = null;
-
-/**
- * Display results in the UI
- */
-function displayResults(title: string, data: unknown): void {
-  if (!resultsDiv) return;
-
-  const resultItem = document.createElement('div');
-  resultItem.style.cssText =
-    'background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; text-align: left;';
-  resultItem.innerHTML = `
-    <strong>${title}</strong>
-    <pre style="margin: 5px 0; font-size: 12px; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>
-  `;
-  resultsDiv.prepend(resultItem);
-}
-
-/**
- * Test IPC communication with backend
- * Per Task 1.4.3: Test frontend-backend communication
- */
 async function testIPCCommunication(): Promise<void> {
   console.log('Testing IPC communication...');
 
-  // Test 1: Health check
   console.log('1. Testing sayHello...');
-  const helloResult = await ipc.call(IPC_METHODS.SAY_HELLO, {
-    message: 'Hello from frontend!',
-  });
+  const helloResult = await ipc.call(IPC_METHODS.SAY_HELLO, { message: 'Hello from frontend!' });
   console.log('   Response:', helloResult);
-  displayResults('1. sayHello', helloResult);
 
-  // Test 2: Engine status
   console.log('2. Testing getEngineStatus...');
   const statusResult = (await ipc.call(IPC_METHODS.GET_ENGINE_STATUS)) as EngineStatusResponse;
   console.log('   Engine initialized:', statusResult.initialized);
-  displayResults('2. getEngineStatus', statusResult);
 
-  // Test 3: Start new game
   console.log('3. Testing startNewGame...');
   const newGameResult = await ipc.call(IPC_METHODS.START_NEW_GAME);
   console.log('   Result:', newGameResult);
-  displayResults('3. startNewGame', newGameResult);
 
-  // Test 4: Get best moves from starting position
   console.log('4. Testing requestBestMoves...');
   const bestMovesResult = (await ipc.call(IPC_METHODS.REQUEST_BEST_MOVES, {
     fen: STARTPOS_FEN,
@@ -2101,9 +549,7 @@ async function testIPCCommunication(): Promise<void> {
   } else {
     console.log('   Top 3 moves:', bestMovesResult.moves.map((m: BestMove) => m.move).join(', '));
   }
-  displayResults('4. requestBestMoves (top 3)', bestMovesResult);
 
-  // Test 5: Evaluate position
   console.log('5. Testing evaluatePosition...');
   const evalResult = (await ipc.call(IPC_METHODS.EVALUATE_POSITION, {
     fen: STARTPOS_FEN,
@@ -2114,9 +560,7 @@ async function testIPCCommunication(): Promise<void> {
     console.log('   Evaluation:', evalResult.formattedScore);
     console.log('   Best move:', evalResult.evaluation.bestMove);
   }
-  displayResults('5. evaluatePosition', evalResult);
 
-  // Test 6: Get guidance moves (for Training Mode)
   console.log('6. Testing getGuidanceMoves...');
   const guidanceResult = (await ipc.call(IPC_METHODS.GET_GUIDANCE_MOVES, {
     fen: STARTPOS_FEN,
@@ -2130,123 +574,110 @@ async function testIPCCommunication(): Promise<void> {
       console.log(`     ${color}: ${m.move}`);
     });
   }
-  displayResults('6. getGuidanceMoves', guidanceResult);
 
-  // Test 7: Analyze a move
   console.log('7. Testing analyzeMove...');
   const analysisResult = await ipc.call(IPC_METHODS.ANALYZE_MOVE, {
     fen: STARTPOS_FEN,
-    playedMove: 'g2g4', // Bad move for testing
+    playedMove: 'g2g4',
     depth: 10,
   });
-  displayResults('7. analyzeMove (g4 from start)', analysisResult);
+  console.log('   Result:', analysisResult);
 
   console.log('\n=== IPC Communication Tests Complete ===');
 }
 
-/**
- * Start a Training Mode game
- * Per Task 3.2.4: Create game initialization flow
- */
-async function startTrainingGame(
-  config: TrainingConfig,
-  playerColor: 'white' | 'black'
-): Promise<void> {
-  // Set current game mode
-  currentGameMode = 'training';
+// ============================================
+// Control Toolbar Initialization
+// ============================================
 
-  // Make sure Exam Mode is stopped
-  if (examManager.isActive()) {
-    examManager.stop();
+function initializeControlToolbar(): void {
+  controlToolbar.mount();
+  controlToolbar.show();
+
+  const buttons = controlToolbar.getButtons();
+  if (buttons) {
+    buttons.newGame.addEventListener('click', () => {
+      if (game.getHistory().length > 0) {
+        showConfirmDialog(
+          'Start New Game?',
+          'Current game progress will be lost. Continue?',
+          showModeSelection
+        );
+      } else {
+        showModeSelection();
+      }
+    });
+
+    buttons.undo.addEventListener('click', handleUndo);
+    buttons.redo.addEventListener('click', handleRedo);
+    buttons.resign.addEventListener('click', handleResign);
+    buttons.flipBoard.addEventListener('click', handleFlipBoard);
   }
 
-  // Reset the game
-  game.reset();
-  redoStack = [];
-
-  // Flip board if playing as black
-  if (playerColor === 'black' && !boardFlipped) {
-    boardFlipped = true;
-  } else if (playerColor === 'white' && boardFlipped) {
-    boardFlipped = false;
-  }
-
-  // Render the fresh board
-  renderChessboard();
-  updateTurnIndicator();
-  updateMoveHistory();
-  updateCapturedPieces();
-  updateGameAlert();
-  updateUndoRedoButtons();
-
-  console.log(`Training Mode started: Playing as ${playerColor}`);
-
-  // If playing as black, bot makes the first move
-  if (playerColor === 'black') {
-    // Hide guidance until it's player's turn
-    showGuidancePanel(false);
-    // Small delay before bot's first move
-    setTimeout(async () => {
-      await requestBotMove();
-      // After bot's first move, update guidance for player
-      await updateGuidance();
-    }, 500);
-  } else if (config.guidanceEnabled) {
-    // Playing as white, show guidance immediately
-    await updateGuidance();
-  }
+  frontendLogger.info('App', 'CS-003: Control Toolbar initialized');
 }
 
-/**
- * Start an Exam Mode game
- * Per Task 4.1.2: Exam Mode setup flow
- * Per Task 4.1.3: Exam Mode state management
- * Per game-modes.md: Guidance is completely disabled
- */
-async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'): Promise<void> {
-  // Set current game mode
-  currentGameMode = 'exam';
+// ============================================
+// Collapsible Sections Initialization
+// ============================================
 
-  // Make sure Training Mode is stopped
-  if (trainingManager.isActive()) {
-    trainingManager.stop();
+function initializeCollapsibleSections(): void {
+  const container = document.getElementById('collapsible-sections-container');
+  if (!container) {
+    frontendLogger.error('App', 'CS-003: Collapsible sections container not found');
+    return;
   }
 
-  // Reset the game
-  game.reset();
-  redoStack = [];
+  moveHistorySection = new CollapsibleSection({
+    id: 'move-history',
+    title: 'Move History',
+    icon: '📜',
+    expanded: true,
+  });
 
-  // Flip board if playing as black
-  if (playerColor === 'black' && !boardFlipped) {
-    boardFlipped = true;
-  } else if (playerColor === 'white' && boardFlipped) {
-    boardFlipped = false;
-  }
+  const moveList = document.createElement('div');
+  moveList.id = 'move-list';
+  moveHistorySection.getContent().appendChild(moveList);
+  container.appendChild(moveHistorySection.getElement());
 
-  // Render the fresh board
-  renderChessboard();
-  updateTurnIndicator();
-  updateMoveHistory();
-  updateCapturedPieces();
-  updateGameAlert();
-  updateUndoRedoButtons();
+  capturedPiecesSection = new CollapsibleSection({
+    id: 'captured-pieces',
+    title: 'Captured Pieces',
+    icon: '♟',
+    expanded: true,
+  });
 
-  // IMPORTANT: Hide guidance panel - Exam Mode has NO guidance
-  showGuidancePanel(false);
-  guidanceManager.deactivate();
+  const capturedPiecesContent = document.createElement('div');
+  capturedPiecesContent.className = 'captured-pieces-content';
 
-  console.log(`Exam Mode started: Playing as ${playerColor}, gameId: ${examManager.getGameId()}`);
+  const whiteCapturedSection = document.createElement('div');
+  whiteCapturedSection.className = 'captured-section';
+  whiteCapturedSection.innerHTML = `
+    <div class="captured-label">White captured:</div>
+    <div id="captured-by-white" class="captured-list"></div>
+    <div class="material-advantage" id="white-advantage"></div>
+  `;
 
-  // If playing as black, bot makes the first move
-  if (playerColor === 'black') {
-    // Small delay before bot's first move
-    setTimeout(async () => {
-      await requestExamBotMove();
-    }, 500);
-  }
+  const blackCapturedSection = document.createElement('div');
+  blackCapturedSection.className = 'captured-section';
+  blackCapturedSection.innerHTML = `
+    <div class="captured-label">Black captured:</div>
+    <div id="captured-by-black" class="captured-list"></div>
+    <div class="material-advantage" id="black-advantage"></div>
+  `;
+
+  capturedPiecesContent.appendChild(whiteCapturedSection);
+  capturedPiecesContent.appendChild(blackCapturedSection);
+  capturedPiecesSection.getContent().appendChild(capturedPiecesContent);
+  container.appendChild(capturedPiecesSection.getElement());
+
+  frontendLogger.info('App', 'CS-003: Collapsible sections initialized');
 }
 
-// Initialize application
+// ============================================
+// Application Initialization
+// ============================================
+
 (async () => {
   // Initialize WebSocket IPC connection
   try {
@@ -2262,29 +693,63 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   renderChessboard();
 
   // Initialize UI elements
-  updateTurnIndicator();
-  updateGameAlert();
+  updateTurnIndicator(game);
+  updateGameAlert(game);
 
-  // Initialize Training Mode UI
+  // Initialize mode UIs
   trainingUI.initialize();
-
-  // Initialize Exam Mode UI (Phase 4)
   examUI.initialize();
-
-  // Initialize Sandbox Mode UI (Phase 7)
   sandboxUI.initialize();
 
   // Set up Training Mode callbacks
   trainingUI.onGameStart = (config, playerColor) => {
-    startTrainingGame(config, playerColor);
+    const modeDeps = {
+      game,
+      trainingManager,
+      examManager,
+      getBoardFlipped,
+      setBoardFlipped,
+      setRedoStack,
+      renderChessboard,
+      updateTurnIndicator: () => updateTurnIndicator(game),
+      updateMoveHistory: () => updateMoveHistory(game, moveHistorySection),
+      updateCapturedPieces: () => updateCapturedPieces(game, capturedPiecesSection),
+      updateGameAlert: () => updateGameAlert(game),
+      updateUndoRedoButtons: () => updateUndoRedoButtons(gameControllerDeps),
+      showGuidancePanel,
+      requestBotMove,
+      requestExamBotMove,
+      updateGuidance,
+      guidanceManager,
+    };
+    startTrainingGame(modeDeps, config, playerColor, setCurrentGameMode);
   };
 
-  // Set up Exam Mode callbacks (Phase 4)
+  // Set up Exam Mode callbacks
   examUI.onGameStart = (config, playerColor) => {
-    startExamGame(config, playerColor);
+    const modeDeps = {
+      game,
+      trainingManager,
+      examManager,
+      getBoardFlipped,
+      setBoardFlipped,
+      setRedoStack,
+      renderChessboard,
+      updateTurnIndicator: () => updateTurnIndicator(game),
+      updateMoveHistory: () => updateMoveHistory(game, moveHistorySection),
+      updateCapturedPieces: () => updateCapturedPieces(game, capturedPiecesSection),
+      updateGameAlert: () => updateGameAlert(game),
+      updateUndoRedoButtons: () => updateUndoRedoButtons(gameControllerDeps),
+      showGuidancePanel,
+      requestBotMove,
+      requestExamBotMove,
+      updateGuidance,
+      guidanceManager,
+    };
+    startExamGame(modeDeps, config, playerColor, setCurrentGameMode);
   };
 
-  // Set up Sandbox Mode callbacks (Phase 7)
+  // Set up Sandbox Mode callbacks
   sandboxUI.onModeStart = () => {
     currentGameMode = 'sandbox';
     frontendLogger.info('App', 'Sandbox Mode started');
@@ -2300,11 +765,11 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   sandboxManager.onPositionChange = () => {
     renderSandboxBoard();
     sandboxUI.updateFenDisplay();
-    updateSandboxValidation();
+    updateSandboxValidation(sandboxControllerDeps);
   };
 
   sandboxManager.onValidationChange = () => {
-    updateSandboxValidation();
+    updateSandboxValidation(sandboxControllerDeps);
   };
 
   sandboxManager.onAnalysisStart = () => {
@@ -2317,13 +782,8 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
       analyzeBtn.textContent = 'Analyzing...';
       (analyzeBtn as HTMLButtonElement).disabled = true;
     }
-    if (resultsDiv) {
-      resultsDiv.classList.remove('hidden');
-    }
-    // Show loading state without destroying the structure
-    if (scoreDiv) {
-      scoreDiv.textContent = '...';
-    }
+    if (resultsDiv) resultsDiv.classList.remove('hidden');
+    if (scoreDiv) scoreDiv.textContent = '...';
     if (movesDiv) {
       movesDiv.innerHTML = `
         <div class="analyzing-indicator">
@@ -2340,8 +800,7 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
       analyzeBtn.textContent = 'Re-analyze';
       (analyzeBtn as HTMLButtonElement).disabled = false;
     }
-
-    renderSandboxBoard(); // Re-render with highlights
+    renderSandboxBoard();
     renderSandboxAnalysisResults(result);
   };
 
@@ -2363,197 +822,29 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     }
   };
 
-  // Helper to show mode selection - resets entire game to fresh state
-  const showModeSelection = () => {
-    // Cancel any pending game result timeout (prevents stale results from showing)
-    if (gameResultTimeoutId !== null) {
-      clearTimeout(gameResultTimeoutId);
-      gameResultTimeoutId = null;
-    }
-
-    // Stop any active game mode
-    if (trainingManager.isActive()) {
-      trainingManager.stop();
-    }
-    if (examManager.isActive()) {
-      examManager.stop();
-    }
-    if (sandboxManager.isActive()) {
-      sandboxManager.stop();
-    }
-    currentGameMode = 'none';
-
-    // Reset game to starting position (clean slate)
-    game.reset();
-    redoStack = [];
-
-    // Reset board orientation to default (white at bottom)
-    boardFlipped = false;
-
-    // Hide all overlays
-    const resultOverlay = document.getElementById('game-result-overlay');
-    if (resultOverlay) {
-      resultOverlay.classList.add('hidden');
-    }
-    const confirmOverlay = document.getElementById('confirm-dialog-overlay');
-    if (confirmOverlay) {
-      confirmOverlay.classList.add('hidden');
-    }
-
-    // Hide guidance panel
-    showGuidancePanel(false);
-    guidanceManager.deactivate();
-
-    // Re-render everything fresh
-    renderChessboard();
-    updateTurnIndicator();
-    updateMoveHistory();
-    updateCapturedPieces();
-    updateGameAlert();
-    updateUndoRedoButtons();
-
-    // Show mode selection
-    trainingUI.show();
-  };
-
-  /**
-   * Initialize Control Toolbar (CS-003)
-   * Mount toolbar and wire up button event handlers
-   */
-  function initializeControlToolbar(): void {
-    // Mount the toolbar to the DOM
-    controlToolbar.mount();
-    controlToolbar.show();
-
-    // Get button references and wire up event handlers
-    const buttons = controlToolbar.getButtons();
-    if (buttons) {
-      // New Game button
-      buttons.newGame.addEventListener('click', () => {
-        if (game.getHistory().length > 0) {
-          showConfirmDialog(
-            'Start New Game?',
-            'Current game progress will be lost. Continue?',
-            showModeSelection
-          );
-        } else {
-          showModeSelection();
-        }
-      });
-
-      // Undo button
-      buttons.undo.addEventListener('click', handleUndo);
-
-      // Redo button
-      buttons.redo.addEventListener('click', handleRedo);
-
-      // Resign button
-      buttons.resign.addEventListener('click', handleResign);
-
-      // Flip Board button
-      buttons.flipBoard.addEventListener('click', handleFlipBoard);
-    }
-
-    frontendLogger.info('App', 'CS-003: Control Toolbar initialized');
-  }
-
-  /**
-   * Initialize Collapsible Sections (CS-003)
-   * Create and mount collapsible sections for Move History and Captured Pieces
-   */
-  function initializeCollapsibleSections(): void {
-    const container = document.getElementById('collapsible-sections-container');
-    if (!container) {
-      frontendLogger.error('App', 'CS-003: Collapsible sections container not found');
-      return;
-    }
-
-    // Create Move History section
-    moveHistorySection = new CollapsibleSection({
-      id: 'move-history',
-      title: 'Move History',
-      icon: '📜',
-      expanded: true,
-    });
-
-    // Create move list container directly
-    const moveList = document.createElement('div');
-    moveList.id = 'move-list';
-    moveHistorySection.getContent().appendChild(moveList);
-
-    container.appendChild(moveHistorySection.getElement());
-
-    // Create Captured Pieces section
-    capturedPiecesSection = new CollapsibleSection({
-      id: 'captured-pieces',
-      title: 'Captured Pieces',
-      icon: '♟',
-      expanded: true,
-    });
-
-    // Create captured pieces structure directly
-    const capturedPiecesContent = document.createElement('div');
-    capturedPiecesContent.className = 'captured-pieces-content';
-
-    const whiteCapturedSection = document.createElement('div');
-    whiteCapturedSection.className = 'captured-section';
-    whiteCapturedSection.innerHTML = `
-      <div class="captured-label">White captured:</div>
-      <div id="captured-by-white" class="captured-list"></div>
-      <div class="material-advantage" id="white-advantage"></div>
-    `;
-
-    const blackCapturedSection = document.createElement('div');
-    blackCapturedSection.className = 'captured-section';
-    blackCapturedSection.innerHTML = `
-      <div class="captured-label">Black captured:</div>
-      <div id="captured-by-black" class="captured-list"></div>
-      <div class="material-advantage" id="black-advantage"></div>
-    `;
-
-    capturedPiecesContent.appendChild(whiteCapturedSection);
-    capturedPiecesContent.appendChild(blackCapturedSection);
-    capturedPiecesSection.getContent().appendChild(capturedPiecesContent);
-
-    container.appendChild(capturedPiecesSection.getElement());
-
-    frontendLogger.info('App', 'CS-003: Collapsible sections initialized');
-  }
-
-  // Wire up "New Game" buttons
+  // Wire up buttons
   const newGameButton = document.getElementById('new-game-button');
   if (newGameButton) {
-    newGameButton.addEventListener('click', () => {
-      showModeSelection();
-    });
+    newGameButton.addEventListener('click', showModeSelection);
   }
 
-  // Phase 5: Wire up "View Analysis" button
   const viewAnalysisButton = document.getElementById('view-analysis-button');
   if (viewAnalysisButton) {
     viewAnalysisButton.addEventListener('click', () => {
       const gameId = examManager.getGameId();
       if (gameId) {
-        // Hide game result overlay and open analysis
         const resultOverlay = document.getElementById('game-result-overlay');
-        if (resultOverlay) {
-          resultOverlay.classList.add('hidden');
-        }
+        if (resultOverlay) resultOverlay.classList.add('hidden');
         analysisUI.openAnalysis(gameId);
       }
     });
   }
 
-  // Phase 5: Set up analysis UI callbacks
-  analysisUI.onClose = () => {
-    // Re-show mode selection when analysis is closed
-    showModeSelection();
-  };
+  analysisUI.onClose = showModeSelection;
 
   const newGameControl = document.getElementById('new-game-control');
   if (newGameControl) {
     newGameControl.addEventListener('click', () => {
-      // Show confirmation if game is in progress
       if (game.getHistory().length > 0) {
         showConfirmDialog(
           'Start New Game?',
@@ -2561,60 +852,39 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
           showModeSelection
         );
       } else {
-        // No game in progress, show mode selection directly
         showModeSelection();
       }
     });
   }
 
-  // Wire up "Resign" button
   const resignButton = document.getElementById('resign-button');
-  if (resignButton) {
-    resignButton.addEventListener('click', handleResign);
-  }
+  if (resignButton) resignButton.addEventListener('click', handleResign);
 
-  // Wire up "Flip Board" button
   const flipBoardButton = document.getElementById('flip-board-button');
-  if (flipBoardButton) {
-    flipBoardButton.addEventListener('click', handleFlipBoard);
-  }
+  if (flipBoardButton) flipBoardButton.addEventListener('click', handleFlipBoard);
 
-  // Wire up "Undo" button
   const undoButton = document.getElementById('undo-button');
-  if (undoButton) {
-    undoButton.addEventListener('click', handleUndo);
-  }
+  if (undoButton) undoButton.addEventListener('click', handleUndo);
 
-  // Wire up "Redo" button
   const redoButton = document.getElementById('redo-button');
-  if (redoButton) {
-    redoButton.addEventListener('click', handleRedo);
-  }
+  if (redoButton) redoButton.addEventListener('click', handleRedo);
 
-  // CS-003: Initialize Control Toolbar and Collapsible Sections
+  // Initialize toolbar and sections
   initializeControlToolbar();
   initializeCollapsibleSections();
+  updateUndoRedoButtons(gameControllerDeps);
 
-  // Set initial button states
-  updateUndoRedoButtons();
-
-  // Note: Keyboard shortcuts now handled by native-menu.ts (Phase 4 Modernization)
-
-  // WebSocket IPC connection already established in initialization above
-
-  // Initialize the frontend logger (checks if dev mode is enabled)
+  // Initialize frontend logger
   await frontendLogger.initialize();
   if (frontendLogger.isEnabled()) {
     frontendLogger.separator('App', 'Chess-Sensei Frontend Session Started');
-    frontendLogger.info('App', 'Debug logging enabled', {
-      logPath: frontendLogger.getLogPath(),
-    });
+    frontendLogger.info('App', 'Debug logging enabled', { logPath: frontendLogger.getLogPath() });
   }
 
-  // Make test function available globally for debugging (Phase 1 tests)
+  // Make test function available globally
   (window as unknown as { testIPC: () => Promise<void> }).testIPC = testIPCCommunication;
 
-  // Phase 6: Setup Progress Dashboard button
+  // Progress Dashboard setup
   const viewProgressBtn = document.getElementById('view-progress-btn');
   if (viewProgressBtn) {
     viewProgressBtn.addEventListener('click', () => {
@@ -2623,7 +893,6 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
     });
   }
 
-  // Setup dashboard callbacks
   progressDashboard.onClose = () => {
     frontendLogger.info('App', 'Progress Dashboard closed');
   };
@@ -2631,14 +900,12 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   progressDashboard.onViewGame = (gameId: string) => {
     frontendLogger.info('App', 'Opening game from dashboard', { gameId });
     progressDashboard.close();
-    // Open analysis for the selected game
     analysisUI.openAnalysis(gameId);
   };
 
   frontendLogger.info('App', 'Phase 6: Progress Dashboard UI initialized');
-  console.log('Phase 6: Progress Dashboard UI initialized');
 
-  // Phase 8: Setup Data Management button and overlay
+  // Data Management setup
   dataManagement.initialize('data-mgmt-overlay');
 
   const viewDataMgmtBtn = document.getElementById('view-data-mgmt-btn');
@@ -2650,29 +917,22 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
   }
 
   frontendLogger.info('App', 'Phase 8: Data Management UI initialized');
-  console.log('Phase 8: Data Management UI initialized');
 
-  // Phase 4 Modernization: Initialize native window menus with keyboard shortcuts
+  // Native menu initialization
   const menuHandlers: MenuActionHandlers = {
     onNewGame: () => {
       frontendLogger.info('Menu', 'New Game requested via menu');
-      // Show mode selection screen
       showModeSelection();
     },
     onImportPGN: () => {
       frontendLogger.info('Menu', 'Import PGN requested via menu');
-      // Open data management and trigger import
       dataManagement.show();
-      // Note: The import button will need to be clicked manually
-      // We could expose a direct import method from dataManagement in the future
     },
     onExportPGN: () => {
       frontendLogger.info('Menu', 'Export PGN requested via menu');
-      // Open data management to access export functionality
       dataManagement.show();
     },
     onExit: () => {
-      // Handled by native-menu.ts (calls app.exit)
       frontendLogger.info('Menu', 'Exit requested via menu');
     },
     onUndo: () => {
@@ -2700,21 +960,17 @@ async function startExamGame(_config: ExamConfig, playerColor: 'white' | 'black'
       dataManagement.show();
     },
     onToggleInspector: () => {
-      // Handled by native-menu.ts
       frontendLogger.info('Menu', 'Toggle Inspector requested via menu');
     },
     onUserGuide: () => {
-      // Handled by native-menu.ts
       frontendLogger.info('Menu', 'User Guide requested via menu');
     },
     onAbout: () => {
-      // Handled by native-menu.ts
       frontendLogger.info('Menu', 'About requested via menu');
     },
   };
 
-  // Initialize native menus
   await initializeNativeMenu(menuHandlers);
-  frontendLogger.info('App', 'Phase 4 Modernization: Native window menus initialized');
-  console.log('Phase 4 Modernization: Native window menus with keyboard shortcuts initialized');
+  frontendLogger.info('App', 'Native window menus initialized');
+  console.log('Chess-Sensei Frontend ready');
 })();

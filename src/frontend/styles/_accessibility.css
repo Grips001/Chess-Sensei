@@ -1,0 +1,198 @@
+/* ========================================
+   Accessibility Features
+   Phase 9: WCAG 2.1 AA compliance
+   ======================================== */
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  :root {
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #4a4a4a;
+    --color-guidance-blue: rgb(50 100 200 / 85%);
+    --color-guidance-green: rgb(60 160 80 / 85%);
+    --color-guidance-yellow: rgb(200 160 30 / 85%);
+  }
+}
+
+/* Focus indicators - visible keyboard navigation */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Enhanced focus for interactive elements */
+button:focus-visible,
+[role='button']:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+/* Focus styles for chess squares */
+.square:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+  z-index: 10;
+}
+
+/* Skip link for keyboard navigation */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  z-index: 10000;
+  transition: top var(--duration-fast) var(--ease-out-soft);
+}
+
+.skip-link:focus {
+  top: var(--space-md);
+}
+
+/* Screen reader only - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Screen reader only, but visible when focused */
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}
+
+/* ARIA live region styling */
+[aria-live='polite'],
+[aria-live='assertive'] {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Visible ARIA live region for status updates */
+.status-announcer {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-text-primary);
+  color: white;
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--duration-normal) var(--ease-out-soft);
+  z-index: 9999;
+}
+
+.status-announcer.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Large text mode */
+.large-text {
+  font-size: 118.75%;
+}
+
+.large-text .panel-section h3 {
+  font-size: 19px;
+}
+
+.large-text .control-button {
+  font-size: 16px;
+  padding: 14px 18px;
+}
+
+/* Large piece mode */
+.large-pieces .piece {
+  width: 90%;
+  height: 90%;
+}
+
+/* High visibility mode - enhanced borders and contrast */
+.high-visibility .square.light {
+  background-color: #f5f5f5;
+}
+
+.high-visibility .square.dark {
+  background-color: #5a6875;
+}
+
+.high-visibility .square.selected {
+  box-shadow:
+    inset 0 0 0 4px rgb(0 100 255),
+    0 0 16px rgb(0 100 255 / 60%);
+}
+
+.high-visibility .guidance-highlight::before {
+  border-width: 4px;
+}
+
+/* Color-blind friendly patterns (optional pattern overlay) */
+.pattern-overlay .guidance-blue::before {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgb(70 130 220 / 30%) 2px,
+    rgb(70 130 220 / 30%) 4px
+  );
+}
+
+.pattern-overlay .guidance-green::before {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 2px,
+    rgb(80 180 100 / 30%) 2px,
+    rgb(80 180 100 / 30%) 4px
+  );
+}
+
+.pattern-overlay .guidance-yellow::before {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgb(220 180 50 / 30%) 2px,
+    rgb(220 180 50 / 30%) 4px
+  );
+}
+
+/* Keyboard navigation indicator for current square */
+.keyboard-nav .square.keyboard-focus {
+  outline: 3px dashed var(--color-primary);
+  outline-offset: -3px;
+}

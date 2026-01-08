@@ -230,13 +230,24 @@ Comprehensive analysis report including:
 
 ### Files
 
-- `src/frontend/analysis-ui.ts` - Main analysis UI module
-- `src/frontend/styles/index.css` - Styling (analysis section)
+- `src/frontend/analysis/analysis-controller.ts` - Main analysis UI manager
+  (AnalysisUIManager class)
+- `src/frontend/analysis/components/` - 9 analysis component modules:
+  - `board-renderer.ts` - Interactive replay board
+  - `evaluation-graph.ts` - Position evaluation visualization
+  - `move-list.ts` - Annotated move list with navigation
+  - `position-analysis.ts` - Move-by-move analysis panel
+  - `summary-panel.ts` - Game summary and statistics
+  - `recommendations.ts` - Training recommendations
+  - `alternatives-modal.ts` - Mistake deep-dive modal
+  - `navigation-controls.ts` - Playback controls
+- `src/frontend/analysis-ui.ts` - Analysis UI factory function
+- `src/frontend/styles/` - Modular CSS styling
 - `index.html` - Analysis overlay markup
 
 ### Key Components
 
-- `AnalysisUIManager` class - Main controller
+- `AnalysisUIManager` class - Main controller (in analysis-controller.ts)
 - `StoredGameData` / `StoredAnalysisData` - Type definitions
 - Export functions (PGN, JSON, Markdown)
 

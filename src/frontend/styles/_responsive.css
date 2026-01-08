@@ -1,0 +1,259 @@
+/* ========================================
+   Responsive Design
+   Phase 9: Mobile, tablet, and desktop breakpoints
+   ======================================== */
+
+/* Tablet breakpoint - 1024px */
+@media (width <= 1024px) {
+  #app {
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  #chess-board-container {
+    order: 1;
+  }
+
+  #right-panel {
+    order: 2;
+    width: 100%;
+    max-height: 40vh;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  #chess-board-wrapper {
+    width: min(calc(100vw - 32px), calc(60vh - 32px));
+    height: min(calc(100vw - 32px), calc(60vh - 32px));
+  }
+
+  .panel-section {
+    flex: 1 1 auto;
+    min-width: 200px;
+  }
+
+  .game-controls {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mobile breakpoint - 768px */
+@media (width <= 768px) {
+  #app {
+    padding: var(--space-sm);
+    gap: var(--space-sm);
+  }
+
+  #chess-board-wrapper {
+    width: min(calc(100vw - 16px), calc(55vh - 16px));
+    height: min(calc(100vw - 16px), calc(55vh - 16px));
+    gap: 4px;
+  }
+
+  .board-files,
+  .board-ranks {
+    font-size: 12px;
+  }
+
+  #right-panel {
+    max-height: 35vh;
+    padding: var(--space-xs);
+  }
+
+  .panel-section {
+    padding: var(--space-sm);
+  }
+
+  .panel-section h3 {
+    font-size: 14px;
+    margin-bottom: var(--space-sm);
+  }
+
+  .control-button {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .game-controls {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+  }
+
+  /* Guidance panel adjustments */
+  .guidance-move-row {
+    padding: var(--space-sm);
+  }
+
+  .guidance-move-notation {
+    font-size: 14px;
+  }
+
+  /* Toast positioning */
+  .toast-container {
+    top: var(--space-sm);
+    right: var(--space-sm);
+    left: var(--space-sm);
+  }
+
+  .toast {
+    max-width: 100%;
+  }
+}
+
+/* Small mobile breakpoint - 480px */
+@media (width <= 480px) {
+  #chess-board-wrapper {
+    width: calc(100vw - 12px);
+    height: calc(100vw - 12px);
+    gap: 2px;
+  }
+
+  .board-files,
+  .board-ranks {
+    font-size: 10px;
+  }
+
+  #right-panel {
+    flex-direction: column;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .panel-section {
+    min-width: 100%;
+  }
+
+  .control-button {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* Stack game controls vertically */
+  .game-controls {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal adjustments */
+  .game-result-modal {
+    margin: var(--space-md);
+    padding: var(--space-lg);
+    max-width: calc(100vw - 32px);
+  }
+
+  .game-result-title {
+    font-size: 22px;
+  }
+
+  .game-result-buttons {
+    flex-direction: column;
+  }
+
+  /* Control Toolbar - Mobile responsive */
+  .control-toolbar {
+    width: calc(100% - 16px);
+    max-width: none;
+  }
+
+  .toolbar-container {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .toolbar-button {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 100px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  /* Collapsible sections - Mobile spacing */
+  #collapsible-sections-container {
+    gap: 10px;
+  }
+
+  .section-header {
+    padding: 12px 14px;
+  }
+
+  .section-title {
+    font-size: 15px;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (height <= 500px) and (orientation: landscape) {
+  #app {
+    flex-direction: row;
+    gap: var(--space-sm);
+  }
+
+  #chess-board-wrapper {
+    width: min(calc(100vh - 32px), 50vw);
+    height: min(calc(100vh - 32px), 50vw);
+  }
+
+  #right-panel {
+    width: auto;
+    flex: 1;
+    max-height: 100%;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+}
+
+/* Very large screens - 1600px+ */
+@media (width >= 1600px) {
+  #app {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
+  #chess-board-wrapper {
+    width: min(calc(100vh - 80px), 800px);
+    height: min(calc(100vh - 80px), 800px);
+  }
+
+  #right-panel {
+    width: 400px;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+  }
+
+  #right-panel {
+    display: none;
+  }
+
+  #chess-board-container {
+    width: 100%;
+    height: auto;
+  }
+
+  #chess-board-wrapper {
+    width: 500px;
+    height: 500px;
+    margin: 0 auto;
+  }
+
+  .piece {
+    filter: none !important;
+  }
+}
+
+/* Reduced motion preference - accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
